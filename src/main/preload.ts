@@ -1,8 +1,7 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 contextBridge.exposeInMainWorld("electron", {
+  getDeviceStatus: () => ipcRenderer.invoke("device:status"),
   authenticate: () => ipcRenderer.invoke("auth:authenticate"),
-  getDeviceConfig: () => ipcRenderer.invoke("device:getConfig"),
-  print: (text: string) => ipcRenderer.invoke("printer:print", text),
-  getDeviceId: () => ipcRenderer.invoke("device:getId"),
+  print: (text: string) => ipcRenderer.invoke("device:print", text),
 });
