@@ -1,0 +1,57 @@
+{
+  "name": "kiosk_v2_electron",
+  "private": true,
+  "version": "0.0.0",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "electron:build": "tsc -p electron",
+    "electron": "npm run electron:build && electron .",
+    "start": "cross-env NODE_ENV=development concurrently \"npm run dev\" \"wait-on http://localhost:5173 && npm run electron\"",
+    "dist": "npm run electron:build && electron-builder"
+  },
+  "build": {
+    "appId": "com.erkhet.kiosk",
+    "productName": "ErkhetKiosk",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable"
+      ]
+    }
+  },
+  "dependencies": {
+    "electron-serve": "^3.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
+    "eslint": "^9.39.1",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "^7.2.4",
+    "wait-on": "^9.0.3"
+  }
+}
