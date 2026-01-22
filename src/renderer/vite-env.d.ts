@@ -13,5 +13,7 @@ interface Window {
         error?: string;
       }) => void
     ) => () => void;
+
+    print: (text: string) => Promise<string>;
   };
 }

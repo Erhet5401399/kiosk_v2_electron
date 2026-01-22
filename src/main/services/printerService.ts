@@ -1,34 +1,45 @@
+import fs from "fs";
+import path from "path";
+import { app, BrowserWindow } from "electron";
+import { print, getPrinters as listPrinters } from "pdf-to-printer";
+
+export interface PrinterDevice {
+  name: string;
+  isDefault: boolean;
+  options?: Record<string, any>;
+}
+
 export class PrinterService {
-  private static instance: PrinterService;
-  private connected = false;
-
-  private constructor() {}
-
-  static getInstance() {
-    if (!PrinterService.instance) PrinterService.instance = new PrinterService();
-    return PrinterService.instance;
+  static async getPrinters(): Promise<PrinterDevice[]> {
+    const rawPrinters = await listPrinters();
+    return rawPrinters.map((p: any, index: number) => {
+      const name = typeof p === "string" ? p : p.name;
+      return {
+        name,
+        isDefault: index === 0,
+        options: {},
+      };
+    });
   }
 
-  async connect() {
-    console.log("Connecting to printer...");
-    await new Promise(res => setTimeout(res, 300));
-    this.connected = true;
+  static async findLexmarkMS430(): Promise<PrinterDevice | null> {
+    const printers = await this.getPrinters();
+    return printers.find((p) => p.name.includes("Lexmark MS430 Series")) || null;
   }
 
-  async disconnect() {
-    console.log("Disconnecting printer...");
-    await new Promise(res => setTimeout(res, 200));
-    this.connected = false;
-  }
+  static async printRaw(content: string, printerName?: string): Promise<string> {
+    const win = new BrowserWindow({ show: false });
+    await win.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(content)}`);
 
-  async printDocument(text: string): Promise<string> {
-    if (!this.connected) await this.connect();
-    console.log("Printing:", text);
-    await new Promise(res => setTimeout(res, 500));
-    return `Printed: ${text}`;
-  }
+    const pdfBuffer = await win.webContents.printToPDF({ printBackground: true });
 
-  get status() {
-    return this.connected;
+    const tempPath = path.join(app.getPath("temp"), "temp_print.pdf");
+    fs.writeFileSync(tempPath, pdfBuffer);
+
+    win.close();
+
+    await print(tempPath, { printer: printerName });
+
+    return `Print job sent to ${printerName || "default printer"}`;
   }
 }
