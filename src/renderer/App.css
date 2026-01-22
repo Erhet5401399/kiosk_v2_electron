@@ -1,42 +1,135 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  background: #0f111a;
+  color: #f0f0f0;
+  overflow: hidden;
+}
+
+.screen {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
+  padding: 2rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #1f2233;
+  border-bottom: 2px solid #444;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.device-info {
+  font-size: 1rem;
+  color: #aaa;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.card {
-  padding: 2em;
+h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #0ff;
 }
 
-.read-the-docs {
-  color: #888;
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.device-box {
+  background: #1f2233;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  border: 1px solid #0ff;
+  margin: 1rem 0;
+  font-family: monospace;
+  font-size: 1.5rem;
+  color: #0ff;
+}
+
+.subtext {
+  margin-top: 0.5rem;
+  color: #aaa;
+  font-size: 1rem;
+}
+
+button.primary {
+  background: #0ff;
+  color: #0f111a;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button.primary:hover {
+  background: #0cc;
+  transform: scale(1.05);
+}
+
+.error {
+  background: #220000;
+  color: #ff5555;
+  padding: 2rem;
+  border-radius: 12px;
+  border: 2px solid #ff5555;
+}
+
+.kiosk-ready {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 6px solid #222;
+  border-top: 6px solid #0ff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 2rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.5rem; }
+  .device-box { font-size: 1.2rem; padding: 0.8rem 1.2rem; }
+  button.primary { font-size: 1.2rem; padding: 0.8rem 1.5rem; }
 }

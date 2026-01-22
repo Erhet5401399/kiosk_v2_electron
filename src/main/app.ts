@@ -1,18 +1,27 @@
 import { createMainWindow, createRegisterWindow } from "./windows";
 import { DeviceRuntime } from "./core/deviceRuntime";
-import setupIPC from "./core/ipc";
+import { BrowserWindow } from "electron";
 
-export async function startApp() {
-  setupIPC();
-
+export function startApp() {
   const runtime = DeviceRuntime.getInstance();
 
-  await runtime.initialize();
+  runtime.on("state-change", (state) => {
+    const snapshot = runtime.getSnapshot();
 
-  if (runtime.isRegistrationRequired()) {
-    createRegisterWindow(runtime.getDeviceId());
-    return;
-  }
+    if (state === "unregistered") {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createRegisterWindow(snapshot.deviceId);
+      }
+    }
 
-  createMainWindow();
+    if (state === "ready") {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createMainWindow();
+      }
+    }
+  });
+
+  runtime.start().catch((err) => {
+    console.error("Runtime failed to start:", err);
+  });
 }

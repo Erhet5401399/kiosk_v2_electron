@@ -4,6 +4,9 @@ import serve from "electron-serve";
 
 const loadURL = serve({ directory: path.join(__dirname, "../dist") });
 
+let mainWindow: BrowserWindow | null = null;
+let registerWindow: BrowserWindow | null = null;
+
 function createBaseWindow(options = {}) {
   return new BrowserWindow({
     show: false,
@@ -16,9 +19,12 @@ function createBaseWindow(options = {}) {
 }
 
 export function createRegisterWindow(deviceId: string) {
-  const win = createBaseWindow({
-    width: 600,
-    height: 400,
+  if (registerWindow) return registerWindow;
+
+  registerWindow = createBaseWindow({
+    width: 1200,
+    height: 800,
+    kiosk: true,
   });
 
   const url =
@@ -26,24 +32,40 @@ export function createRegisterWindow(deviceId: string) {
       ? `http://localhost:5173/#/register?deviceId=${deviceId}`
       : `file://${path.join(__dirname, "../dist/index.html")}#/register?deviceId=${deviceId}`;
 
-  win.loadURL(url);
-  win.once("ready-to-show", () => win.show());
+  registerWindow.loadURL(url);
+  registerWindow.once("ready-to-show", () => registerWindow?.show());
 
-  return win;
+  registerWindow.on("closed", () => {
+    registerWindow = null;
+  });
+
+  return registerWindow;
 }
 
 export function createMainWindow() {
-  const win = createBaseWindow({
+  if (mainWindow) return mainWindow;
+
+  mainWindow = createBaseWindow({
     width: 1200,
     height: 800,
     kiosk: true,
   });
 
   process.env.NODE_ENV === "development"
-    ? win.loadURL("http://localhost:5173")
-    : loadURL(win);
+    ? mainWindow.loadURL("http://localhost:5173")
+    : loadURL(mainWindow);
 
-  win.once("ready-to-show", () => win.show());
+  mainWindow.once("ready-to-show", () => mainWindow?.show());
 
-  return win;
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
+
+  return mainWindow;
+}
+
+export function closeRegisterWindow() {
+  if (!registerWindow) return;
+  registerWindow.close();
+  registerWindow = null;
 }

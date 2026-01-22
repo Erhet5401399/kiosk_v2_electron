@@ -1,102 +1,71 @@
 import { useEffect, useState } from "react";
-import reactLogo from "./assets/react.svg";
 import "./App.css";
 
-type AppState = "loading" | "register" | "ready" | "error";
+type RuntimeState = "loading" | "unregistered" | "authenticating" | "ready" | "error";
+
+interface Snapshot {
+  state: RuntimeState;
+  deviceId: string;
+  error?: string;
+}
 
 function App() {
-  const [state, setState] = useState<AppState>("loading");
-  const [deviceId, setDeviceId] = useState<string>("");
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [printResult, setPrintResult] = useState<string>("");
+  const [snapshot, setSnapshot] = useState<Snapshot>({
+    state: "loading",
+    deviceId: "",
+  });
 
   useEffect(() => {
-    async function boot() {
-      try {
-        const status = await window.electron.getDeviceStatus();
-        setDeviceId(status.deviceId);
-
-        if (!status.registered) {
-          setState("register");
-          return;
-        }
-
-        await window.electron.authenticate();
-        setState("ready");
-      } catch (err) {
-        console.error(err);
-        setAuthError("Failed to initialize device");
-        setState("error");
-      }
-    }
-
-    boot();
+    window.electron.getRuntimeSnapshot().then(setSnapshot);
+    const unsubscribe = window.electron.onRuntimeState(setSnapshot);
+    return unsubscribe;
   }, []);
 
-  const handlePrint = async () => {
-    try {
-      const result = await window.electron.print("Test print from kiosk");
-      setPrintResult(result);
-    } catch {
-      setPrintResult("Print failed");
-    }
-  };
-
-  if (state === "loading") {
-    return (
-      <div className="screen center">
-        <h2>Starting kiosk…</h2>
-      </div>
-    );
-  }
-
-  if (state === "register") {
-    return (
-      <div className="screen center">
-        <h1>Device Registration</h1>
-        <p>This device is not registered.</p>
-
-        <div className="device-box">
-          <strong>Device ID</strong>
-          <pre>{deviceId}</pre>
-        </div>
-
-        <p>
-          Please register this device in the admin panel.
-          <br />
-          The kiosk will activate automatically.
-        </p>
-      </div>
-    );
-  }
-
-  if (state === "error") {
-    return (
-      <div className="screen center error">
-        <h2>Startup Error</h2>
-        <p>{authError}</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="screen kiosk">
-      <header className="header">
-        <img src={reactLogo} className="logo" />
-        <div className="device-info">
-          Device: {deviceId}
+    <div className={`screen ${snapshot.state}`}>
+      {snapshot.state === "loading" && (
+        <div className="center">
+          <div className="spinner" />
+          <h2>Starting Kiosk…</h2>
         </div>
-      </header>
+      )}
 
-      <main className="content">
-        <h1>Kiosk Ready</h1>
+      {snapshot.state === "unregistered" && (
+        <div className="center register">
+          <h1>Device Registration</h1>
+          <p>This device is not registered.</p>
+          <div className="device-box">{snapshot.deviceId}</div>
+          <p className="subtext">Kiosk will activate automatically once registered.</p>
+        </div>
+      )}
 
-        <button className="primary" onClick={handlePrint}>
-          Print Test Document
-        </button>
+      {snapshot.state === "authenticating" && (
+        <div className="center">
+          <div className="spinner" />
+          <h2>Activating device…</h2>
+        </div>
+      )}
 
-        {printResult && <p className="result">{printResult}</p>}
-      </main>
+      {snapshot.state === "ready" && (
+        <div className="kiosk-ready">
+          <header className="header">
+            <h1>Kiosk Ready</h1>
+            <div className="device-info">Device: {snapshot.deviceId}</div>
+          </header>
+          <main className="content">
+            <button className="primary" onClick={() => alert("Print test!")}>
+              Print Test Document
+            </button>
+          </main>
+        </div>
+      )}
+
+      {snapshot.state === "error" && (
+        <div className="center error">
+          <h2>Startup Error</h2>
+          <p>{snapshot.error || "Unknown error occurred"}</p>
+        </div>
+      )}
     </div>
   );
 }

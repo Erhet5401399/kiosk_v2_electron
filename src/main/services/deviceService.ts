@@ -17,7 +17,28 @@ export class DeviceService {
   }
 
   isRegistered(): boolean {
-    const cfg = ConfigService.getTokens();
-    return !!cfg;
+    return !!ConfigService.getTokens();
+  }
+  async tryRegisterDevice(): Promise<boolean> {
+    if (this.isRegistered()) return true;
+
+    console.log("Attempting device registration…");
+
+    await new Promise((r) => setTimeout(r, 1000));
+
+    const success = Math.random() > 0.7;
+
+    if (!success) {
+      console.log("Registration failed");
+      return false;
+    }
+
+    ConfigService.setTokens({
+      accessToken: "mock-access-token",
+      refreshToken: "mock-refresh-token",
+    });
+
+    console.log("Registration successful");
+    return true;
   }
 }
