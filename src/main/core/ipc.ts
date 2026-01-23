@@ -1,6 +1,11 @@
-import { ipcMain, BrowserWindow } from "electron";
+import { ipcMain, BrowserWindow, app } from "electron";
 import { DeviceRuntime } from "../core/deviceRuntime";
+// import { NativePrinterService } from "../services/nativePrinterService";
+// import path from "path";
 import { PrinterService } from "../services/printerService";
+
+// const printerService = new NativePrinterService('Lexmark MS430');
+// const pdfPath = path.join(app.getAppPath(), 'src', 'pdfs', 'test.pdf');
 
 export default function setupIPC() {
   const runtime = DeviceRuntime.getInstance();
@@ -30,4 +35,16 @@ export default function setupIPC() {
       return { success: false, message: err.message || "Unknown error" };
     }
   });
+
+  // ipcMain.handle("native-print", async (_event, content: string) => {
+  //   try {
+  //     // const result = await NativePrinterService.printPDF(Buffer.from(content), "Lexmark MS430 Series");
+  //     const pdfBuffer = fs.readFileSync(pdfPath);
+  //     const result = await printerService.printPDFBuffer(pdfBuffer);
+  //     console.log(result, "Successfully printed");
+  //   } catch (error) {
+  //     console.error("Print error:", error);
+  //     return { success: false, message: "Unknown error" };
+  //   }
+  // });
 }
