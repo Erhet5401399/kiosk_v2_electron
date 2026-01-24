@@ -2,7 +2,7 @@
   "name": "kiosk_v2_electron",
   "private": true,
   "version": "0.0.1",
-  "main": "dist-electron/main.js",
+  "main": "dist-electron/main/main.js",
   "scripts": {
     "dev": "vite",
     "build:renderer": "vite build",

@@ -1,151 +1,158 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", "Segoe UI", sans-serif;
+/* App.css – clean kiosk style */
+
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --border: #30363d;
+  --text: #c9d1d9;
+  --muted: #8b949e;
+  --accent: #2f81f7;
+  --danger: #f85149;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  background: #0f111a;
-  color: #f0f0f0;
-  overflow: hidden;
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
 }
 
 .screen {
-  width: 100%;
-  height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
+/* ===== HEADER ===== */
+.status-bar {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  align-items: center;
+}
+
+.state {
+  font-weight: 600;
+}
+
+/* ===== CENTER CONTENT ===== */
 .center {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  place-content: center;
+  gap: 12px;
   text-align: center;
-  padding: 2rem;
+  padding: 24px;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: #1f2233;
-  border-bottom: 2px solid #444;
+.center p,
+.center small {
+  color: var(--muted);
 }
 
-.device-info {
-  font-size: 1rem;
-  color: #aaa;
+.center.error {
+  color: var(--danger);
 }
 
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  color: #0ff;
-}
-
-h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-.device-box {
-  background: #1f2233;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  border: 1px solid #0ff;
-  margin: 1rem 0;
-  font-family: monospace;
-  font-size: 1.5rem;
-  color: #0ff;
-}
-
-.subtext {
-  margin-top: 0.5rem;
-  color: #aaa;
-  font-size: 1rem;
-}
-
-button.primary {
-  background: #0ff;
-  color: #0f111a;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 12px;
-  font-size: 1.5rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-button.primary:hover {
-  background: #0cc;
-  transform: scale(1.05);
-}
-
-.error {
-  background: #220000;
-  color: #ff5555;
-  padding: 2rem;
-  border-radius: 12px;
-  border: 2px solid #ff5555;
-}
-
-.kiosk-ready {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
+/* ===== SPINNER ===== */
 .spinner {
-  width: 60px;
-  height: 60px;
-  border: 6px solid #222;
-  border-top: 6px solid #0ff;
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 2rem;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-@media (max-width: 768px) {
-  h1 {
-    font-size: 2.2rem;
+/* ===== DEVICE BOX ===== */
+.box {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+}
+
+/* ===== READY VIEW ===== */
+.kiosk {
+  flex: 1;
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+}
+
+.info {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.actions {
+  display: grid;
+  place-content: center;
+}
+
+.actions button {
+  padding: 14px 24px;
+  font-size: 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+}
+
+.actions button:active {
+  transform: translateY(1px);
+}
+
+/* ===== RESPONSIVE (PORTRAIT / LANDSCAPE) ===== */
+@media (orientation: landscape) {
+  .kiosk {
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
   }
-  h2 {
-    font-size: 1.5rem;
+
+  .actions {
+    justify-items: start;
   }
-  .device-box {
-    font-size: 1.2rem;
-    padding: 0.8rem 1.2rem;
+}
+
+@media (orientation: portrait) {
+  .status-bar {
+    grid-template-columns: 1fr;
+    row-gap: 4px;
+    font-size: 12px;
   }
-  button.primary {
-    font-size: 1.2rem;
-    padding: 0.8rem 1.5rem;
-  }
+}
+
+/* ===== STATE HINTS ===== */
+.state-error {
+  background: #120b0e;
+}
+
+.state-offline {
+  background: #0f1419;
+}
+
+.state-shutting_down {
+  opacity: 0.7;
 }

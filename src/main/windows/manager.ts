@@ -1,5 +1,6 @@
 import { BrowserWindow, shell, screen } from "electron";
 import path from "path";
+import serve from "electron-serve";
 import { RuntimeSnapshot } from "../../shared/types";
 import { logger } from "../services";
 
@@ -10,12 +11,15 @@ interface ManagedWindow {
   window: BrowserWindow;
 }
 
+const loadURL = serve({ directory: path.join(__dirname, "../../../dist") });
+
 class WindowManager {
   private static inst: WindowManager;
   private windows = new Map<number, ManagedWindow>();
   private isDev = process.env.NODE_ENV === "development";
   private preload = path.join(__dirname, "../preload.js");
-  private dist = path.join(__dirname, "../dist");
+  // private dist = path.join(__dirname, "../dist");
+
   private log = logger.child("Windows");
 
   static get(): WindowManager {
@@ -32,12 +36,10 @@ class WindowManager {
       show: false,
       frame: this.isDev,
       kiosk: !this.isDev && type === "main",
-      backgroundColor: "#1a1a2e",
+      backgroundColor: "#ffffff",
       webPreferences: {
         preload: this.preload,
         contextIsolation: true,
-        nodeIntegration: false,
-        sandbox: true,
       },
       ...opts,
     });
@@ -65,16 +67,34 @@ class WindowManager {
     return win;
   }
 
-  private url(route: string, query?: Record<string, string>): string {
+  // private url(route: string, query?: Record<string, string>): string {
+  //   const qs = query
+  //     ? "?" +
+  //       Object.entries(query)
+  //         .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
+  //         .join("&")
+  //     : "";
+  //   return this.isDev
+  //     ? `http://localhost:5173/#${route}${qs}`
+  //     : `file://${path.join(this.dist, "index.html")}#${route}${qs}`;
+  // }
+  private async load(
+    win: BrowserWindow,
+    route: string,
+    query?: Record<string, string>,
+  ) {
     const qs = query
       ? "?" +
         Object.entries(query)
           .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
           .join("&")
       : "";
-    return this.isDev
-      ? `http://localhost:5173/#${route}${qs}`
-      : `file://${path.join(this.dist, "index.html")}#${route}${qs}`;
+
+    if (this.isDev) {
+      await win.loadURL(`http://localhost:5173/#${route}${qs}`);
+    } else {
+      await loadURL(win, { hash: `#${route}${qs}` });
+    }
   }
 
   private getByType(type: WindowType): BrowserWindow | null {
@@ -91,7 +111,8 @@ class WindowManager {
       return win;
     }
     win = this.create("main");
-    await win.loadURL(this.url("/"));
+    // await win.loadURL(this.url("/"));
+    await this.load(win, "/");
     return win;
   }
 
@@ -107,7 +128,8 @@ class WindowManager {
       kiosk: false,
       resizable: false,
     });
-    await win.loadURL(this.url("/register", { deviceId }));
+    // await win.loadURL(this.url("/register", { deviceId }));
+    await this.load(win, "/register", { deviceId });
     return win;
   }
 
@@ -123,7 +145,8 @@ class WindowManager {
       kiosk: false,
       resizable: false,
     });
-    await win.loadURL(this.url("/error", { message, code: code || "UNKNOWN" }));
+    // await win.loadURL(this.url("/error", { message, code: code || "UNKNOWN" }));
+    await this.load(win, "/error", { message, code: code || "UNKNOWN" });
     return win;
   }
 
