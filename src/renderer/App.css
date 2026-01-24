@@ -5,7 +5,9 @@
   font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
   height: 100%;
   background: #0f111a;
@@ -123,13 +125,27 @@ button.primary:hover {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @media (max-width: 768px) {
-  h1 { font-size: 2.2rem; }
-  h2 { font-size: 1.5rem; }
-  .device-box { font-size: 1.2rem; padding: 0.8rem 1.2rem; }
-  button.primary { font-size: 1.2rem; padding: 0.8rem 1.5rem; }
+  h1 {
+    font-size: 2.2rem;
+  }
+  h2 {
+    font-size: 1.5rem;
+  }
+  .device-box {
+    font-size: 1.2rem;
+    padding: 0.8rem 1.2rem;
+  }
+  button.primary {
+    font-size: 1.2rem;
+    padding: 0.8rem 1.5rem;
+  }
 }

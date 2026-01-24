@@ -1,19 +1,33 @@
-interface Window {
-  electron: {
-    getRuntimeSnapshot: () => Promise<{
-      state: "loading" | "unregistered" | "authenticating" | "ready" | "error";
-      deviceId: string;
-      error?: string;
-    }>;
+// vite-env.d.ts
+import type { RuntimeSnapshot } from "../shared/types";
 
-    onRuntimeState: (
-      callback: (snapshot: {
-        state: "loading" | "unregistered" | "authenticating" | "ready" | "error";
-        deviceId: string;
-        error?: string;
-      }) => void
-    ) => () => void;
+export {};
 
-    print: (text: string) => Promise<string>;
-  };
+declare global {
+  interface Window {
+    electron: {
+      runtime: {
+        getSnapshot: () => Promise<RuntimeSnapshot>;
+        onUpdate: (callback: (snapshot: RuntimeSnapshot) => void) => () => void;
+        retry: () => Promise<void>;
+        reset: () => Promise<void>;
+      };
+      config: {
+        get: () => Promise<any>;
+        refresh: () => Promise<void>;
+      };
+      printer: {
+        print: (req: { content: string }) => Promise<string>;
+        list: () => Promise<string[]>;
+      };
+      health: {
+        getStatus: () => Promise<any>;
+      };
+      platform: {
+        isElectron: boolean;
+        platform: NodeJS.Platform;
+        version: string;
+      };
+    };
+  }
 }

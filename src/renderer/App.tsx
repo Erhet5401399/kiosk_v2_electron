@@ -1,41 +1,59 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-
-type RuntimeState = "loading" | "unregistered" | "authenticating" | "ready" | "error";
-
-interface Snapshot {
-  state: RuntimeState;
-  deviceId: string;
-  error?: string;
-}
+import type { RuntimeSnapshot } from "../shared/types";
 
 function App() {
-  const [snapshot, setSnapshot] = useState<Snapshot>({
-    state: "loading",
+  const [snapshot, setSnapshot] = useState<RuntimeSnapshot>({
+    state: "initializing",
     deviceId: "",
+    retryCount: 0,
+    uptime: 0,
+    startedAt: 0,
   });
 
   useEffect(() => {
-    window.electron.getRuntimeSnapshot().then(setSnapshot);
-    const unsubscribe = window.electron.onRuntimeState(setSnapshot);
-    return unsubscribe;
+    window.electron.runtime.getSnapshot().then(setSnapshot);
+    const unsubscribe = window.electron.runtime.onUpdate((snap) => {
+      setSnapshot(snap);
+    });
+    return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    console.log(snapshot, "snapshot changed");
+  }, [snapshot]);
+
+  const handlePrint = async () => {
+    try {
+      await window.electron.printer.print({ content: "Test Print Document" });
+      alert("Print job sent");
+    } catch (err) {
+      console.error("Printing failed", err);
+      alert("Failed to print document");
+    }
+  };
 
   return (
     <div className={`screen ${snapshot.state}`}>
-      {snapshot.state === "loading" && (
+      {snapshot.state === "initializing" && (
         <div className="center">
           <div className="spinner" />
           <h2>Starting Kiosk…</h2>
         </div>
       )}
 
-      {snapshot.state === "unregistered" && (
+      {(snapshot.state === "unregistered" ||
+        snapshot.state === "registering") && (
         <div className="center register">
           <h1>Device Registration</h1>
           <p>This device is not registered.</p>
           <div className="device-box">{snapshot.deviceId}</div>
-          <p className="subtext">Kiosk will activate automatically once registered.</p>
+          {snapshot.retryCount !== undefined && (
+            <p>Retries: {snapshot.retryCount}</p>
+          )}
+          <p className="subtext">
+            Kiosk will activate automatically once registered.
+          </p>
         </div>
       )}
 
@@ -51,9 +69,12 @@ function App() {
           <header className="header">
             <h1>Kiosk Ready</h1>
             <div className="device-info">Device: {snapshot.deviceId}</div>
+            {snapshot.uptime !== undefined && (
+              <div>Uptime: {snapshot.uptime}s</div>
+            )}
           </header>
           <main className="content">
-            <button className="primary" onClick={() => window.electron.print("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.")}>
+            <button className="primary" onClick={handlePrint}>
               Print Test Document
             </button>
           </main>
@@ -63,7 +84,7 @@ function App() {
       {snapshot.state === "error" && (
         <div className="center error">
           <h2>Startup Error</h2>
-          <p>{snapshot.error || "Unknown error occurred"}</p>
+          <p>{snapshot.errorMessage || "Unknown error occurred"}</p>
         </div>
       )}
     </div>
