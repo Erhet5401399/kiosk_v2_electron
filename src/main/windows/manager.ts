@@ -1,4 +1,4 @@
-import { BrowserWindow, shell, screen } from "electron";
+import { BrowserWindow, shell } from "electron";
 import path from "path";
 import serve from "electron-serve";
 import { RuntimeSnapshot } from "../../shared/types";
@@ -18,8 +18,6 @@ class WindowManager {
   private windows = new Map<number, ManagedWindow>();
   private isDev = process.env.NODE_ENV === "development";
   private preload = path.join(__dirname, "../preload.js");
-  // private dist = path.join(__dirname, "../dist");
-
   private log = logger.child("Windows");
 
   static get(): WindowManager {
@@ -67,17 +65,6 @@ class WindowManager {
     return win;
   }
 
-  // private url(route: string, query?: Record<string, string>): string {
-  //   const qs = query
-  //     ? "?" +
-  //       Object.entries(query)
-  //         .map(([k, v]) => `${k}=${encodeURIComponent(v)}`)
-  //         .join("&")
-  //     : "";
-  //   return this.isDev
-  //     ? `http://localhost:5173/#${route}${qs}`
-  //     : `file://${path.join(this.dist, "index.html")}#${route}${qs}`;
-  // }
   private async load(
     win: BrowserWindow,
     route: string,
@@ -111,7 +98,6 @@ class WindowManager {
       return win;
     }
     win = this.create("main");
-    // await win.loadURL(this.url("/"));
     await this.load(win, "/");
     return win;
   }
@@ -128,7 +114,6 @@ class WindowManager {
       kiosk: false,
       resizable: false,
     });
-    // await win.loadURL(this.url("/register", { deviceId }));
     await this.load(win, "/register", { deviceId });
     return win;
   }
@@ -145,7 +130,6 @@ class WindowManager {
       kiosk: false,
       resizable: false,
     });
-    // await win.loadURL(this.url("/error", { message, code: code || "UNKNOWN" }));
     await this.load(win, "/error", { message, code: code || "UNKNOWN" });
     return win;
   }
