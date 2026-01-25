@@ -74,6 +74,100 @@ function App() {
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [selectedCategory, setSelectedCategory] = useState("Бүгд");
   const [selectedService, setSelectedService] = useState(null);
+  const [registerNumber, setRegisterNumber] = useState("");
+  const [registerPrefix, setRegisterPrefix] = useState("");
+  const [registerSuffix, setRegisterSuffix] = useState("");
+  const [showKeyboard, setShowKeyboard] = useState(false);
+  const [keyboardTarget, setKeyboardTarget] = useState("prefix"); // prefix or suffix
+
+  const MONGOLIAN_KEYBOARD = [
+    ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
+    ["Ф", "Ц", "У", "Ж", "Э", "Н", "Г", "Ш", "Ү", "З", "К", "Ъ"],
+    ["Й", "Ы", "Б", "Ө", "А", "Х", "Р", "О", "Л", "Д", "П"],
+    ["Я", "Ч", "Ё", "С", "М", "И", "Т", "Ь", "В", "Ю"],
+  ];
+
+  const handleKeyClick = (key) => {
+    if (keyboardTarget === "prefix") {
+      if (registerPrefix.length < 2 && isNaN(key)) {
+        setRegisterPrefix((prev) => prev + key);
+        if (registerPrefix.length === 1) setKeyboardTarget("suffix");
+      }
+    } else {
+      if (registerSuffix.length < 8 && !isNaN(key)) {
+        setRegisterSuffix((prev) => prev + key);
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    if (keyboardTarget === "suffix" && registerSuffix.length > 0) {
+      setRegisterSuffix((prev) => prev.slice(0, -1));
+    } else if (keyboardTarget === "suffix" && registerSuffix.length === 0) {
+      setKeyboardTarget("prefix");
+      setRegisterPrefix((prev) => prev.slice(0, -1));
+    } else if (keyboardTarget === "prefix") {
+      setRegisterPrefix((prev) => prev.slice(0, -1));
+    }
+  };
+
+  useEffect(() => {
+    setRegisterNumber(registerPrefix + registerSuffix);
+  }, [registerPrefix, registerSuffix]);
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [paymentStep, setPaymentStep] = useState("info"); // info, payment, success
+
+  const handleServiceSelect = (service) => {
+    setSelectedService(service);
+    setPaymentStep("info");
+    setPaymentMethod(null);
+    setRegisterNumber("");
+  };
+
+  const handlePrint = async () => {
+    if (window.electron) {
+      await window.electron.printer.print({
+        content: `Service: ${selectedService?.name}\nRegister: ${registerNumber}\nPrice: ${selectedService?.price}`,
+      });
+    } else {
+      alert("Баримт хэвлэх команд илгээгдлээ!");
+    }
+    setSelectedService(null);
+  };
+
+  const startPayment = () => {
+    if (!registerNumber || registerNumber.length < 7) {
+      alert("Регистрийн дугаараа зөв оруулна уу.");
+      return;
+    }
+    setPaymentStep("payment");
+  };
+
+  const simulatePayment = (method) => {
+    setPaymentMethod(method);
+    // Simulate processing
+    setTimeout(() => {
+      setPaymentStep("success");
+    }, 2000);
+  };
+
+  const filteredServices = useMemo(() => {
+    if (selectedCategory === "Бүгд") return SERVICES;
+    return SERVICES.filter((s) => s.category === selectedCategory);
+  }, [selectedCategory]);
+
+  const stateLabel = {
+    initializing: "Initializing system",
+    booting: "Booting runtime",
+    unregistered: "Device not registered",
+    registering: "Registering device",
+    authenticating: "Authenticating",
+    loading_config: "Loading configuration",
+    ready: "Kiosk ready",
+    offline: "Offline mode",
+    error: "Runtime error",
+    shutting_down: "Shutting down",
+  };
 
   useEffect(() => {
     if (window.electron) {
@@ -99,35 +193,6 @@ function App() {
     }
   }, []);
 
-  const filteredServices = useMemo(() => {
-    if (selectedCategory === "Бүгд") return SERVICES;
-    return SERVICES.filter((s) => s.category === selectedCategory);
-  }, [selectedCategory]);
-
-  const handlePrint = async () => {
-    if (window.electron) {
-      await window.electron.printer.print({
-        content: `Service: ${selectedService?.name}\nDescription: ${selectedService?.desc}\nPrice: ${selectedService?.price}`,
-      });
-    } else {
-      alert("Print command sent to mock printer!");
-    }
-    setSelectedService(null);
-  };
-
-  const stateLabel = {
-    initializing: "Initializing system",
-    booting: "Booting runtime",
-    unregistered: "Device not registered",
-    registering: "Registering device",
-    authenticating: "Authenticating",
-    loading_config: "Loading configuration",
-    ready: "Kiosk ready",
-    offline: "Offline mode",
-    error: "Runtime error",
-    shutting_down: "Shutting down",
-  };
-
   if (snapshot.state !== "ready") {
     return (
       <div className="loading-screen">
@@ -144,6 +209,11 @@ function App() {
 
   return (
     <div className="screen">
+      {/* <div className="mesh-gradient">
+        <div className="mesh-ball ball-1"></div>
+        <div className="mesh-ball ball-2"></div>
+        <div className="mesh-ball ball-3"></div>
+      </div> */}
       <section className="promo-container">
         <video
           className="promo-video"
@@ -159,59 +229,73 @@ function App() {
           />
         </video>
         <div className="promo-overlay">
-          <h1>Эрхэт киоск</h1>
+          <h1>Киоск</h1>
           <p>Та доорх үйлчилгээнүүдээс сонгоно уу</p>
         </div>
       </section>
 
-      <nav className="categories-bar">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.name}
-            className={`category-btn ${selectedCategory === cat.name ? "active" : ""}`}
-            onClick={() => setSelectedCategory(cat.name)}
-          >
-            <span className="category-icon">{cat.icon}</span>
-            {cat.name}
-          </button>
-        ))}
-      </nav>
-
-      <main className="service-list">
-        {filteredServices.map((service) => (
-          <div
-            key={service.id}
-            className="service-card"
-            onClick={() => setSelectedService(service)}
-          >
-            <div className="card-header-flex">
-              <div className="service-icon-box">{service.icon}</div>
-              <div>
-                <h3>{service.name}</h3>
-                <p>{service.desc}</p>
-              </div>
-            </div>
-            <div className="card-footer">
-              <span className="price">{service.price}</span>
-              <div className="select-btn">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
+      <div className="content sidebar-layout">
+        <aside className="sidebar">
+          <div className="sidebar-pill-container">
+            <motion.div
+              className="sidebar-active-pill"
+              animate={{
+                y:
+                  CATEGORIES.findIndex((c) => c.name === selectedCategory) * 72,
+              }}
+              transition={{ type: "spring", stiffness: 350, damping: 35 }}
+            />
+            <nav className="categories-list">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.name}
+                  className={`category-btn-sidebar ${selectedCategory === cat.name ? "active" : ""}`}
+                  onClick={() => setSelectedCategory(cat.name)}
                 >
-                  <path
-                    d="M12 5V19M5 12H19"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                  <span className="category-icon">{cat.icon}</span>
+                  <span className="category-name">{cat.name}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+        <main className="service-list">
+          {filteredServices.map((service) => (
+            <div
+              key={service.id}
+              className="service-card"
+              onClick={() => handleServiceSelect(service)}
+            >
+              <div className="card-header-flex">
+                <div className="service-icon-box">{service.icon}</div>
+                <div>
+                  <h3>{service.name}</h3>
+                  <p>{service.desc}</p>
+                </div>
+              </div>
+              <div className="card-footer">
+                <span className="price">{service.price}</span>
+                <div className="select-btn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M12 5V19M5 12H19"
+                      stroke="currentColor"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </main>
+          ))}
+        </main>
+      </div>
 
       <AnimatePresence>
         {selectedService && (
@@ -223,68 +307,285 @@ function App() {
             onClick={() => setSelectedService(null)}
           >
             <motion.div
-              className="modal-content"
+              className="modal-content full-height"
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-              drag="y"
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0.05, bottom: 0.5 }}
-              onDragEnd={(_, info) => {
-                if (info.offset.y > 150 || info.velocity.y > 500) {
-                  setSelectedService(null);
-                }
+              transition={{
+                type: "tween",
+                duration: 0.4,
+                ease: [0.32, 0.72, 0, 1],
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="modal-handle"></div>
-              <div className="modal-body">
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "15px",
-                    marginBottom: "15px",
-                  }}
-                >
-                  <div
-                    className="service-icon-box"
-                    style={{ width: "64px", height: "64px", fontSize: "2rem" }}
-                  >
-                    {selectedService.icon}
-                  </div>
-                  <h2>{selectedService.name}</h2>
-                </div>
-                <p>{selectedService.desc}</p>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    background: "rgba(0,0,0,0.03)",
-                    padding: "24px",
-                    borderRadius: "20px",
-                  }}
-                >
-                  <span style={{ color: "var(--muted)", fontWeight: 600 }}>
-                    Нийт төлбөр:
-                  </span>
-                  <span style={{ fontSize: "1.7rem", fontWeight: 900 }}>
-                    {selectedService.price}
-                  </span>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button className="btn btn-primary" onClick={handlePrint}>
-                  Үйлчилгээ авах
-                </button>
+              <div className="modal-header-fixed">
+                <div className="modal-handle"></div>
                 <button
-                  className="btn btn-secondary"
+                  className="modal-close-icon"
                   onClick={() => setSelectedService(null)}
                 >
-                  Болих
+                  ✕
                 </button>
+              </div>
+              <div className="modal-scroll-body">
+                {paymentStep === "info" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    <div className="service-header-modal">
+                      <div className="service-icon-box large">
+                        {selectedService.icon}
+                      </div>
+                      <div>
+                        <h1>{selectedService.name}</h1>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p>{selectedService.desc}</p>
+                    </div>
+
+                    <div className="input-section">
+                      <label>Иргэний регистрийн дугаар</label>
+                      <div className="segmented-input-container">
+                        <div
+                          className={`segment-box prefix ${keyboardTarget === "prefix" && showKeyboard ? "active" : ""}`}
+                          onClick={() => {
+                            setShowKeyboard(true);
+                            setKeyboardTarget("prefix");
+                          }}
+                        >
+                          <span className="segment-label">Үсэг</span>
+                          <div className="segment-value">
+                            {registerPrefix || (
+                              <span className="placeholder">АА</span>
+                            )}
+                            {keyboardTarget === "prefix" && showKeyboard && (
+                              <div className="cursor"></div>
+                            )}
+                          </div>
+                        </div>
+                        <div className="segment-dash">-</div>
+                        <div
+                          className={`segment-box suffix ${keyboardTarget === "suffix" && showKeyboard ? "active" : ""}`}
+                          onClick={() => {
+                            setShowKeyboard(true);
+                            setKeyboardTarget("suffix");
+                          }}
+                        >
+                          <span className="segment-label">Тоо</span>
+                          <div className="segment-value">
+                            {registerSuffix || (
+                              <span className="placeholder">12345678</span>
+                            )}
+                            {keyboardTarget === "suffix" && showKeyboard && (
+                              <div className="cursor"></div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {showKeyboard && (
+                      <motion.div
+                        className="virtual-keyboard"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                      >
+                        {MONGOLIAN_KEYBOARD.map((row, i) => (
+                          <div key={i} className="keyboard-row">
+                            {row.map((key) => (
+                              <button
+                                key={key}
+                                className="key"
+                                onClick={() => handleKeyClick(key)}
+                              >
+                                {key}
+                              </button>
+                            ))}
+                            {i === 3 && (
+                              <button
+                                className="key backspace"
+                                onClick={handleBackspace}
+                              >
+                                ⌫
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <div className="keyboard-footer">
+                          <button
+                            className="keyboard-done"
+                            onClick={() => setShowKeyboard(false)}
+                          >
+                            Болсон
+                          </button>
+                        </div>
+                      </motion.div>
+                    )}
+
+                    <div className="price-summary-box">
+                      <span className="label">Нийт төлбөр:</span>
+                      <span className="value">{selectedService.price}</span>
+                    </div>
+
+                    <div className="modal-footer">
+                      <button
+                        className="btn btn-primary"
+                        onClick={startPayment}
+                      >
+                        Төлбөр төлөх
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setSelectedService(null)}
+                      >
+                        Болих
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {paymentStep === "payment" && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="payment-selection"
+                  >
+                    <h2>Төлбөрийн хэлбэр сонгох</h2>
+                    <p>Та төлбөрөө дараах аргуудаас сонгон төлнө үү</p>
+
+                    <div className="payment-grid">
+                      <button
+                        className={`payment-option ${paymentMethod === "qrcode" ? "loading" : ""}`}
+                        onClick={() => simulatePayment("qrcode")}
+                        disabled={!!paymentMethod}
+                      >
+                        <div className="payment-icon">📱</div>
+                        <div className="payment-info">
+                          <h3>QR Код</h3>
+                          <span>SocialPay, QPay, Банкны апп</span>
+                        </div>
+                        {paymentMethod === "qrcode" && (
+                          <div className="mini-spinner"></div>
+                        )}
+                      </button>
+
+                      <button
+                        className={`payment-option ${paymentMethod === "pos" ? "loading" : ""}`}
+                        onClick={() => simulatePayment("pos")}
+                        disabled={!!paymentMethod}
+                      >
+                        <div className="payment-icon">💳</div>
+                        <div className="payment-info">
+                          <h3>POS Машин</h3>
+                          <span>Бүх төрлийн банкны карт</span>
+                        </div>
+                        {paymentMethod === "pos" && (
+                          <div className="mini-spinner"></div>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="modal-footer">
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setPaymentStep("info")}
+                        disabled={!!paymentMethod}
+                      >
+                        Буцах
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+
+                {paymentStep === "success" && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="success-view"
+                  >
+                    <div className="confetti-container">
+                      {[...Array(12)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="confetti"
+                          style={{
+                            left: `${Math.random() * 100}%`,
+                            background: [
+                              "#007aff",
+                              "#5856d6",
+                              "#107f32",
+                              "#ff9500",
+                            ][i % 4],
+                            animationDelay: `${Math.random() * 3}s`,
+                            width: `${Math.random() * 8 + 4}px`,
+                            height: `${Math.random() * 8 + 4}px`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <div className="success-header">
+                      <div className="success-icon">✅</div>
+                      <h2>Төлбөр амжилттай</h2>
+                      <p>Таны баримт бэлэн боллоо</p>
+                    </div>
+
+                    <div className="pdf-preview-container">
+                      <div className="pdf-mock-page">
+                        <div className="pdf-header">
+                          <img
+                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Soyombo_symbol.svg/1200px-Soyombo_symbol.svg.png"
+                            alt="Soyombo"
+                            className="pdf-logo"
+                          />
+                          <div>
+                            <h4>ГАЗРЫН ХАРИЛЦАА, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h4>
+                            <p>Албан ёсны баримт бичиг</p>
+                          </div>
+                        </div>
+                        <hr />
+                        <div className="pdf-content">
+                          <div className="pdf-row">
+                            <span>Үйлчилгээ:</span>
+                            <strong>{selectedService.name}</strong>
+                          </div>
+                          <div className="pdf-row">
+                            <span>Регистрийн дугаар:</span>
+                            <strong>{registerNumber}</strong>
+                          </div>
+                          <div className="pdf-row">
+                            <span>Огноо:</span>
+                            <strong>{new Date().toLocaleDateString()}</strong>
+                          </div>
+                          <div className="pdf-row">
+                            <span>Төлөв:</span>
+                            <strong style={{ color: "green" }}>
+                              Баталгаажсан
+                            </strong>
+                          </div>
+                          <div className="pdf-qr-placeholder">
+                            <div className="mock-qr"></div>
+                            <p>Баримтын дугаар: #88219472</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="modal-footer">
+                      <button className="btn btn-primary" onClick={handlePrint}>
+                        Хэвлэх
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setSelectedService(null)}
+                      >
+                        Дуусгах
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </motion.div>
@@ -293,7 +594,7 @@ function App() {
 
       <footer className="status-bar">
         <span>● {stateLabel[snapshot.state]}</span>
-        <span>Киоск ID: {snapshot.deviceId.split("-")[0] ?? ""}</span>
+        <span>Киоск ID: {snapshot.deviceId?.split("-")[0] ?? ""}</span>
         <span>Uptime: {snapshot.uptime}s</span>
       </footer>
     </div>
