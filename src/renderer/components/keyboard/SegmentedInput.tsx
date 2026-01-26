@@ -27,7 +27,7 @@ export function SegmentedInput({
         >
           <span className="segment-label">Үсэг</span>
           <div className="segment-value">
-            {prefix || <span className="placeholder">АА</span>}
+            {prefix || <span className="placeholder"></span>}
             {keyboardTarget === 'prefix' && showKeyboard && <div className="cursor" />}
           </div>
         </div>
@@ -38,7 +38,7 @@ export function SegmentedInput({
         >
           <span className="segment-label">Тоо</span>
           <div className="segment-value">
-            {suffix || <span className="placeholder">12345678</span>}
+            {suffix || <span className="placeholder"></span>}
             {keyboardTarget === 'suffix' && showKeyboard && <div className="cursor" />}
           </div>
         </div>

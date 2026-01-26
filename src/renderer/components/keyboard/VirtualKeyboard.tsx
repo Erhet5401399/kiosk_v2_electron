@@ -38,8 +38,12 @@ export function VirtualKeyboard({ onKeyClick, onBackspace, onDone }: VirtualKeyb
             </div>
           ))}
           <div className="keyboard-row">
+            <button className="key ghost"/>
             <button className="key backspace" onClick={onBackspace}>
               Арилгах
+            </button>
+            <button className="key keyboard-done" onClick={onDone}>
+              Хаах
             </button>
           </div>
         </div>
@@ -59,12 +63,6 @@ export function VirtualKeyboard({ onKeyClick, onBackspace, onDone }: VirtualKeyb
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="keyboard-footer">
-        <button className="keyboard-done" onClick={onDone}>
-          Болсон
-        </button>
       </div>
     </motion.div>
   );

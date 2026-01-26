@@ -38,6 +38,10 @@
   max-width: 120px;
 }
 
+.segment-box.suffix {
+  max-width: 420px;
+}
+
 .segment-label {
   font-size: 11px;
   font-weight: 700;
@@ -65,10 +69,10 @@
 }
 
 .cursor {
-  width: 3px;
-  height: 2.5rem;
+  width: 4px;
+  height: 2.2rem;
   background: var(--accent);
-  margin-left: 4px;
+  margin-left: 0px;
   animation: blink 1s infinite;
 }
 
@@ -79,11 +83,12 @@
 }
 
 .virtual-keyboard {
-  background: #d1d4d9;
+  background: #333;
   padding: 10px;
-  border-radius: 20px;
-  margin: 20px 0;
+  border-radius: 10px;
+  margin: 0 0 40px 0;
   user-select: none;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
 
 .virtual-keyboard.split-layout {
@@ -109,26 +114,27 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  border-left: 2px solid rgba(0, 0, 0, 0.1);
+  border-left: 2px solid rgba(196, 196, 196, 0.1);
   padding-left: 16px;
 }
 
 .keyboard-row {
   display: flex;
   justify-content: center;
+  align-items: flex-end;
   gap: 6px;
 }
 
 .key {
   flex: 1;
-  height: 60px;
+  height: 68px;
   min-width: 45px;
   background: white;
   border: none;
   border-radius: 8px;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #000;
+  color: #333;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
@@ -142,13 +148,20 @@
 }
 
 .key.backspace {
-  background: #abb1ba;
+  background: #d3dae6;
   font-size: 1rem;
-  flex: 1;
+  flex: 0.2;
+}
+
+.key.ghost {
+  background: transparent;
+  box-shadow: none;
+  cursor: default;
+  flex: 0.6;
 }
 
 .key.number-key {
-  height: 60px;
+  height: 68px;
   font-size: 1.4rem;
   font-weight: 700;
 }
@@ -164,8 +177,8 @@
   justify-content: flex-end;
 }
 
-.keyboard-done {
-  background: var(--accent);
+.key.keyboard-done {
+  background: var(--success);
   color: white;
   padding: 12px 30px;
   border-radius: 12px;
@@ -173,4 +186,5 @@
   font-weight: 700;
   font-size: 1.1rem;
   cursor: pointer;
+  flex: 0.2;
 }

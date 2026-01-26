@@ -6,6 +6,7 @@
   --accent: #003cff;
   --border: rgba(0, 0, 0, 0.05);
   --glass: rgba(255, 255, 255, 0.6);
+  --success: #5ee27f;
   --black: #000000;
   --font-main: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
