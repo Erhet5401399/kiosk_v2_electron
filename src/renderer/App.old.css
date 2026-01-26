@@ -5,7 +5,7 @@
   --surface: rgba(255, 255, 255, 0.75);
   --text: #000000;
   --muted: #8e8e93;
-  --accent: #007aff;
+  --accent: #003cff;
   --border: rgba(0, 0, 0, 0.05);
   --glass: rgba(255, 255, 255, 0.6);
   --black: #000000;
@@ -20,9 +20,10 @@
 
 body {
   margin: 0;
-  background: linear-gradient(-45deg, #0714a2, #2735b8, #14884a, #281fa8);
+  /* background: linear-gradient(-45deg, #0714a2, #2d11cc, #281fa8);
   background-size: 400% 400%;
-  animation: gradientBG 10s ease infinite;
+  animation: gradientBG 10s ease infinite; */
+  background: var(--bg);
   color: var(--text);
   font-family: var(--font-main);
   overflow: hidden;
@@ -123,7 +124,7 @@ body {
   left: 16px;
   right: 16px;
   height: 56px;
-  background: white;
+  background: var(--accent);
   border-radius: 16px;
   z-index: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -140,7 +141,7 @@ body {
   border-radius: 16px;
   border: none;
   background: transparent;
-  color: white;
+  color: var(--accent);
   font-weight: 600;
   font-size: 16px;
   transition: color 0.3s ease;
@@ -148,9 +149,9 @@ body {
   width: 100%;
   margin-bottom: 8px;
 }
-
+/* ===== 007aff ===== */
 .category-btn-sidebar.active {
-  color: #007aff;
+  color: #ffffff;
   background: transparent !important;
   box-shadow: none !important;
 }
@@ -249,12 +250,30 @@ body {
   color: white;
 }
 
-.promo-overlay h1 {
+.promo-overlay-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.promo-overlay-title img {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.promo-overlay-title h1 {
   margin: 0;
   font-size: 2.2rem;
-  line-height: 0.5;
+  line-height: 1.2;
   font-weight: 700;
   letter-spacing: -0.5px;
+}
+
+.promo-overlay p {
+  margin-top: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 /* ===== LAYOUT ===== */
@@ -291,9 +310,10 @@ body {
   border-radius: 16px;
   border: 1px solid transparent;
   background: transparent;
-  color: white;
-  font-weight: 600;
-  font-size: 16px;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: -0.3px;
   text-align: left;
   transition: all 0.2s ease;
   cursor: pointer;
@@ -308,13 +328,13 @@ body {
 }
 
 .category-btn-sidebar.active {
-  background: white;
-  color: #007aff;
+  background: var(--accent);
+  color: var(--bg);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .category-btn-sidebar:active:not(.active) {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 /* ===== SERVICE LIST ===== */
@@ -403,14 +423,15 @@ body {
 .select-btn {
   background: var(--accent);
   color: white;
-  width: 44px;
-  height: 44px;
-  border-radius: 22px;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   transition: all 0.2s ease;
-  padding: 0;
   border: none;
 }
 

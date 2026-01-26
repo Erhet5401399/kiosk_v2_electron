@@ -1,0 +1,71 @@
+import { motion } from 'framer-motion';
+
+const LETTERS = [
+  ['Ф', 'Ц', 'У', 'Ж', 'Э', 'Н', 'Г', 'Ш', 'Ү', 'З', 'К', 'Ъ'],
+  ['Й', 'Ы', 'Б', 'Ө', 'А', 'Х', 'Р', 'О', 'Л', 'Д', 'П'],
+  ['Я', 'Ч', 'Ё', 'С', 'М', 'И', 'Т', 'Ь', 'В', 'Ю'],
+];
+
+const NUMBERS = [
+  ['1', '2', '3'],
+  ['4', '5', '6'],
+  ['7', '8', '9'],
+  ['', '0', ''],
+];
+
+interface VirtualKeyboardProps {
+  onKeyClick: (key: string) => void;
+  onBackspace: () => void;
+  onDone: () => void;
+}
+
+export function VirtualKeyboard({ onKeyClick, onBackspace, onDone }: VirtualKeyboardProps) {
+  return (
+    <motion.div
+      className="virtual-keyboard split-layout"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="keyboard-main">
+        <div className="keyboard-letters">
+          {LETTERS.map((row, i) => (
+            <div key={i} className="keyboard-row">
+              {row.map((key) => (
+                <button key={key} className="key" onClick={() => onKeyClick(key)}>
+                  {key}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div className="keyboard-row">
+            <button className="key backspace" onClick={onBackspace}>
+              Арилгах
+            </button>
+          </div>
+        </div>
+
+        <div className="keyboard-numbers">
+          {NUMBERS.map((row, i) => (
+            <div key={i} className="keyboard-row">
+              {row.map((key, j) =>
+                key ? (
+                  <button key={key} className="key number-key" onClick={() => onKeyClick(key)}>
+                    {key}
+                  </button>
+                ) : (
+                  <div key={`empty-${j}`} className="key-spacer" />
+                )
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="keyboard-footer">
+        <button className="keyboard-done" onClick={onDone}>
+          Болсон
+        </button>
+      </div>
+    </motion.div>
+  );
+}

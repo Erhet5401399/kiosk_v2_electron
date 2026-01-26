@@ -1,0 +1,11 @@
+:root {
+  --bg: #f2f2f7;
+  --surface: rgba(255, 255, 255, 0.75);
+  --text: #000000;
+  --muted: #8e8e93;
+  --accent: #003cff;
+  --border: rgba(0, 0, 0, 0.05);
+  --glass: rgba(255, 255, 255, 0.6);
+  --black: #000000;
+  --font-main: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
