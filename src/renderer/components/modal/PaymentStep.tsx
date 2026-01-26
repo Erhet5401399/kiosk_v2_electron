@@ -15,7 +15,7 @@ export function PaymentStep({ paymentMethod, onSelectPayment, onBack }: PaymentS
       animate={{ opacity: 1, x: 0 }}
       className="payment-selection"
     >
-      <h2>Төлбөрийн хэлбэр сонгох</h2>
+      <h1>Төлбөрийн хэлбэр сонгох</h1>
       <p>Та төлбөрөө дараах аргуудаас сонгон төлнө үү</p>
 
       <div className="payment-grid">
@@ -26,7 +26,7 @@ export function PaymentStep({ paymentMethod, onSelectPayment, onBack }: PaymentS
         >
           <div className="payment-icon">📱</div>
           <div className="payment-info">
-            <h3>QR Код</h3>
+            <h3>QPAY</h3>
             <span>SocialPay, QPay, Банкны апп</span>
           </div>
           {paymentMethod === 'qrcode' && <div className="mini-spinner" />}
@@ -39,7 +39,7 @@ export function PaymentStep({ paymentMethod, onSelectPayment, onBack }: PaymentS
         >
           <div className="payment-icon">💳</div>
           <div className="payment-info">
-            <h3>POS Машин</h3>
+            <h3>Карт уншуулах</h3>
             <span>Бүх төрлийн банкны карт</span>
           </div>
           {paymentMethod === 'pos' && <div className="mini-spinner" />}
