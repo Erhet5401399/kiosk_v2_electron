@@ -6,7 +6,7 @@
 
 .sidebar {
   width: 280px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-right: 1px solid rgba(255, 255, 255, 0.2);
@@ -50,7 +50,7 @@
   border-radius: 16px;
   border: none;
   background: transparent;
-  color: var(--accent);
+  color: var(--text);
   font-weight: 700;
   font-size: 1.3rem;
   letter-spacing: -0.3px;

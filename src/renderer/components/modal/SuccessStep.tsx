@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-import type { Service } from '../../types';
-import { Button } from '../common';
+import { motion } from "framer-motion";
+import type { Service } from "../../types";
+import { Button } from "../common";
 
 interface SuccessStepProps {
   service: Service;
@@ -9,34 +9,21 @@ interface SuccessStepProps {
   onClose: () => void;
 }
 
-export function SuccessStep({ service, registerNumber, onPrint, onClose }: SuccessStepProps) {
-  const confettiColors = ['#007aff', '#5856d6', '#107f32', '#ff9500'];
-
+export function SuccessStep({
+  service,
+  registerNumber,
+  onPrint,
+  onClose,
+}: SuccessStepProps) {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="success-view"
     >
-      <div className="confetti-container">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="confetti"
-            style={{
-              left: `${Math.random() * 100}%`,
-              background: confettiColors[i % 4],
-              animationDelay: `${Math.random() * 3}s`,
-              width: `${Math.random() * 8 + 4}px`,
-              height: `${Math.random() * 8 + 4}px`,
-            }}
-          />
-        ))}
-      </div>
-
       <div className="success-header">
         <div className="success-icon">✅</div>
-        <h2>Төлбөр амжилттай</h2>
+        <h1>Төлбөр амжилттай</h1>
         <p>Таны баримт бэлэн боллоо</p>
       </div>
 
@@ -69,17 +56,19 @@ export function SuccessStep({ service, registerNumber, onPrint, onClose }: Succe
             </div>
             <div className="pdf-row">
               <span>Төлөв:</span>
-              <strong style={{ color: 'green' }}>Баталгаажсан</strong>
+              <strong style={{ color: "green" }}>Баталгаажсан</strong>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="modal-footer">
-        <Button onClick={onPrint}>Баримт хэвлэх</Button>
-        <Button variant="secondary" onClick={onClose}>
-          Болсон
-        </Button>
+      <div className="modal-footer-container">
+        <div className="modal-footer">
+          <Button variant="secondary" onClick={onClose}>
+            Болсон
+          </Button>
+          <Button onClick={onPrint}>Баримт хэвлэх</Button>
+        </div>
       </div>
     </motion.div>
   );

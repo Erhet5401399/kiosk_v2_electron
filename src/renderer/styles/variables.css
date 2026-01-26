@@ -1,6 +1,6 @@
 :root {
   --bg: #f2f2f7;
-  --surface: rgba(255, 255, 255, 0.75);
+  --surface: rgba(255, 255, 255, 0.85);
   --text: #000000;
   --muted: #8e8e93;
   --accent: #003cff;
@@ -8,5 +8,6 @@
   --glass: rgba(255, 255, 255, 0.6);
   --success: #5ee27f;
   --black: #000000;
-  --font-main: 'Montserrat', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main:
+    "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }

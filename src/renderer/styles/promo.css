@@ -12,41 +12,36 @@
   object-fit: cover;
 }
 
-.promo-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.5));
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding-left: 24px;
-  padding-right: 24px;
-  padding-bottom: 10px;
-  color: white;
+.main-header {
+  background: white;
+  padding: 16px 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.promo-overlay-title {
+.header-brand {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 16px;
 }
 
-.promo-overlay-title img {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 8px;
+.header-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
 }
 
-.promo-overlay-title h1 {
+.header-text h1 {
   margin: 0;
-  font-size: 2.2rem;
-  line-height: 1.2;
+  font-size: 1.5rem;
+  color: var(--text);
   font-weight: 700;
-  letter-spacing: -0.5px;
 }
 
-.promo-overlay p {
-  margin-top: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
+.header-text p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--muted);
 }

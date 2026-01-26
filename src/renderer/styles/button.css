@@ -1,7 +1,7 @@
 .btn {
   width: 100%;
   padding: 22px;
-  border-radius: 20px;
+  border-radius: 18px;
   font-weight: 700;
   font-size: 19px;
   border: none;
@@ -15,8 +15,8 @@
 }
 
 .btn-secondary {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--text);
+  background: rgb(155, 155, 155);
+  color: white;
 }
 
 .btn:active {

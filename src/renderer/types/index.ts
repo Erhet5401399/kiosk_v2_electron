@@ -1,6 +1,7 @@
 export interface Category {
   name: string;
   icon: string;
+  desc?: string;
 }
 
 export interface Service {
@@ -12,6 +13,6 @@ export interface Service {
   price: string;
 }
 
-export type PaymentStep = 'info' | 'payment' | 'success';
-export type PaymentMethod = 'qrcode' | 'pos' | null;
-export type KeyboardTarget = 'prefix' | 'suffix';
+export type PaymentStep = "info" | "payment" | "success";
+export type PaymentMethod = "qrcode" | "pos" | null;
+export type KeyboardTarget = "prefix" | "suffix";

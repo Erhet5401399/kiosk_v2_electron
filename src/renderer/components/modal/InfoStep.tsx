@@ -1,7 +1,8 @@
-import { motion } from 'framer-motion';
-import type { Service, KeyboardTarget } from '../../types';
-import { Button } from '../common';
-import { SegmentedInput, VirtualKeyboard } from '../keyboard';
+import { motion } from "framer-motion";
+import type { Service, KeyboardTarget } from "../../types";
+import { Button } from "../common";
+import { SegmentedInput, VirtualKeyboard } from "../keyboard";
+import { useEffect } from "react";
 
 interface InfoStepProps {
   service: Service;
@@ -30,6 +31,11 @@ export function InfoStep({
   onStartPayment,
   onCancel,
 }: InfoStepProps) {
+  useEffect(() => {
+    onSetShowKeyboard(true);
+    onSetKeyboardTarget("prefix");
+  }, []);
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="service-header-modal">
@@ -50,11 +56,11 @@ export function InfoStep({
         keyboardTarget={keyboardTarget}
         onPrefixClick={() => {
           onSetShowKeyboard(true);
-          onSetKeyboardTarget('prefix');
+          onSetKeyboardTarget("prefix");
         }}
         onSuffixClick={() => {
           onSetShowKeyboard(true);
-          onSetKeyboardTarget('suffix');
+          onSetKeyboardTarget("suffix");
         }}
       />
 
@@ -71,11 +77,13 @@ export function InfoStep({
         <span className="value">{service.price}</span>
       </div>
 
-      <div className="modal-footer">
-        <Button variant="secondary" onClick={onCancel}>
-          Болих
-        </Button>
-        <Button onClick={onStartPayment}>Төлбөр төлөх</Button>
+      <div className="modal-footer-container">
+        <div className="modal-footer">
+          <Button variant="secondary" onClick={onCancel}>
+            Болих
+          </Button>
+          <Button onClick={onStartPayment}>Төлбөр төлөх</Button>
+        </div>
       </div>
     </motion.div>
   );
