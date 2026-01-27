@@ -9,7 +9,7 @@ export const STATE_LABELS: Record<string, string> = {
   registering: "Registering device",
   authenticating: "Authenticating",
   loading_config: "Loading configuration",
-  ready: "Kiosk ready",
+  ready: "Ready",
   offline: "Offline mode",
   error: "Runtime error",
   shutting_down: "Shutting down",

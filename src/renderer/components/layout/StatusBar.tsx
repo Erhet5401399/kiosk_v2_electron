@@ -1,12 +1,14 @@
 interface StatusBarProps {
+  deviceState?: string;
   deviceId?: string;
   uptime?: number;
 }
 
-export function StatusBar({ deviceId, uptime }: StatusBarProps) {
+export function StatusBar({ deviceState, deviceId, uptime }: StatusBarProps) {
   return (
     <footer className="status-bar">
-      <span>Device: {deviceId || 'Unknown'}</span>
+      <span>Киоск төлөв: {deviceState}</span>
+      <span>Киоск ID: {deviceId || 'Unknown'}</span>
       <span>Uptime: {uptime ? `${uptime}s` : '-'}</span>
     </footer>
   );

@@ -36,9 +36,6 @@ export function ModalWrapper({
             <img src={logoSrc} alt="Logo" className="modal-logo" />
             <span className="modal-title">{title}</span>
           </div>
-          {/* <button className="modal-close-icon" onClick={onClose}>
-            ✕
-          </button> */}
           <span className="modal-timeout">05:00</span>
         </div>
         <div className="modal-scroll-body">{children}</div>

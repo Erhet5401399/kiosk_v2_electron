@@ -16,3 +16,5 @@ export interface Service {
 export type PaymentStep = "info" | "payment" | "success";
 export type PaymentMethod = "qrcode" | "pos" | null;
 export type KeyboardTarget = "prefix" | "suffix";
+
+export * from './steps';

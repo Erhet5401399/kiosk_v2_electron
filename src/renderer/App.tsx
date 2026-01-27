@@ -1,16 +1,15 @@
 import { useState, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { Service } from './types';
-import { CATEGORIES, SERVICES } from './constants';
-import { useElectron, useRegistration } from './hooks';
-import { PromoSection, Sidebar, LoadingScreen } from './components/layout';
+import { CATEGORIES, SERVICES, STATE_LABELS } from './constants';
+import { useElectron } from './hooks';
+import { PromoSection, Sidebar, LoadingScreen, StatusBar } from './components/layout';
 import { ServiceList } from './components/service';
 import { ServiceModal } from './components/modal';
 import './styles/index.css';
 
 export default function App() {
   const { snapshot, handlePrint } = useElectron();
-  const registration = useRegistration();
 
   const [selectedCategory, setSelectedCategory] = useState('Бүгд');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -22,18 +21,16 @@ export default function App() {
 
   const handleServiceSelect = (service: Service) => {
     setSelectedService(service);
-    registration.reset();
   };
 
   const handleCloseModal = () => {
     setSelectedService(null);
-    registration.reset();
   };
 
-  const handlePrintAndClose = async () => {
+  const handlePrintAndClose = async (registerNumber: string) => {
     if (selectedService) {
       await handlePrint(
-        `Service: ${selectedService.name}\nRegister: ${registration.registerNumber}\nPrice: ${selectedService.price}`
+        `Service: ${selectedService.name}\nRegister: ${registerNumber}\nPrice: ${selectedService.price}`
       );
       handleCloseModal();
     }
@@ -60,20 +57,13 @@ export default function App() {
         {selectedService && (
           <ServiceModal
             service={selectedService}
-            registerPrefix={registration.registerPrefix}
-            registerSuffix={registration.registerSuffix}
-            registerNumber={registration.registerNumber}
-            showKeyboard={registration.showKeyboard}
-            keyboardTarget={registration.keyboardTarget}
-            onSetShowKeyboard={registration.setShowKeyboard}
-            onSetKeyboardTarget={registration.setKeyboardTarget}
-            onKeyClick={registration.handleKeyClick}
-            onBackspace={registration.handleBackspace}
             onPrint={handlePrintAndClose}
             onClose={handleCloseModal}
           />
         )}
       </AnimatePresence>
+
+      <StatusBar deviceState={STATE_LABELS[snapshot.state]} deviceId={snapshot.deviceId} uptime={snapshot.uptime}/>
     </div>
   );
 }

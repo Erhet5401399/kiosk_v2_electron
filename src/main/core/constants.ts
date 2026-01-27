@@ -5,7 +5,7 @@ export const APP = {
 } as const;
 
 export const API = {
-  BASE_URL: process.env.API_URL || "https://api.kiosk.example.com",
+  BASE_URL: process.env.API_URL || "http://localhost:8080",
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,

@@ -1,0 +1,11 @@
+export { RegistrationInputStep } from './RegistrationInputStep';
+export { PaymentMethodStep } from './PaymentMethodStep';
+export { PaymentProcessingStep } from './PaymentProcessingStep';
+export { SuccessStep } from './SuccessStep';
+export { LandParcelSelectStep } from './LandParcelSelectStep';
+export { DocumentTypeSelectStep } from './DocumentTypeSelectStep';
+export { OwnershipCheckStep } from './OwnershipCheckStep';
+export { BoundaryVerificationStep } from './BoundaryVerificationStep';
+export { PaymentInfoStep } from './PaymentInfoStep';
+export { ConfirmationStep } from './ConfirmationStep';
+export { PrintOptionsStep } from './PrintOptionsStep';

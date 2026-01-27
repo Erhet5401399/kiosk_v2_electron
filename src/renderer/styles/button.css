@@ -28,3 +28,7 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.btn-ghost {
+  opacity: 0;
+}
