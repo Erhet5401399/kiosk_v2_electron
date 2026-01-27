@@ -1,4 +1,5 @@
 import { APP_NAME } from "../../constants";
+import { Logo } from "../common";
 
 interface PromoSectionProps {
   logoSrc?: string;
@@ -8,7 +9,6 @@ interface PromoSectionProps {
 }
 
 export function PromoSection({
-  logoSrc = "/assets/logo.png",
   title = APP_NAME,
   subtitle = "Та үйлчилгээний төрлөө сонгоно уу!",
   videoSrc = "https://www.pexels.com/download/video/3141208/",
@@ -24,7 +24,7 @@ export function PromoSection({
       <header className="main-header">
         <div className="header-content">
           <div className="header-brand">
-            <img src={logoSrc} alt="Logo" className="header-logo" />
+            <Logo/>
             <div className="header-text">
               <h1>{title}</h1>
               <p>{subtitle}</p>

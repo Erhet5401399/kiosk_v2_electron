@@ -28,9 +28,22 @@
 }
 
 .header-logo {
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
+  display: block;
+}
+
+.header-logo--small {
+  width: 32px;
+  height: auto;
+}
+
+.header-logo--medium {
+  width: 42px;
+  height: auto;
+}
+
+.header-logo--large {
+  width: 96px;
+  height: auto;
 }
 
 .header-text h1 {

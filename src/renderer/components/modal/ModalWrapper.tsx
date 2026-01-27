@@ -1,19 +1,18 @@
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { APP_NAME } from "../../constants";
+import { Logo } from "../common";
 
 interface ModalWrapperProps {
   children: ReactNode;
   onClose: () => void;
   title?: string;
-  logoSrc?: string;
 }
 
 export function ModalWrapper({
   children,
   onClose,
   title = APP_NAME,
-  logoSrc = "/assets/logo.png",
 }: ModalWrapperProps) {
   return (
     <motion.div
@@ -33,7 +32,7 @@ export function ModalWrapper({
       >
         <div className="modal-header-fixed">
           <div className="modal-brand">
-            <img src={logoSrc} alt="Logo" className="modal-logo" />
+            <Logo size="small"/>
             <span className="modal-title">{title}</span>
           </div>
           <span className="modal-timeout">05:00</span>
