@@ -22,7 +22,7 @@
 }
 
 .step-label {
-  font-size: 11px;
+  font-size: var(--font-sm);
   color: #999;
   text-align: center;
   max-width: 80px;
@@ -31,7 +31,7 @@
 
 .progress-step.active .step-label {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .progress-step.completed .step-label {
@@ -54,21 +54,6 @@
   height: 100%;
   background: var(--accent);
   transform-origin: left center;
-}
-
-.step-header {
-  text-align: center;
-  padding: 20px 0;
-}
-
-.step-header h1 {
-  font-size: 1.8rem;
-  margin: 0 0 8px;
-}
-
-.step-header p {
-  color: var(--muted);
-  margin: 0;
 }
 
 .parcel-list,
@@ -113,13 +98,13 @@
 .parcel-option:active,
 .document-option:active,
 .print-option:active {
-  transform: scale(0.98);
+  transform: scale(0.99);
 }
 
 .parcel-icon,
 .document-icon,
 .option-icon {
-  font-size: 2.5rem;
+  font-size: var(--font-md);
   width: 60px;
   height: 60px;
   display: flex;
@@ -139,20 +124,20 @@
 .document-info h3,
 .option-info h3 {
   margin: 0 0 4px;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.3rem;
+  font-weight: 700;
 }
 
 .parcel-info span,
 .document-info span {
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .parcel-area {
   display: block;
   margin-top: 4px;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--accent) !important;
 }
 
@@ -165,7 +150,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: var(--font-md);
   font-weight: 700;
 }
 
@@ -176,6 +161,7 @@
   justify-content: center;
   padding: 60px 20px;
   gap: 20px;
+  min-height: 400px;
 }
 
 .processing-spinner {
@@ -211,7 +197,7 @@
   padding: 12px 24px;
   border-radius: 12px;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 700;
   margin-bottom: 24px;
 }
 
@@ -318,7 +304,7 @@
 }
 
 .history-item .amount {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .history-item .status {

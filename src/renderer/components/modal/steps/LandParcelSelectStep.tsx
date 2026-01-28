@@ -2,16 +2,14 @@ import { motion } from 'framer-motion';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
 import { CheckIcon } from '../../common/CheckIcon';
-
-const MOCK_PARCELS = [
-  { id: 'P001', address: 'Улаанбаатар, СХД, 3-р хороо', area: '500 м²' },
-  { id: 'P002', address: 'Улаанбаатар, БГД, 5-р хороо', area: '750 м²' },
-  { id: 'P003', address: 'Улаанбаатар, ЧД, 1-р хороо', area: '300 м²' },
-];
+import { useParcels } from '../../../hooks';
 
 export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
+  const registerNumber = stepData.registerNumber as string ?? "";
   const selectedParcel = stepData.selectedParcel as string | undefined;
+
+  const { parcels, isLoading } = useParcels({ register: registerNumber });
 
   const handleSelectParcel = (parcelId: string) => {
     actions.onUpdateStepData({ selectedParcel: parcelId });
@@ -29,23 +27,39 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
           <p>Таны регистрийн дугаартай холбоотой газрын нэгжүүд</p>
         </div>
 
-        <div className="parcel-list">
-          {MOCK_PARCELS.map((parcel) => (
-            <button
-              key={parcel.id}
-              className={`parcel-option ${selectedParcel === parcel.id ? 'selected' : ''}`}
-              onClick={() => handleSelectParcel(parcel.id)}
-            >
-              <div className="parcel-icon">🗺️</div>
-              <div className="parcel-info">
-                <h3>{parcel.id}</h3>
-                <span>{parcel.address}</span>
-                <span className="parcel-area">{parcel.area}</span>
-              </div>
-              {selectedParcel === parcel.id && <div className="check-icon"><CheckIcon/></div>}
-            </button>
-          ))}
-        </div>
+        {isLoading ? (
+            <div className="loading-container">
+              <div className="processing-spinner" />
+              <p>Түр хүлээнэ үү...</p>
+            </div>
+          ) : parcels.length ? (
+            <div className="parcel-list">
+            {parcels.map((parcel) => (
+              <button
+                key={parcel.parcel}
+                className={`parcel-option ${selectedParcel === parcel.parcel ? 'selected' : ''}`}
+                onClick={() => handleSelectParcel(parcel.parcel)}
+              >
+                <div className="parcel-icon">🗺️</div>
+                <div className="parcel-info">
+                  <h3>Нэгж талбарын дугаар: {parcel.parcel}</h3>
+                  <div><span>Төлөв: {parcel.status_desc}</span></div>
+                  <div><span>Өргөдөл: {parcel.app_type_name}</span></div>
+                  <div><span>Талбайн хэмжээ (м²): {parcel.area_m2}</span></div>
+                  <div><span>Аймаг /Нийслэл/: {parcel.au1_name}</span></div>
+                  <div><span>Сум /Дүүрэг/: {parcel.au2_name}</span></div>
+                </div>
+                {selectedParcel === parcel.parcel && <div className="check-icon"><CheckIcon/></div>}
+              </button>
+            ))}
+          </div>
+          ) : (
+            <div className='step-no-data'>
+              <p><strong>{registerNumber}</strong> регистрийн дугаар дээр өмчилсөн газар олдсонгүй!</p>
+            </div>
+          )
+        }
+        
       </div>
 
       <div className="service-modal-footer">

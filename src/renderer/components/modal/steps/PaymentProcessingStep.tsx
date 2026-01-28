@@ -16,9 +16,9 @@ export function PaymentProcessingStep({ actions }: StepComponentProps) {
       animate={{ opacity: 1 }}
       className="payment-processing"
     >
-      <div className="processing-content">
-        <div className="processing-spinner" />
-        <h2>Төлбөр боловсруулж байна...</h2>
+      <div className="step-header">
+        <div className="processing-spinner" style={{marginBottom: 20}}/>
+        <h1>Төлбөр боловсруулж байна...</h1>
         <p>Түр хүлээнэ үү</p>
       </div>
     </motion.div>

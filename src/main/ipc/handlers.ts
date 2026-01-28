@@ -3,6 +3,7 @@ import { IPC } from '../core/constants';
 import { runtime } from '../runtime';
 import { config, printer, logger } from '../services';
 import { windows } from '../windows/manager';
+import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 
 const log = logger.child('IPC');
 
@@ -34,6 +35,8 @@ export function setupIPC() {
     },
   }));
 
+  setupParcelHandlers();
+
   runtime.on('state-change', (snapshot) => {
     windows.broadcast(IPC.RUNTIME_UPDATE, snapshot);
   });
@@ -42,5 +45,13 @@ export function setupIPC() {
 }
 
 export function cleanupIPC() {
-  Object.values(IPC).forEach((ch) => ipcMain.removeHandler(ch));
+  cleanupParcelHandlers();
+  ipcMain.removeHandler(IPC.RUNTIME_SNAPSHOT);
+  ipcMain.removeHandler(IPC.RUNTIME_RETRY);
+  ipcMain.removeHandler(IPC.RUNTIME_RESET);
+  ipcMain.removeHandler(IPC.PRINT);
+  ipcMain.removeHandler(IPC.PRINTERS);
+  ipcMain.removeHandler(IPC.CONFIG_GET);
+  ipcMain.removeHandler(IPC.CONFIG_REFRESH);
+  ipcMain.removeHandler(IPC.HEALTH);
 }

@@ -52,7 +52,7 @@
   background: transparent;
   color: var(--text);
   font-weight: 700;
-  font-size: 1.3rem;
+  font-size: var(--font-lg);
   letter-spacing: -0.3px;
   text-align: left;
   transition: color 0.3s ease;
@@ -62,7 +62,7 @@
 }
 
 .category-btn-sidebar .category-icon {
-  font-size: 1.4rem;
+  font-size: var(--font-lg);
   width: 32px;
   display: flex;
   justify-content: center;

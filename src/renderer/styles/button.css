@@ -3,7 +3,7 @@
   padding: 22px;
   border-radius: 18px;
   font-weight: 700;
-  font-size: 19px;
+  font-size: var(--font-lg);
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;

@@ -3,7 +3,7 @@
   background: white;
   border: 4px solid #eee;
   border-radius: 20px;
-  margin: 20px 0 40px 0;
+  margin: 20px 0 10px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -21,19 +21,22 @@
 }
 
 .registration-input-field .input-label {
-  font-size: 11px;
+  font-size: var(--font-sm);
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
 }
 
 .registration-input-field .input-value {
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  min-height: 2.5rem;
+  font-size: var(--font-xl);
+  font-weight: 900;
+  letter-spacing: 3px;
+  min-height: var(--font-xl);
   display: flex;
   align-items: center;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
 }
 
 .registration-input-field .input-value .placeholder {
@@ -42,7 +45,7 @@
 
 .input-cursor {
   width: 4px;
-  height: 2.2rem;
+  height: var(--font-xl);
   background: var(--accent);
   /* position: absolute;
   right: 24px;
@@ -106,7 +109,7 @@
   border: none;
   border-radius: 8px;
   font-size: 1.2rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #333;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   display: flex;
@@ -151,8 +154,7 @@
 }
 
 .key.keyboard-done {
-  background: var(--success);
-  color: white;
+  /* color: white; */
   padding: 12px 30px;
   border-radius: 12px;
   border: none;

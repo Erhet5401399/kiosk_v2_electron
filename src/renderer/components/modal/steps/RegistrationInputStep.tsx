@@ -44,7 +44,7 @@ export function RegistrationInputStep({ context, actions }: StepComponentProps) 
           <div className="input-label">Регистрийн дугаар</div>
           <div className="input-value">
             {showKeyboard && !registerNumber && <div className="input-cursor" />}
-            {registerNumber || <span className="placeholder">Оруулах...</span>}
+            {registerNumber || <span className="placeholder"></span>}
             {showKeyboard && registerNumber && <div className="input-cursor" />}
           </div>
         </div>

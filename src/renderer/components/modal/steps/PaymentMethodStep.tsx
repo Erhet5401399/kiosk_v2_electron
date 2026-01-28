@@ -19,7 +19,7 @@ export function PaymentMethodStep({ context, actions }: StepComponentProps) {
       className="service-modal"
     >
       <div className="service-modal-body">
-        <div className="payment-selection-header">
+        <div className="step-header">
           <h1>Төлбөрийн хэлбэр сонгох</h1>
           <p>Та төлбөрөө дараах аргуудаас сонгон төлнө үү</p>
         </div>

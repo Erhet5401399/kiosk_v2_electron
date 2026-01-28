@@ -5,7 +5,7 @@ export const APP = {
 } as const;
 
 export const API = {
-  BASE_URL: process.env.API_URL || "http://localhost:8080",
+  BASE_URL: process.env.API_URL || "http://66.181.168.123:8080",
   TIMEOUT: 30000,
   RETRY_ATTEMPTS: 3,
   RETRY_DELAY: 1000,
@@ -43,11 +43,16 @@ export const IPC = {
   RUNTIME_UPDATE: "runtime:update",
   RUNTIME_RETRY: "runtime:retry",
   RUNTIME_RESET: "runtime:reset",
+
   PRINT: "hardware:print",
   PRINTERS: "hardware:printers",
+
   CONFIG_GET: "config:get",
   CONFIG_REFRESH: "config:refresh",
+
   HEALTH: "health:status",
+
+  PARCEL_LIST: "parcel:list",
 } as const;
 
 export const ERROR = {

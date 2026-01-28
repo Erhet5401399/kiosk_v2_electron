@@ -1,14 +1,50 @@
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: bold;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: light;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat-Black.ttf") format("truetype");
+  font-weight: 900;
+  font-style: black;
+}
+
+@font-face {
+  font-family: "Montserrat";
+  src: url("../assets/fonts/Montserrat-Medium.ttf") format("truetype");
+  font-weight: 600;
+  font-style: medium;
+}
+
 :root {
   --bg: #f2f2f7;
   --surface: rgba(255, 255, 255, 0.85);
   --text: #000000;
   --muted: #8e8e93;
-  --accent: #003cff;
+  --accent: #1a42f7;
+  --danger: #f71a1a;
   --border: rgba(0, 0, 0, 0.05);
   --glass: rgba(255, 255, 255, 0.6);
   --success: #5ee27f;
   --black: #000000;
-  --font-main: "Montserrat", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main: "Montserrat", sans-serif;
   
   /* Standardizing shadows and radii */
   --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
@@ -16,4 +52,10 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+
+  /* FONT SIZES */
+  --font-xl: 34px;   /* headings */
+  --font-lg: 22px;   /* title */
+  --font-md: 18px;   /* normal text */
+  --font-sm: 14px;   /* labels / muted */
 }

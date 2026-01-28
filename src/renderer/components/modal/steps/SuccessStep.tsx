@@ -25,7 +25,7 @@ export function SuccessStep({
       className="service-modal"
     >
       <div className="service-modal-body">
-        <div className="success-header">
+        <div className="step-header">
           <div className="success-icon">✅</div>
           <h1>Төлбөр амжилттай</h1>
           <p>Таны баримт бэлэн боллоо</p>

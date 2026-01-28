@@ -1,3 +1,8 @@
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
 export interface TokenPayload {
   accessToken: string;
   refreshToken?: string;
@@ -73,4 +78,24 @@ export interface RuntimeSnapshot {
   retryCount: number;
   uptime: number;
   startedAt: number;
+}
+
+export interface Parcel {
+  parcel: string;
+  app_id: string;
+  app_no: string;
+  property_no: string;
+  status_code: string;
+  app_timestamp: string;
+  app_type_code: string;
+  app_type_name: string;
+  status_desc: string;
+  right_type_desc: string;
+  au1_name: string;
+  approved_landuse: string;
+  au2_name: string;
+  area_m2: string;
+  valid_from: string;
+  valid_till: string;
+  person_register: string;
 }

@@ -5,6 +5,7 @@ import { toAppError } from "../core/errors";
 import { debounce } from "../core/utils";
 import { canTransition } from "./states";
 import { storage, logger, device, deviceStore, config, api } from "../services";
+import { registerMocks } from "../services/mocks";
 
 class DeviceRuntime extends EventEmitter {
   private static inst: DeviceRuntime;
@@ -28,6 +29,7 @@ class DeviceRuntime extends EventEmitter {
       startedAt: Date.now(),
       deviceId: saved.deviceId,
     };
+    registerMocks();
     this.persist = debounce(() => this.save(), RUNTIME.PERSIST_DEBOUNCE);
   }
 

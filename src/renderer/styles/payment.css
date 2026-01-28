@@ -11,7 +11,7 @@
 
 .price-summary-box .label {
   color: var(--muted);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1.1rem;
 }
 
@@ -65,12 +65,12 @@
 
 .payment-info h3 {
   margin: 4px;
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: var(--font-lg);
+  font-weight: 900;
 }
 
 .payment-info span {
-  font-size: 0.9rem;
+  font-size: var(--font-md);
   color: var(--muted);
 }
 
@@ -84,21 +84,4 @@
   border-top: 3px solid var(--accent);
   border-radius: 50%;
   animation: spin 0.8s infinite linear;
-}
-
-.payment-selection-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 20px;
-}
-
-.payment-selection-header h1 {
-  font-size: 1.8rem;
-  margin: 0;
-}
-
-.payment-selection-header p {
-  margin: 8px;
 }

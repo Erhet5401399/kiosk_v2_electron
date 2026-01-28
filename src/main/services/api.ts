@@ -6,21 +6,55 @@ import { logger } from "./logger";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
+type MockHandler<T = unknown> = (method: Method, url: string, body?: unknown) => T | Promise<T>;
+
+interface MockRoute {
+  pattern: string | RegExp;
+  handler: MockHandler;
+}
+
 class ApiClient {
   private static inst: ApiClient;
   private baseUrl = API.BASE_URL;
   private token: string | null = null;
   private log = logger.child("API");
+  private mockRoutes: MockRoute[] = [];
+  private useMockFallback = process.env.NODE_ENV === "development";
 
   static get(): ApiClient {
-    if (true) {
-      return mockApiClient as unknown as ApiClient;
-    }
     return this.inst || (this.inst = new ApiClient());
   }
 
   setToken(token: string | null) {
     this.token = token;
+  }
+
+  setMockFallback(enabled: boolean) {
+    this.useMockFallback = enabled;
+  }
+
+  registerMock(pattern: string | RegExp, handler: MockHandler) {
+    this.mockRoutes.push({ pattern, handler });
+    this.log.debug(`Mock registered: ${pattern}`);
+  }
+
+  clearMocks() {
+    this.mockRoutes = [];
+  }
+
+  removeMock(pattern: string | RegExp) {
+    this.mockRoutes = this.mockRoutes.filter(r => 
+      r.pattern.toString() !== pattern.toString()
+    );
+  }
+
+  private findMock(url: string): MockRoute | undefined {
+    return this.mockRoutes.find(route => {
+      if (typeof route.pattern === "string") {
+        return url === route.pattern || url.startsWith(route.pattern);
+      }
+      return route.pattern.test(url);
+    });
   }
 
   private makeRequest<T>(
@@ -68,6 +102,12 @@ class ApiClient {
   }
 
   async request<T>(method: Method, url: string, body?: unknown): Promise<T> {
+    const mock = this.findMock(url);
+    if (mock) {
+      this.log.debug(`[MOCK] ${method} ${url}`);
+      return Promise.resolve(mock.handler(method, url, body) as T);
+    }
+
     const exec = () =>
       timeout(this.makeRequest<T>(method, url, body), API.TIMEOUT);
 
@@ -92,63 +132,12 @@ class ApiClient {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await timeout(this.makeRequest("GET", "/health"), 5000);
+      await timeout(this.request("GET", "/health"), 5000);
       return true;
     } catch {
       return false;
     }
   }
 }
-
-const mockApiClient = {
-  setToken: (token: string | null) => {},
-  request: async <T>(
-    method: Method,
-    url: string,
-    body?: unknown,
-  ): Promise<T> => {
-    if (url === "/device/register") {
-      return {
-        tokens: {
-          accessToken: "mock-token",
-          refreshToken: "mock-refresh",
-          expiresAt: Date.now() + 3600_000,
-        },
-      } as unknown as T;
-    }
-    if (url === "/auth/device-login") {
-      return {
-        accessToken: "mock-token",
-        refreshToken: "mock-refresh",
-        expiresAt: Date.now() + 3600_000,
-      } as unknown as T;
-    }
-
-    if (url === "/device/config") {
-      return {
-        deviceName: "Mock Kiosk",
-        printerEnabled: true,
-        kioskMode: true,
-        refreshInterval: 30_000,
-        maintenanceMode: false,
-      } as unknown as T;
-    }
-
-    return {} as T;
-  },
-  get: function <T>(url: string) {
-    return this.request<T>("GET", url);
-  },
-  post: function <T>(url: string, body?: unknown) {
-    return this.request<T>("POST", url, body);
-  },
-  put: function <T>(url: string, body?: unknown) {
-    return this.request<T>("PUT", url, body);
-  },
-  del: function <T>(url: string) {
-    return this.request<T>("DELETE", url);
-  },
-  healthCheck: async () => true,
-};
 
 export const api = ApiClient.get();

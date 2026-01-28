@@ -1,5 +1,5 @@
 // vite-env.d.ts
-import type { RuntimeSnapshot } from "../shared/types";
+import type { Parcel, RuntimeSnapshot } from "../shared/types";
 
 export {};
 
@@ -23,6 +23,9 @@ declare global {
       health: {
         getStatus: () => Promise<any>;
       };
+      parcel: {
+        list: (register: string) => Promise<Parcel[]>; 
+      },
       platform: {
         isElectron: boolean;
         platform: NodeJS.Platform;

@@ -90,7 +90,7 @@
 
 .modal-scroll-body p {
   color: var(--muted);
-  font-size: 1.1rem;
+  font-size: var(--font-md);
   font-weight: 400;
   line-height: 1.4;
   display: -webkit-box;
