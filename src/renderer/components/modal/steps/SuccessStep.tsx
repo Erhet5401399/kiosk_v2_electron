@@ -22,7 +22,7 @@ export function SuccessStep({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="service-modal success-view"
+      className="service-modal"
     >
       <div className="service-modal-body">
         <div className="success-header">
@@ -70,9 +70,9 @@ export function SuccessStep({
       <div className="service-modal-footer">
         <div className="modal-footer">
           <Button variant="secondary" onClick={actions.onComplete}>
-            Болсон
+            Дуусгах
           </Button>
-          <Button onClick={handlePrint}>Баримт хэвлэх</Button>
+          <Button onClick={handlePrint}>Хэвлэх</Button>
         </div>
       </div>
     </motion.div>

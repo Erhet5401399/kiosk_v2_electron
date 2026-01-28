@@ -66,7 +66,7 @@ export function RegistrationInputStep({ context, actions }: StepComponentProps) 
       <div className="service-modal-footer">
         <div className="modal-footer">
           <Button variant="secondary" onClick={actions.onCancel}>
-            Болих
+            Цуцлах
           </Button>
           <Button onClick={actions.onNext}>Үргэлжлүүлэх</Button>
         </div>
