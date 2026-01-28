@@ -1,7 +1,7 @@
 .service-list {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(370px, 1fr));
   gap: 20px;
   padding: 20px;
   overflow-y: auto;
@@ -20,7 +20,7 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: transform 0.2s ease;
-  height: 320px;
+  height: 340px;
   cursor: pointer;
 }
 
@@ -44,11 +44,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--font-xl);
+  font-size: 80px;
   flex-shrink: 0;
   line-height: 1;
-  align-self: center;
   /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); */
+}
+
+.service-icon-box.small {
+  width: 60px;
+  height: 60px;
+  font-size: 60px;
+  border-radius: 20px;
 }
 
 .service-icon-box.large {
