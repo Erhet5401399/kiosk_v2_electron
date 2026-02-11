@@ -31,6 +31,13 @@ export const RUNTIME = {
   PERSIST_DEBOUNCE: 500,
 } as const;
 
+export const UPDATER = {
+  CHECK_INTERVAL_MS: Number(process.env.UPDATE_CHECK_INTERVAL_MS || 6 * 60 * 60 * 1000),
+  START_DELAY_MS: Number(process.env.UPDATE_START_DELAY_MS || 30000),
+  INSTALL_WINDOW_START: process.env.UPDATE_INSTALL_WINDOW_START || "02:00",
+  INSTALL_WINDOW_END: process.env.UPDATE_INSTALL_WINDOW_END || "04:00",
+} as const;
+
 export const PRINTER = {
   PATTERN: /Lexmark\s*MS430/i,
   TIMEOUT: 60000,
@@ -53,6 +60,11 @@ export const IPC = {
   HEALTH: "health:status",
 
   PARCEL_LIST: "parcel:list",
+
+  UPDATE_STATUS: "update:status",
+  UPDATE_CHECK: "update:check",
+  UPDATE_INSTALL: "update:install",
+  UPDATE_EVENT: "update:event",
 } as const;
 
 export const ERROR = {

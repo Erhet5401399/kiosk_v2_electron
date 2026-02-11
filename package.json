@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "electron-serve": "^3.0.0",
+    "electron-updater": "^6.7.3",
     "motion": "^12.29.0",
     "pdf-to-printer": "^5.6.1",
     "react": "^19.2.0",

@@ -1,11 +1,14 @@
 import { ipcMain } from 'electron';
 import { IPC } from '../core/constants';
 import { runtime } from '../runtime';
-import { config, printer, logger } from '../services';
+import { config, printer, logger, updater } from '../services';
 import { windows } from '../windows/manager';
 import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 
 const log = logger.child('IPC');
+const updaterStatusHandler = (status: unknown) => {
+  windows.broadcast(IPC.UPDATE_EVENT, status);
+};
 
 export function setupIPC() {
   ipcMain.handle(IPC.RUNTIME_SNAPSHOT, () => runtime.getSnapshot());
@@ -24,6 +27,9 @@ export function setupIPC() {
   ipcMain.handle(IPC.PRINTERS, () => printer.list());
   ipcMain.handle(IPC.CONFIG_GET, () => config.get());
   ipcMain.handle(IPC.CONFIG_REFRESH, () => config.fetch());
+  ipcMain.handle(IPC.UPDATE_STATUS, () => updater.getStatus());
+  ipcMain.handle(IPC.UPDATE_CHECK, () => updater.checkForUpdates());
+  ipcMain.handle(IPC.UPDATE_INSTALL, () => updater.installNow());
 
   ipcMain.handle(IPC.HEALTH, () => ({
     online: runtime.isReady(),
@@ -40,6 +46,7 @@ export function setupIPC() {
   runtime.on('state-change', (snapshot) => {
     windows.broadcast(IPC.RUNTIME_UPDATE, snapshot);
   });
+  updater.on('status', updaterStatusHandler);
 
   log.info('IPC handlers registered');
 }
@@ -53,5 +60,9 @@ export function cleanupIPC() {
   ipcMain.removeHandler(IPC.PRINTERS);
   ipcMain.removeHandler(IPC.CONFIG_GET);
   ipcMain.removeHandler(IPC.CONFIG_REFRESH);
+  ipcMain.removeHandler(IPC.UPDATE_STATUS);
+  ipcMain.removeHandler(IPC.UPDATE_CHECK);
+  ipcMain.removeHandler(IPC.UPDATE_INSTALL);
   ipcMain.removeHandler(IPC.HEALTH);
+  updater.removeListener('status', updaterStatusHandler);
 }

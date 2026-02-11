@@ -56,6 +56,28 @@ export interface HealthStatus {
   metrics: { uptime: number; memoryUsage: number };
 }
 
+export type UpdateState =
+  | "idle"
+  | "checking"
+  | "available"
+  | "downloading"
+  | "downloaded"
+  | "installing"
+  | "up_to_date"
+  | "error";
+
+export interface UpdateStatus {
+  state: UpdateState;
+  currentVersion: string;
+  availableVersion?: string;
+  downloadedBytes?: number;
+  totalBytes?: number;
+  percent?: number;
+  lastCheckedAt?: number;
+  error?: string;
+  mock: boolean;
+}
+
 export type LogLevel = "debug" | "info" | "warn" | "error" | "fatal";
 
 export type RuntimeState =

@@ -31,6 +31,17 @@ const api = {
     getStatus: () => ipcRenderer.invoke("health:status"),
   },
 
+  updater: {
+    getStatus: () => ipcRenderer.invoke("update:status"),
+    check: () => ipcRenderer.invoke("update:check"),
+    install: () => ipcRenderer.invoke("update:install"),
+    onStatus: (cb: (status: unknown) => void) => {
+      const handler = (_: unknown, status: unknown) => cb(status);
+      ipcRenderer.on("update:event", handler);
+      return () => ipcRenderer.removeListener("update:event", handler);
+    },
+  },
+
   parcel: {
     list: (register: string) => ipcRenderer.invoke("parcel:list", register),
   },

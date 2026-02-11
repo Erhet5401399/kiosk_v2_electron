@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type { Service } from './types';
 import { CATEGORIES, SERVICES, STATE_LABELS } from './constants';
-import { useElectron } from './hooks';
+import { useElectron, useUpdater } from './hooks';
 import { PromoSection, Sidebar, LoadingScreen, StatusBar } from './components/layout';
 import { ServiceList } from './components/service';
 import { ServiceModal } from './components/modal';
@@ -10,6 +10,7 @@ import './styles/index.css';
 
 export default function App() {
   const { snapshot, handlePrint } = useElectron();
+  const { updateStatus, checkForUpdates } = useUpdater();
 
   const [selectedCategory, setSelectedCategory] = useState('Бүгд');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -63,7 +64,13 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <StatusBar deviceState={STATE_LABELS[snapshot.state]} deviceId={snapshot.deviceId} uptime={snapshot.uptime}/>
+      <StatusBar
+        deviceState={STATE_LABELS[snapshot.state]}
+        deviceId={snapshot.deviceId}
+        uptime={snapshot.uptime}
+        updaterStatus={updateStatus}
+        onUpdateCheck={checkForUpdates}
+      />
     </div>
   );
 }

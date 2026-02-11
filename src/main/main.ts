@@ -1,8 +1,9 @@
+import "dotenv/config";
 import { app, dialog } from "electron";
 import { setupIPC, cleanupIPC } from "./ipc/handlers";
 import { runtime } from "./runtime";
 import { windows } from "./windows/manager";
-import { logger } from "./services";
+import { logger, updater } from "./services";
 import { APP } from "./core/constants";
 
 const log = logger.child("Main");
@@ -60,6 +61,7 @@ async function shutdown(code = 0) {
   log.info("Shutting down");
 
   try {
+    updater.destroy();
     await runtime.shutdown();
     cleanupIPC();
     await logger.close();
@@ -85,6 +87,7 @@ async function init() {
   runtime.on("shutdown", () => windows.closeAll());
 
   await runtime.start();
+  await updater.start();
   log.info("Application ready");
 }
 
@@ -110,3 +113,4 @@ app.on("before-quit", (e) => {
 
 process.on("SIGINT", () => shutdown());
 process.on("SIGTERM", () => shutdown());
+

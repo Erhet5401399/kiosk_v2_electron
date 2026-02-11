@@ -5,3 +5,4 @@ export { device, deviceStore } from './device';
 export { config } from './config';
 export { printer } from './printer';
 export { parcel } from './parcel';
+export { updater } from './updater';

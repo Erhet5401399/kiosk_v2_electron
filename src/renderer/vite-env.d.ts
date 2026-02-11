@@ -1,5 +1,5 @@
 // vite-env.d.ts
-import type { Parcel, RuntimeSnapshot } from "../shared/types";
+import type { Parcel, RuntimeSnapshot, UpdateStatus } from "../shared/types";
 
 export {};
 
@@ -22,6 +22,12 @@ declare global {
       };
       health: {
         getStatus: () => Promise<any>;
+      };
+      updater: {
+        getStatus: () => Promise<UpdateStatus>;
+        check: () => Promise<UpdateStatus>;
+        install: () => Promise<boolean>;
+        onStatus: (callback: (status: UpdateStatus) => void) => () => void;
       };
       parcel: {
         list: (register: string) => Promise<Parcel[]>; 
