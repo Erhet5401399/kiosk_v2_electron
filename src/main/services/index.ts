@@ -6,3 +6,4 @@ export { config } from './config';
 export { printer } from './printer';
 export { parcel } from './parcel';
 export { updater } from './updater';
+export { userAuth } from './auth';

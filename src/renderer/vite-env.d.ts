@@ -1,5 +1,13 @@
 // vite-env.d.ts
-import type { Parcel, RuntimeSnapshot, UpdateStatus } from "../shared/types";
+import type {
+  Parcel,
+  RuntimeSnapshot,
+  UpdateStatus,
+  UserAuthChallenge,
+  UserAuthMethod,
+  UserAuthStatus,
+  UserAuthVerifyRequest,
+} from "../shared/types";
 
 export {};
 
@@ -30,13 +38,34 @@ declare global {
         onStatus: (callback: (status: UpdateStatus) => void) => () => void;
       };
       parcel: {
-        list: (register: string) => Promise<Parcel[]>; 
+        list: (register: string) => Promise<Parcel[]>;
+      };
+      auth: {
+        listMethods: () => Promise<UserAuthMethod[]>;
+        start: (methodId: string) => Promise<UserAuthChallenge>;
+        verify: (req: UserAuthVerifyRequest) => Promise<UserAuthStatus>;
+        status: () => Promise<UserAuthStatus>;
+        touch: () => Promise<UserAuthStatus>;
+        logout: () => Promise<UserAuthStatus>;
       },
       platform: {
         isElectron: boolean;
         platform: NodeJS.Platform;
         version: string;
       };
+    };
+  }
+}
+
+declare namespace JSX {
+  interface IntrinsicElements {
+    webview: React.DetailedHTMLProps<
+      React.HTMLAttributes<HTMLElement>,
+      HTMLElement
+    > & {
+      src?: string;
+      partition?: string;
+      allowpopups?: string;
     };
   }
 }

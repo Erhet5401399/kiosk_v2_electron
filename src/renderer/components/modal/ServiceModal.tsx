@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import type {
   Service,
@@ -15,12 +15,14 @@ import { useFlowEngine } from '../../flows/hooks/useFlowEngine';
 
 interface ServiceModalProps {
   service: Service;
+  registerNumber: string;
   onPrint: (registerNumber: string) => void;
   onClose: () => void;
 }
 
 export function ServiceModal({
   service,
+  registerNumber,
   onPrint,
   onClose,
 }: ServiceModalProps) {
@@ -48,6 +50,12 @@ export function ServiceModal({
     onComplete: onClose,
     onCancel: onClose,
   });
+
+  useEffect(() => {
+    if (registerNumber) {
+      updateStepData({ registerNumber });
+    }
+  }, [registerNumber, updateStepData]);
 
   const context: StepContext = useMemo(() => ({
     service,
@@ -151,8 +159,8 @@ export function ServiceModal({
   const currentConfig = engine.getCurrentStepConfig();
 
   const handlePrintAndClose = () => {
-    const registerNumber = state.stepData.registerNumber as string || '';
-    onPrint(registerNumber);
+    const currentRegister = (state.stepData.registerNumber as string) || registerNumber;
+    onPrint(currentRegister);
     complete();
   };
 

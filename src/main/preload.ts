@@ -46,6 +46,19 @@ const api = {
     list: (register: string) => ipcRenderer.invoke("parcel:list", register),
   },
 
+  auth: {
+    listMethods: () => ipcRenderer.invoke("user-auth:methods"),
+    start: (methodId: string) => ipcRenderer.invoke("user-auth:start", methodId),
+    verify: (req: {
+      methodId: string;
+      challengeId: string;
+      payload: Record<string, unknown>;
+    }) => ipcRenderer.invoke("user-auth:verify", req),
+    status: () => ipcRenderer.invoke("user-auth:status"),
+    touch: () => ipcRenderer.invoke("user-auth:touch"),
+    logout: () => ipcRenderer.invoke("user-auth:logout"),
+  },
+
   platform: {
     isElectron: true,
     platform: process.platform,

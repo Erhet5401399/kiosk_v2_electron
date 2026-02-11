@@ -10,8 +10,43 @@ const log = logger.child("Main");
 let quitting = false;
 
 function setupSecurity() {
+  const safeOrigin = (value: string): string => {
+    if (!value) return "";
+    try {
+      return new URL(value).origin;
+    } catch {
+      return "";
+    }
+  };
+
+  const danAuthorizeUrl = String(process.env.DAN_AUTHORIZE_URL || "").trim();
+  const danRedirectUri = String(process.env.DAN_REDIRECT_URI || "").trim();
+
+  const danAuthorizeOrigin = safeOrigin(danAuthorizeUrl);
+  const danRedirectOrigin = safeOrigin(danRedirectUri);
+
   app.on("web-contents-created", (_, contents) => {
-    contents.on("will-attach-webview", (e) => e.preventDefault());
+    contents.on("will-attach-webview", (event, webPreferences, params) => {
+      const src = String(params.src || "");
+      const srcOrigin = src.startsWith("http") ? safeOrigin(src) : "";
+      const allowed =
+        src.startsWith("data:text/html") ||
+        src.startsWith("https://kiosk.local/auth/dan/") ||
+        (!!danAuthorizeOrigin && srcOrigin === danAuthorizeOrigin) ||
+        (!!danRedirectOrigin && srcOrigin === danRedirectOrigin);
+
+      if (!allowed) {
+        event.preventDefault();
+        log.warn("Blocked webview source", { src });
+        return;
+      }
+
+      webPreferences.nodeIntegration = false;
+      webPreferences.contextIsolation = true;
+      webPreferences.webSecurity = true;
+      delete (webPreferences as { preload?: string }).preload;
+      delete (webPreferences as { preloadURL?: string }).preloadURL;
+    });
     contents.setWindowOpenHandler(() => ({ action: "deny" }));
   });
 }

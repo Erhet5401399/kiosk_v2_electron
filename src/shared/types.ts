@@ -102,6 +102,56 @@ export interface RuntimeSnapshot {
   startedAt: number;
 }
 
+export type UserAuthMethodType =
+  | "webview_oauth"
+  | "credentials"
+  | "scanner"
+  | "third_party";
+
+export interface UserAuthMethod {
+  id: string;
+  label: string;
+  type: UserAuthMethodType;
+  enabled: boolean;
+}
+
+export interface UserAuthChallenge {
+  methodId: string;
+  challengeId: string;
+  expiresAt: number;
+  webUrl?: string;
+  callbackUrl?: string;
+  meta?: Record<string, unknown>;
+}
+
+export interface UserAuthVerifyRequest {
+  methodId: string;
+  challengeId: string;
+  payload: Record<string, unknown>;
+}
+
+export interface UserAuthSession {
+  sessionId: string;
+  methodId: string;
+  registerNumber: string;
+  issuedAt: number;
+  lastActivityAt: number;
+  expiresAt: number;
+  maxExpiresAt: number;
+  claims?: Record<string, unknown>;
+}
+
+export type UserAuthStatusReason =
+  | "not_authenticated"
+  | "manual_logout"
+  | "expired";
+
+export interface UserAuthStatus {
+  authenticated: boolean;
+  session: UserAuthSession | null;
+  reason?: UserAuthStatusReason;
+}
+
 export interface Parcel {
   parcel: string;
   app_id: string;

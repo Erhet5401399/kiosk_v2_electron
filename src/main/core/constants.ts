@@ -14,6 +14,8 @@ export const API = {
 export const AUTH = {
   TOKEN_REFRESH_THRESHOLD: 5 * 60 * 1000,
   MAX_REFRESH_RETRIES: 3,
+  USER_SESSION_IDLE_MS: Number(process.env.USER_SESSION_IDLE_MS || 90_000),
+  USER_SESSION_MAX_MS: Number(process.env.USER_SESSION_MAX_MS || 600_000),
 } as const;
 
 export const STORAGE = {
@@ -65,6 +67,13 @@ export const IPC = {
   UPDATE_CHECK: "update:check",
   UPDATE_INSTALL: "update:install",
   UPDATE_EVENT: "update:event",
+
+  USER_AUTH_METHODS: "user-auth:methods",
+  USER_AUTH_START: "user-auth:start",
+  USER_AUTH_VERIFY: "user-auth:verify",
+  USER_AUTH_STATUS: "user-auth:status",
+  USER_AUTH_TOUCH: "user-auth:touch",
+  USER_AUTH_LOGOUT: "user-auth:logout",
 } as const;
 
 export const ERROR = {

@@ -143,3 +143,30 @@
   align-items: center;
   gap: 20px;
 }
+
+.auth-webview-card {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-webview {
+  width: 100%;
+  min-height: 420px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.auth-webview-placeholder {
+  width: 100%;
+  min-height: 420px;
+  border: 1px dashed rgba(0, 0, 0, 0.22);
+  border-radius: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-md);
+}

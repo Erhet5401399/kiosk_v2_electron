@@ -38,6 +38,7 @@ class WindowManager {
       webPreferences: {
         preload: this.preload,
         contextIsolation: true,
+        webviewTag: true,
       },
       ...opts,
     });

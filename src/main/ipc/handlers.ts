@@ -1,9 +1,10 @@
 import { ipcMain } from 'electron';
 import { IPC } from '../core/constants';
 import { runtime } from '../runtime';
-import { config, printer, logger, updater } from '../services';
+import { config, printer, logger, updater, userAuth } from '../services';
 import { windows } from '../windows/manager';
 import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
+import type { UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
 const updaterStatusHandler = (status: unknown) => {
@@ -30,6 +31,14 @@ export function setupIPC() {
   ipcMain.handle(IPC.UPDATE_STATUS, () => updater.getStatus());
   ipcMain.handle(IPC.UPDATE_CHECK, () => updater.checkForUpdates());
   ipcMain.handle(IPC.UPDATE_INSTALL, () => updater.installNow());
+  ipcMain.handle(IPC.USER_AUTH_METHODS, () => userAuth.listMethods());
+  ipcMain.handle(IPC.USER_AUTH_START, (_, methodId: string) => userAuth.start(methodId));
+  ipcMain.handle(IPC.USER_AUTH_VERIFY, (_, req: UserAuthVerifyRequest) =>
+    userAuth.verify(req),
+  );
+  ipcMain.handle(IPC.USER_AUTH_STATUS, () => userAuth.getStatus());
+  ipcMain.handle(IPC.USER_AUTH_TOUCH, () => userAuth.touch());
+  ipcMain.handle(IPC.USER_AUTH_LOGOUT, () => userAuth.logout());
 
   ipcMain.handle(IPC.HEALTH, () => ({
     online: runtime.isReady(),
@@ -63,6 +72,12 @@ export function cleanupIPC() {
   ipcMain.removeHandler(IPC.UPDATE_STATUS);
   ipcMain.removeHandler(IPC.UPDATE_CHECK);
   ipcMain.removeHandler(IPC.UPDATE_INSTALL);
+  ipcMain.removeHandler(IPC.USER_AUTH_METHODS);
+  ipcMain.removeHandler(IPC.USER_AUTH_START);
+  ipcMain.removeHandler(IPC.USER_AUTH_VERIFY);
+  ipcMain.removeHandler(IPC.USER_AUTH_STATUS);
+  ipcMain.removeHandler(IPC.USER_AUTH_TOUCH);
+  ipcMain.removeHandler(IPC.USER_AUTH_LOGOUT);
   ipcMain.removeHandler(IPC.HEALTH);
   updater.removeListener('status', updaterStatusHandler);
 }
