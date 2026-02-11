@@ -14,12 +14,20 @@ const NUMBERS = [
 ];
 
 interface VirtualKeyboardProps {
+  mode?: 'alphanumeric' | 'numeric';
   onKeyClick: (key: string) => void;
   onBackspace: () => void;
   onDone: () => void;
 }
 
-export function VirtualKeyboard({ onKeyClick, onBackspace, onDone }: VirtualKeyboardProps) {
+export function VirtualKeyboard({
+  mode = 'alphanumeric',
+  onKeyClick,
+  onBackspace,
+  onDone,
+}: VirtualKeyboardProps) {
+  const showLetters = mode !== 'numeric';
+
   return (
     <motion.div
       className="virtual-keyboard split-layout"
@@ -27,28 +35,30 @@ export function VirtualKeyboard({ onKeyClick, onBackspace, onDone }: VirtualKeyb
       animate={{ opacity: 1, y: 0 }}
     >
       <div className="keyboard-main">
-        <div className="keyboard-letters">
-          {LETTERS.map((row, i) => (
-            <div key={i} className="keyboard-row">
-              {row.map((key) => (
-                <button key={key} className="key" onClick={() => onKeyClick(key)}>
-                  {key}
-                </button>
-              ))}
+        {showLetters && (
+          <div className="keyboard-letters">
+            {LETTERS.map((row, i) => (
+              <div key={i} className="keyboard-row">
+                {row.map((key) => (
+                  <button key={key} className="key" onClick={() => onKeyClick(key)}>
+                    {key}
+                  </button>
+                ))}
+              </div>
+            ))}
+            <div className="keyboard-row">
+              <button className="key ghost" />
+              <button className="key backspace" onClick={onBackspace}>
+                Backspace
+              </button>
+              <button className="key keyboard-done" onClick={onDone}>
+                Done
+              </button>
             </div>
-          ))}
-          <div className="keyboard-row">
-            <button className="key ghost"/>
-            <button className="key backspace" onClick={onBackspace}>
-              Арилгах
-            </button>
-            <button className="key keyboard-done" onClick={onDone}>
-              Хаах
-            </button>
           </div>
-        </div>
+        )}
 
-        <div className="keyboard-numbers">
+        <div className={`keyboard-numbers ${showLetters ? '' : 'numbers-full'}`}>
           {NUMBERS.map((row, i) => (
             <div key={i} className="keyboard-row">
               {row.map((key, j) =>
@@ -58,10 +68,21 @@ export function VirtualKeyboard({ onKeyClick, onBackspace, onDone }: VirtualKeyb
                   </button>
                 ) : (
                   <div key={`empty-${j}`} className="key-spacer" />
-                )
+                ),
               )}
             </div>
           ))}
+
+          {!showLetters && (
+            <div className="keyboard-row">
+              <button className="key backspace" onClick={onBackspace}>
+                Backspace
+              </button>
+              <button className="key keyboard-done" onClick={onDone}>
+                Done
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

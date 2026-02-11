@@ -1,27 +1,18 @@
 import { motion } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
-import { VirtualKeyboard } from '../../keyboard';
 
 export function RegistrationInputStep({ context, actions }: StepComponentProps) {
-  const { service, stepData } = context;
-  const [registerNumber, setRegisterNumber] = useState((stepData.registerNumber as string) || '');
-  const [showKeyboard, setShowKeyboard] = useState(true);
+  const { service, stepData, keyboard } = context;
+  const registerNumber = (stepData.registerNumber as string) || '';
+  const isActive = keyboard.activeTarget === 'registerNumber';
 
   useEffect(() => {
-    actions.onUpdateStepData({ registerNumber });
-  }, [registerNumber]);
-
-  const handleKeyClick = (key: string) => {
-    if (registerNumber.length < 10) {
-      setRegisterNumber((prev) => prev + key);
-    }
-  };
-
-  const handleBackspace = () => {
-    setRegisterNumber((prev) => prev.slice(0, -1));
-  };
+    actions.onKeyboardOpen('registerNumber', { mode: 'alphanumeric', maxLength: 10 });
+    return () => actions.onKeyboardClose();
+    // Keep this mount-scoped so step transition controls keyboard ownership.
+  }, []);
 
   return (
     <motion.div className="service-modal" initial={{ opacity: 0, y: 0 }} animate={{ opacity: 1, y: 0 }}>
@@ -37,25 +28,17 @@ export function RegistrationInputStep({ context, actions }: StepComponentProps) 
           <p>{service.desc}</p>
         </div>
 
-        <div 
-          className={`registration-input-field ${showKeyboard ? 'active' : ''}`}
-          onClick={() => setShowKeyboard(true)}
+        <div
+          className={`registration-input-field ${isActive ? 'active' : ''}`}
+          onClick={() => actions.onKeyboardOpen('registerNumber', { mode: 'alphanumeric', maxLength: 10 })}
         >
           <div className="input-label">Регистрийн дугаар</div>
           <div className="input-value">
-            {showKeyboard && !registerNumber && <div className="input-cursor" />}
-            {registerNumber || <span className="placeholder"></span>}
-            {showKeyboard && registerNumber && <div className="input-cursor" />}
+            {isActive && !registerNumber && <div className="input-cursor" />}
+            {registerNumber || <span className="placeholder" />}
+            {isActive && registerNumber && <div className="input-cursor" />}
           </div>
         </div>
-
-        {showKeyboard && (
-          <VirtualKeyboard
-            onKeyClick={handleKeyClick}
-            onBackspace={handleBackspace}
-            onDone={() => setShowKeyboard(false)}
-          />
-        )}
 
         <div className="price-summary-box">
           <span className="label">Нийт төлбөр:</span>

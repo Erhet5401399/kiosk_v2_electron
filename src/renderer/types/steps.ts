@@ -1,4 +1,9 @@
-import type { Service, PaymentMethod, KeyboardTarget } from './index';
+import type {
+  Service,
+  PaymentMethod,
+  KeyboardInputMode,
+  KeyboardTarget,
+} from './index';
 
 export type StepId = string;
 
@@ -6,10 +11,21 @@ export interface StepContext {
   service: Service;
   paymentMethod: PaymentMethod;
   stepData: Record<string, unknown>;
+  keyboard: {
+    activeTarget: KeyboardTarget | null;
+    mode: KeyboardInputMode;
+  };
 }
 
 export interface StepActions {
   onUpdateStepData: (data: Record<string, unknown>) => void;
+  onKeyboardOpen: (
+    target: KeyboardTarget,
+    options?: { mode?: KeyboardInputMode; maxLength?: number },
+  ) => void;
+  onKeyboardClose: () => void;
+  onKeyboardAppend: (key: string) => void;
+  onKeyboardBackspace: () => void;
   onNext: () => void;
   onBack: () => void;
   onGoToStep: (stepId: StepId) => void;
