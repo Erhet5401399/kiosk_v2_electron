@@ -52,6 +52,11 @@
 .modal-timeout {
   font-size: 2rem;
   font-weight: 700;
+  color: var(--text);
+}
+
+.modal-timeout.is-warning {
+  color: #dc2626;
 }
 
 .modal-logo {

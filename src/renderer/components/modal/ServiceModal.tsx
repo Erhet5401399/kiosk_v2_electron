@@ -16,6 +16,9 @@ import { useFlowEngine } from '../../flows/hooks/useFlowEngine';
 interface ServiceModalProps {
   service: Service;
   registerNumber: string;
+  userClaims?: Record<string, unknown>;
+  sessionExpiresAt?: number;
+  onSessionExpired?: () => void;
   onPrint: (registerNumber: string) => void;
   onClose: () => void;
 }
@@ -23,6 +26,9 @@ interface ServiceModalProps {
 export function ServiceModal({
   service,
   registerNumber,
+  userClaims,
+  sessionExpiresAt,
+  onSessionExpired,
   onPrint,
   onClose,
 }: ServiceModalProps) {
@@ -52,10 +58,25 @@ export function ServiceModal({
   });
 
   useEffect(() => {
-    if (registerNumber) {
-      updateStepData({ registerNumber });
-    }
-  }, [registerNumber, updateStepData]);
+    const claimRegnum = String(userClaims?.regnum || "").trim();
+    const resolvedRegister = String(registerNumber || claimRegnum).trim();
+
+    const citizen = {
+      regnum: resolvedRegister,
+      reghash: String(userClaims?.reghash || "").trim(),
+      image: String(userClaims?.image || "").trim(),
+      firstname: String(userClaims?.firstname || "").trim(),
+      lastname: String(userClaims?.lastname || "").trim(),
+      address: String(userClaims?.address || "").trim(),
+      personId: String(userClaims?.personId || "").trim(),
+      phone: String(userClaims?.phone || "").trim(),
+    };
+
+    updateStepData({
+      registerNumber: resolvedRegister,
+      citizen,
+    });
+  }, [registerNumber, userClaims, updateStepData]);
 
   const context: StepContext = useMemo(() => ({
     service,
@@ -166,7 +187,11 @@ export function ServiceModal({
 
   return (
     <AnimatePresence>
-      <ModalWrapper onClose={cancel}>
+      <ModalWrapper
+        onClose={cancel}
+        countdownTo={sessionExpiresAt}
+        onCountdownEnd={onSessionExpired}
+      >
         <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
         <StepRenderer
           context={context}

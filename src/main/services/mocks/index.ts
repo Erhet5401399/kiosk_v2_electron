@@ -110,8 +110,16 @@ export function registerMocks() {
     }
 
     return {
-      registerNumber: 'РК87071215',
+      registerNumber: 'RK87071215',
       claims: {
+        regnum: 'RK87071215',
+        reghash: '9a3dee68asd23',
+        image: '',
+        firstname: 'Оюунбаяр',
+        lastname: 'Хэрлэн',
+        address: 'Улаанбаатар, Хан-Уул дүүрэг, 3-р хороо',
+        personId: '',
+        phone: '',
         code,
         provider: 'DAN',
         mock: true,
@@ -126,4 +134,5 @@ export function clearAllMocks() {
   api.clearMocks();
   log.info('All mocks cleared');
 }
+
 

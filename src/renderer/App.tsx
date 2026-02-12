@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import type { UserAuthStatus } from "../shared/types";
+import type { UserAuthSession, UserAuthStatus } from "../shared/types";
 import type { Service } from "./types";
 import { CATEGORIES, SERVICES, STATE_LABELS } from "./constants";
 import { useElectron, useUpdater } from "./hooks";
@@ -84,12 +84,26 @@ export default function App() {
     setPendingService(null);
   };
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (session: UserAuthSession) => {
     if (!pendingService) return;
+    setAuthStatus({
+      authenticated: true,
+      session,
+    });
     setSelectedService(pendingService);
     setPendingService(null);
-    void loadAuthStatus();
   };
+
+  const handleSessionExpired = useCallback(() => {
+    setSelectedService(null);
+    setPendingService(null);
+    setAuthStatus({
+      authenticated: false,
+      session: null,
+      reason: "expired",
+    });
+    void window.electron?.auth?.logout().catch(() => {});
+  }, []);
 
   const handlePrintAndClose = async (registerNumber: string) => {
     if (selectedService) {
@@ -133,6 +147,9 @@ export default function App() {
           <ServiceModal
             service={selectedService}
             registerNumber={authStatus.session?.registerNumber || ""}
+            userClaims={authStatus.session?.claims}
+            sessionExpiresAt={authStatus.session?.expiresAt}
+            onSessionExpired={handleSessionExpired}
             onPrint={handlePrintAndClose}
             onClose={handleCloseModal}
           />

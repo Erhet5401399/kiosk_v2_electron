@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import type { UserAuthChallenge, UserAuthMethod } from "../../../shared/types";
+import type {
+  UserAuthChallenge,
+  UserAuthMethod,
+  UserAuthSession,
+} from "../../../shared/types";
 import { ModalWrapper } from "./ModalWrapper";
 import { Button } from "../common";
+import { APP_NAME } from "../../constants";
 
 interface UserAuthModalProps {
   serviceName: string;
   onCancel: () => void;
-  onSuccess: (registerNumber: string) => void;
+  onSuccess: (session: UserAuthSession) => void;
 }
 
 type WebViewElement = HTMLElement & {
@@ -33,6 +38,7 @@ export function UserAuthModal({
   const [initializing, setInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [authMethodId, setAuthMethodId] = useState<string | null>(null);
+  const [loginDeadline, setLoginDeadline] = useState<number | null>(null);
   const webviewRef = useRef<WebViewElement | null>(null);
   const authInFlightRef = useRef(false);
 
@@ -64,6 +70,7 @@ export function UserAuthModal({
         const started = await window.electron.auth.start(preferred.id);
         if (!active) return;
         setChallenge(started);
+        setLoginDeadline(Date.now() + 60_000);
 
         if (!started.webUrl) {
           throw new Error(
@@ -99,7 +106,7 @@ export function UserAuthModal({
       if (!status.authenticated || !status.session) {
         throw new Error("Authentication failed");
       }
-      onSuccess(status.session.registerNumber);
+      onSuccess(status.session);
     } catch (e) {
       setError((e as Error).message || "Authentication failed");
       authInFlightRef.current = false;
@@ -141,7 +148,12 @@ export function UserAuthModal({
   }, [challenge]);
 
   return (
-    <ModalWrapper onClose={onCancel} title="User Login">
+    <ModalWrapper
+      onClose={onCancel}
+      title={APP_NAME}
+      countdownTo={loginDeadline ?? undefined}
+      onCountdownEnd={onCancel}
+    >
       <motion.div
         className="service-modal"
         initial={{ opacity: 0, y: 0 }}
@@ -149,14 +161,13 @@ export function UserAuthModal({
       >
         <div className="service-modal-body">
           <div className="step-header">
-            <h1>Sign in required</h1>
+            <h1>Та нэвтрэх шаардлагатай</h1>
             <p>{serviceName}</p>
           </div>
 
           <div className="auth-webview-card">
-            <div className="input-label">Authentication Method</div>
             <div className="input-value">
-              {selectedMethod?.label || "Loading method..."}
+              {selectedMethod?.label ? `Нэвтрэх төрөл: ${selectedMethod?.label}` : "Loading method..."}
             </div>
 
             {challenge?.webUrl ? (
@@ -181,13 +192,13 @@ export function UserAuthModal({
         <div className="service-modal-footer">
           <div className="modal-footer">
             <Button variant="secondary" onClick={onCancel} disabled={loading}>
-              Cancel
+              Цуцлах
             </Button>
             <Button
               onClick={() => webviewRef.current?.reload()}
               disabled={loading || !challenge?.webUrl}
             >
-              Reload
+              Үргэлжлүүлэх
             </Button>
           </div>
         </div>
