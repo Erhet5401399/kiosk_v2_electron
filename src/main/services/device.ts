@@ -110,10 +110,10 @@ class DeviceService extends EventEmitter {
     try {
       this.log.info("Registering device");
       const res = await api.post<{ tokens?: TokenPayload }>(
-        "/device/register",
+        "/api/auth/kiosk/register/login",
         {
-          deviceId: deviceStore.getDeviceId(),
-          hardwareId: deviceStore.getInfo().hardwareId,
+          device_id: deviceStore.getDeviceId(),
+          hardware_id: deviceStore.getInfo().hardwareId,
           platform: process.platform,
         },
       );
@@ -164,9 +164,9 @@ class DeviceService extends EventEmitter {
 
     if (tokens?.refreshToken) {
       try {
-        const res = await api.post<TokenPayload>("/auth/refresh", {
-          refreshToken: tokens.refreshToken,
-          deviceId: deviceStore.getDeviceId(),
+        const res = await api.post<TokenPayload>("/api/auth/kiosk/refresh/token", {
+          refresh_token: tokens.refreshToken,
+          device_id: deviceStore.getDeviceId(),
         });
         deviceStore.setTokens(res);
         api.setToken(res.accessToken);
@@ -176,8 +176,8 @@ class DeviceService extends EventEmitter {
       }
     }
 
-    const res = await api.post<TokenPayload>("/auth/device-login", {
-      deviceId: deviceStore.getDeviceId(),
+    const res = await api.post<TokenPayload>("/api/auth/kiosk/register/login", {
+      device_id: deviceStore.getDeviceId(),
     });
     deviceStore.setTokens(res);
     api.setToken(res.accessToken);
