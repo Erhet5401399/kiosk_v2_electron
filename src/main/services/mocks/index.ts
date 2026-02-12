@@ -110,9 +110,9 @@ export function registerMocks() {
     }
 
     return {
-      registerNumber: 'RK87071215',
+      registerNumber: 'РК87071215',
       claims: {
-        regnum: 'RK87071215',
+        regnum: 'РК87071215',
         reghash: '9a3dee68asd23',
         image: '',
         firstname: 'Оюунбаяр',
