@@ -17,6 +17,7 @@ import {
 } from "./components/layout";
 import { ServiceList } from "./components/service";
 import { ServiceModal, UserAuthModal } from "./components/modal";
+import { hasStepDefinition } from "./flows/steps/definitions";
 import "./styles/index.css";
 
 export default function App() {
@@ -40,16 +41,44 @@ export default function App() {
     return services.filter((s) => s.category === selectedCategory);
   }, [selectedCategory, services]);
 
+  const categoryServiceCount = useMemo(() => {
+    return services.reduce<Record<string, number>>((acc, service) => {
+      const categoryName = String(service.category || "").trim();
+      if (!categoryName) return acc;
+      acc[categoryName] = (acc[categoryName] || 0) + 1;
+      return acc;
+    }, {});
+  }, [services]);
+
   const buildServiceFlowConfig = useCallback((svc: CategoryService) => {
     const rawFlowConfig = svc.config;
     const rawSteps = rawFlowConfig?.steps;
-    if (!Array.isArray(rawSteps) || !rawSteps.length) return undefined;
+
+    const toUnavailableFlow = (reason: string) => ({
+      serviceId: svc.id,
+      steps: ["service-unavailable"],
+      initialStepData: {
+        ...(rawFlowConfig?.initial || {}),
+        unavailableReason: reason,
+      },
+    });
+
+    if (!Array.isArray(rawSteps) || !rawSteps.length) {
+      return toUnavailableFlow("No flow steps returned from backend.");
+    }
 
     const steps = rawSteps
       .map((step) => String(step || "").trim())
       .filter((step) => !!step);
 
-    if (!steps.length) return undefined;
+    if (!steps.length) {
+      return toUnavailableFlow("Flow steps are empty.");
+    }
+
+    const unknownStep = steps.find((step) => !hasStepDefinition(step));
+    if (unknownStep) {
+      return toUnavailableFlow(`Unknown flow step: ${unknownStep}`);
+    }
 
     return {
       serviceId: svc.id,
@@ -219,6 +248,7 @@ export default function App() {
         <Sidebar
           categories={categories}
           selectedCategory={selectedCategory}
+          categoryServiceCount={categoryServiceCount}
           onSelectCategory={setSelectedCategory}
         />
         <ServiceList

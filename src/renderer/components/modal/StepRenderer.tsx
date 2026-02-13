@@ -1,5 +1,6 @@
 import type { StepComponentProps } from '../../types/steps';
 import { getStepComponent } from '../../flows/steps/definitions';
+import { StateCard } from '../common';
 
 interface StepRendererProps extends StepComponentProps {
   onPrint?: () => void;
@@ -10,13 +11,20 @@ export function StepRenderer({ context, actions, config, onPrint }: StepRenderer
 
   if (!Component) {
     return (
-      <div className="step-not-found">
-        <h2>Step not found: {config.id}</h2>
-        <p>This step component has not been implemented yet.</p>
+      <div className="service-modal">
+        <div className="service-modal-body">
+          <StateCard
+            title="Step not available"
+            description="This step is not implemented in this kiosk version."
+            detail={`Step id: ${config.id}`}
+            tone="warning"
+          />
+        </div>
       </div>
     );
   }
 
   return <Component context={context} actions={actions} config={config} onPrint={onPrint} />;
 }
+
 export { registerStepComponent, hasStepComponent } from '../../flows/steps/definitions';

@@ -17,6 +17,7 @@ import {
   PaymentInfoStep,
   ConfirmationStep,
   PrintOptionsStep,
+  ServiceUnavailableStep,
 } from '../../components/modal/steps';
 
 export type StepComponent = ComponentType<StepComponentProps & { onPrint?: () => void }>;
@@ -103,6 +104,11 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
     title: 'Баталгаажуулалт',
     component: ConfirmationStep,
   },
+  'service-unavailable': {
+    id: 'service-unavailable',
+    title: 'Service Unavailable',
+    component: ServiceUnavailableStep,
+  },
 };
 
 export function getStepDefinition(stepId: string): StepDefinition {
@@ -119,6 +125,10 @@ export function getStepComponent(stepId: string): StepComponent | undefined {
 
 export function hasStepComponent(stepId: string): boolean {
   return stepId in STEP_DEFINITIONS && Boolean(STEP_DEFINITIONS[stepId]?.component);
+}
+
+export function hasStepDefinition(stepId: string): boolean {
+  return stepId in STEP_DEFINITIONS;
 }
 
 export function registerStepDefinition(definition: StepDefinition): void {

@@ -9,3 +9,4 @@ export { BoundaryVerificationStep } from './BoundaryVerificationStep';
 export { PaymentInfoStep } from './PaymentInfoStep';
 export { ConfirmationStep } from './ConfirmationStep';
 export { PrintOptionsStep } from './PrintOptionsStep';
+export { ServiceUnavailableStep } from './ServiceUnavailableStep';

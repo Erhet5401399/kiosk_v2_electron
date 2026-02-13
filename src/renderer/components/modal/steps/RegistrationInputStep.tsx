@@ -39,7 +39,12 @@ export function RegistrationInputStep({ context, actions }: StepComponentProps) 
   }, []);
 
   return (
-    <motion.div className="service-modal" initial={{ opacity: 0, y: 0 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.div
+      className="service-modal"
+      initial={{ opacity: 0, y: 0 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
+    >
       <div className="service-modal-body">
         <div className="service-header-modal">
           <div className="service-icon-box large">{service.icon}</div>

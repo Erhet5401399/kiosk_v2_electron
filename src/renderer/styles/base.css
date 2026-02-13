@@ -77,6 +77,48 @@ body {
   margin: 8px;
 }
 
+.state-card {
+  margin: auto;
+  width: 100%;
+  max-width: 760px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 18px;
+  padding: 28px 24px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
+  text-align: center;
+}
+
+.state-card-warning {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: linear-gradient(180deg, rgba(255, 251, 235, 0.86), #ffffff);
+}
+
+.state-card-title {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.state-card-description {
+  margin: 0;
+  font-size: var(--font-lg);
+  color: var(--text);
+}
+
+.state-card-detail {
+  margin: 10px 0 0;
+  font-size: var(--font-md);
+  color: var(--muted);
+}
+
+.state-card-actions {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

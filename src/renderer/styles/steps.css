@@ -65,6 +65,42 @@
   margin: 20px 0 30px;
 }
 
+.land-parcel-list {
+  gap: 14px;
+}
+
+.land-parcel-option {
+  align-items: flex-start;
+  padding: 20px 20px 18px;
+}
+
+.land-parcel-info h3 {
+  margin-bottom: 10px;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.land-parcel-meta-row {
+  display: grid;
+  grid-template-columns: minmax(170px, 230px) 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 4px 0;
+}
+
+.land-parcel-label {
+  color: var(--muted);
+  font-size: 0.96rem;
+  font-weight: 600;
+}
+
+.land-parcel-value {
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .parcel-option,
 .document-option,
 .print-option {
@@ -79,13 +115,6 @@
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   text-align: left;
-}
-
-.parcel-option:hover,
-.document-option:hover,
-.print-option:hover {
-  border-color: rgba(0, 122, 255, 0.3);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .parcel-option.selected,

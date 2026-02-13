@@ -32,6 +32,7 @@ export function OwnershipCheckStep({ context, actions }: StepComponentProps) {
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
+      transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
       className="service-modal"
     >
       <div className='service-modal-body'>

@@ -19,7 +19,7 @@ class ParcelService {
     const query = new URLSearchParams();
     if (register) query.set('reg', register);
     
-    const url = `/getParcels${query.toString() ? '?' + query.toString() : ''}`;
+    const url = `/api/kiosk/service/active/all/parcel?${query.toString()}`;
     this.log.debug('Fetching parcels:', url);
     return api.get(url);
   }

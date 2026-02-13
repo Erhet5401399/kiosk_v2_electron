@@ -20,13 +20,16 @@ export function SuccessStep({
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
       className="service-modal"
     >
       <div className="service-modal-body">
         <div className="step-header">
-          <div className="success-icon">✅</div>
+          <div className="success-icon" aria-hidden="true">
+            <span className="success-icon-mark">{'\u2713'}</span>
+          </div>
           <h1>Төлбөр амжилттай</h1>
           <p>Таны баримт бэлэн боллоо</p>
         </div>
@@ -78,3 +81,4 @@ export function SuccessStep({
     </motion.div>
   );
 }
+

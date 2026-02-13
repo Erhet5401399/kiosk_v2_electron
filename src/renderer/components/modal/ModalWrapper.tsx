@@ -59,16 +59,29 @@ export function ModalWrapper({
     <motion.div
       className="modal-overlay"
       initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+      animate={{
+        opacity: 1,
+        transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
+      }}
+      exit={{
+        opacity: 0,
+        transition: { duration: 0, ease: [0.4, 0, 1, 1] },
+      }}
       onClick={onClose}
     >
       <motion.div
         className="modal-content full-height"
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
-        transition={{ type: "tween", duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+        initial={{ y: 24, opacity: 0.98 }}
+        animate={{
+          y: 0,
+          opacity: 1,
+          transition: { duration: 0.26, ease: [0.22, 1, 0.36, 1] },
+        }}
+        exit={{
+          y: 20,
+          opacity: 0.98,
+          transition: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-header-fixed">

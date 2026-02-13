@@ -4,17 +4,17 @@ import { logger } from "../logger";
 const log = logger.child("Mocks");
 
 export function registerMocks() {
-  api.registerMock("/api/auth/kiosk/register/login", () => ({
-    access_token: "mock-token",
-    refresh_token: "mock-refresh",
-    expires_at: Date.now() + 3600_000,
-  }));
+  // api.registerMock("/api/auth/kiosk/register/login", () => ({
+  //   access_token: "mock-token",
+  //   refresh_token: "mock-refresh",
+  //   expires_at: Date.now() + 3600_000,
+  // }));
 
-  api.registerMock("/api/auth/kiosk/refresh/token", () => ({
-    access_token: "mock-token",
-    refresh_token: "mock-refresh",
-    expires_at: Date.now() + 3600_000,
-  }));
+  // api.registerMock("/api/auth/kiosk/refresh/token", () => ({
+  //   access_token: "mock-token",
+  //   refresh_token: "mock-refresh",
+  //   expires_at: Date.now() + 3600_000,
+  // }));
 
   api.registerMock("/device/config", () => ({
     device_name: "Mock Kiosk",
@@ -82,7 +82,7 @@ export function registerMocks() {
     return byCategory[catId] || [];
   });
 
-  api.registerMock("/getParcels", (_, url) => {
+  api.registerMock("/api/kiosk/service/active/all/parcel", (_, url) => {
     const parsed = new URL(url, "http://localhost");
     const reg = String(parsed.searchParams.get("reg") || "")
       .trim()

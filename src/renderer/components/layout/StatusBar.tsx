@@ -19,6 +19,22 @@ const UPDATER_LABELS: Record<UpdateStatus['state'], string> = {
   error: 'Error',
 };
 
+function formatUptime(totalSeconds?: number): string {
+  if (!totalSeconds || totalSeconds < 0) return '--';
+  const seconds = Math.floor(totalSeconds);
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const secs = seconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
+  }
+  if (minutes > 0) {
+    return `${minutes}m ${secs.toString().padStart(2, '0')}s`;
+  }
+  return `${secs}s`;
+}
+
 export function StatusBar({
   deviceState,
   deviceId,
@@ -34,29 +50,39 @@ export function StatusBar({
     typeof updaterStatus.percent === 'number'
       ? `${Math.round(updaterStatus.percent)}%`
       : '-';
+  const updaterStateClass = `updater-state updater-state-${updaterStatus.state}`;
 
   return (
     <footer className="status-bar">
-      <span>Kiosk state: {deviceState}</span>
-      <span>Kiosk ID: {deviceId || 'Unknown'}</span>
-      <span>Uptime: {uptime ? `${uptime}s` : '-'}</span>
+      <div className="status-meta">
+        <span className="status-item">
+          <span className="status-label">State</span>
+          <strong className="status-value">{deviceState || 'Unknown'}</strong>
+        </span>
+        <span className="status-item">
+          <span className="status-label">Kiosk ID</span>
+          <strong className="status-value status-id">{deviceId || 'Unknown'}</strong>
+        </span>
+        <span className="status-item">
+          <span className="status-label">Uptime</span>
+          <strong className="status-value">{formatUptime(uptime)}</strong>
+        </span>
+      </div>
 
       <div className="updater-panel">
-        <span>
-          Update: {UPDATER_LABELS[updaterStatus.state]} ({percentText})
-          {updaterStatus.mock ? ' [mock]' : ''}
+        <span className={updaterStateClass}>
+          {UPDATER_LABELS[updaterStatus.state]} {percentText !== '-' ? `(${percentText})` : ''}
         </span>
-        <span>
+        <span className="updater-version">
           v{updaterStatus.currentVersion}
-          {updaterStatus.availableVersion
-            ? ` -> v${updaterStatus.availableVersion}`
-            : ''}
+          {updaterStatus.availableVersion ? ` -> v${updaterStatus.availableVersion}` : ''}
+          {updaterStatus.mock ? ' [mock]' : ''}
         </span>
         {updaterStatus.error && (
           <span className="updater-error">{updaterStatus.error}</span>
         )}
         {updaterStatus.state === 'downloaded' && (
-          <span>Auto install queued (no manual action)</span>
+          <span className="updater-note">Auto install queued</span>
         )}
 
         <div className="updater-actions">

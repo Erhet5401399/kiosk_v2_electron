@@ -7,7 +7,6 @@ export { STEP_REGISTRY, getStepConfig, registerStep } from './steps/registry';
 export { STEP_DEFINITIONS, getStepDefinition, registerStepDefinition } from './steps/definitions';
 
 export { 
-  SERVICE_FLOW_CONFIGS, 
   getServiceFlowConfig, 
   createServiceFlowConfig 
 } from './configs';

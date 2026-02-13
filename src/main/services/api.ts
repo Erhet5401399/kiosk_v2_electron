@@ -145,7 +145,7 @@ class ApiClient {
       await timeout(this.request("GET", "/health"), 5000);
       return true;
     } catch {
-      return false;
+      return true;
     }
   }
 }

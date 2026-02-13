@@ -207,6 +207,13 @@ export function ServiceModal({
         countdownTo={sessionExpiresAt}
         onCountdownEnd={onSessionExpired}
       >
+        <div className="service-context-strip">
+          <div className="service-context-main">
+            <strong className="service-context-name">{service.name}</strong>
+            <span className="service-context-price">{service.price} MNT</span>
+          </div>
+          <span className="service-context-meta">Step {state.currentStepIndex + 1} / {state.steps.length}</span>
+        </div>
         <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
         <StepRenderer
           context={context}

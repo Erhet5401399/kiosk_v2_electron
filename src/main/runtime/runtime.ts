@@ -5,7 +5,7 @@ import { toAppError } from "../core/errors";
 import { debounce } from "../core/utils";
 import { canTransition } from "./states";
 import { storage, logger, device, deviceStore, config, api } from "../services";
-import { registerMocks } from "../services/mocks";
+import { clearAllMocks, registerMocks } from "../services/mocks";
 
 class DeviceRuntime extends EventEmitter {
   private static inst: DeviceRuntime;
@@ -14,6 +14,12 @@ class DeviceRuntime extends EventEmitter {
   private shuttingDown = false;
   private log = logger.child("Runtime");
   private persist: () => void;
+  private mocksEnabled = !["0", "false", "off", "no"].includes(
+    String(process.env.ENABLE_MOCKS ?? "true").trim().toLowerCase(),
+  );
+  private forceClearTokens = ["1", "true", "on", "yes"].includes(
+    String(process.env.CLEAR_DEVICE_TOKENS ?? "false").trim().toLowerCase(),
+  );
 
   private constructor() {
     super();
@@ -29,7 +35,32 @@ class DeviceRuntime extends EventEmitter {
       startedAt: Date.now(),
       deviceId: saved.deviceId,
     };
-    registerMocks();
+    if (this.mocksEnabled) {
+      registerMocks();
+      this.log.info("Mocks enabled via ENABLE_MOCKS");
+    } else {
+      clearAllMocks();
+      this.log.info("Mocks disabled via ENABLE_MOCKS");
+    }
+
+    const existingTokens = deviceStore.getTokens();
+    const accessToken = String(existingTokens?.access_token || "");
+    const refreshToken = String(existingTokens?.refresh_token || "");
+    const looksLikeMockToken =
+      accessToken.startsWith("mock-") ||
+      refreshToken.startsWith("mock-") ||
+      accessToken === "mock-token" ||
+      refreshToken === "mock-refresh";
+
+    if (this.forceClearTokens || (!this.mocksEnabled && looksLikeMockToken)) {
+      deviceStore.clearTokens();
+      api.setToken(null);
+      this.log.warn("Device tokens cleared", {
+        reason: this.forceClearTokens
+          ? "CLEAR_DEVICE_TOKENS"
+          : "mock_tokens_with_mocks_disabled",
+      });
+    }
     this.persist = debounce(() => this.save(), RUNTIME.PERSIST_DEBOUNCE);
   }
 
