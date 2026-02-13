@@ -62,13 +62,13 @@ class DeviceStore {
     return this.load().tokens || null;
   }
   isRegistered() {
-    return !!this.getTokens()?.accessToken;
+    return !!this.getTokens()?.access_token;
   }
 
   setTokens(tokens: TokenPayload) {
     this.load();
     if (this.data) {
-      this.data.tokens = { ...tokens, issuedAt: Date.now() };
+      this.data.tokens = { ...tokens, issued_at: Date.now() };
       this.save();
     }
   }
@@ -83,7 +83,7 @@ class DeviceStore {
   isTokenExpired() {
     const t = this.getTokens();
     return (
-      !t?.expiresAt || Date.now() >= t.expiresAt - AUTH.TOKEN_REFRESH_THRESHOLD
+      !t?.expires_at || Date.now() >= t.expires_at - AUTH.TOKEN_REFRESH_THRESHOLD
     );
   }
 
@@ -109,7 +109,7 @@ class DeviceService extends EventEmitter {
 
     try {
       this.log.info("Registering device");
-      const res = await api.post<{ tokens?: TokenPayload }>(
+      const res = await api.post<TokenPayload>(
         "/api/auth/kiosk/register/login",
         {
           device_id: deviceStore.getDeviceId(),
@@ -118,9 +118,9 @@ class DeviceService extends EventEmitter {
         },
       );
 
-      if (res.tokens) {
-        deviceStore.setTokens(res.tokens);
-        api.setToken(res.tokens.accessToken);
+      if (res?.access_token) {
+        deviceStore.setTokens(res);
+        api.setToken(res.access_token);
         this.emit("registered");
         this.log.info("Registered");
         return true;
@@ -158,18 +158,21 @@ class DeviceService extends EventEmitter {
     const tokens = deviceStore.getTokens();
 
     if (tokens && !deviceStore.isTokenExpired()) {
-      api.setToken(tokens.accessToken);
+      api.setToken(tokens.access_token);
       return tokens;
     }
 
-    if (tokens?.refreshToken) {
+    if (tokens?.refresh_token) {
       try {
         const res = await api.post<TokenPayload>("/api/auth/kiosk/refresh/token", {
-          refresh_token: tokens.refreshToken,
+          refresh_token: tokens.refresh_token,
           device_id: deviceStore.getDeviceId(),
         });
+        if (!res.access_token) {
+          throw new Error("Missing access token");
+        }
         deviceStore.setTokens(res);
-        api.setToken(res.accessToken);
+        api.setToken(res.access_token);
         return res;
       } catch {
         deviceStore.clearTokens();
@@ -179,8 +182,11 @@ class DeviceService extends EventEmitter {
     const res = await api.post<TokenPayload>("/api/auth/kiosk/register/login", {
       device_id: deviceStore.getDeviceId(),
     });
+    if (!res.access_token) {
+      throw new Error("Missing access token");
+    }
     deviceStore.setTokens(res);
-    api.setToken(res.accessToken);
+    api.setToken(res.access_token);
     return res;
   }
 

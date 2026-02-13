@@ -46,6 +46,7 @@ export function UserAuthModal({
     () => methods.find((m) => m.id === authMethodId) || null,
     [methods, authMethodId],
   );
+  const isMockChallenge = Boolean(challenge?.meta?.mock);
 
   useEffect(() => {
     let active = true;
@@ -147,6 +148,15 @@ export function UserAuthModal({
     };
   }, [challenge]);
 
+  const continueMockLogin = () => {
+    if (!challenge?.callbackUrl) return;
+    const callback = new URL(challenge.callbackUrl);
+    callback.searchParams.set("challenge", challenge.challengeId);
+    callback.searchParams.set("status", "1");
+    callback.searchParams.set("code", "mock-dan-code");
+    void verifyFromCallback(callback.toString());
+  };
+
   return (
     <ModalWrapper
       onClose={onCancel}
@@ -159,16 +169,16 @@ export function UserAuthModal({
         initial={{ opacity: 0, y: 0 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <div className="service-modal-body">
-          <div className="step-header">
+        <div className="service-modal-body-login">
+          {/* <div className="step-header">
             <h1>Та нэвтрэх шаардлагатай</h1>
             <p>{serviceName}</p>
-          </div>
+          </div> */}
 
           <div className="auth-webview-card">
-            <div className="input-value">
+            {/* <div className="input-value">
               {selectedMethod?.label ? `Нэвтрэх төрөл: ${selectedMethod?.label}` : "Loading method..."}
-            </div>
+            </div> */}
 
             {challenge?.webUrl ? (
               <webview
@@ -195,10 +205,10 @@ export function UserAuthModal({
               Цуцлах
             </Button>
             <Button
-              onClick={() => webviewRef.current?.reload()}
-              disabled={loading || !challenge?.webUrl}
+              onClick={isMockChallenge ? continueMockLogin : () => webviewRef.current?.reload()}
+              disabled={loading || (isMockChallenge ? !challenge?.callbackUrl : !challenge?.webUrl)}
             >
-              Үргэлжлүүлэх
+              {isMockChallenge ? "Mock login" : "Үргэлжлүүлэх"}
             </Button>
           </div>
         </div>

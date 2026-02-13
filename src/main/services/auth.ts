@@ -25,14 +25,14 @@ interface AuthProvider {
 }
 
 type DanStartResponse = {
-  authUrl: string;
-  callbackUrl?: string;
-  expiresAt?: number;
+  auth_url?: string;
+  callback_url?: string;
+  expires_at?: number;
   mock?: boolean;
 };
 
 type DanFinalizeResponse = {
-  registerNumber?: string;
+  register_number?: string;
   regnum?: string;
   claims?: Record<string, unknown>;
 };
@@ -74,10 +74,12 @@ class DanBackendProvider implements AuthProvider {
     });
 
     const callbackUrl = String(
-      started.callbackUrl || this.defaultCallbackUrl,
+      started.callback_url || this.defaultCallbackUrl,
     ).trim();
-    const expiresAt = Number(started.expiresAt || Date.now() + 5 * 60 * 1000);
-    const webUrl = String(started.authUrl || "").trim();
+    const expiresAt = Number(
+      started.expires_at || Date.now() + 5 * 60 * 1000,
+    );
+    const webUrl = String(started.auth_url || "").trim();
 
     if (!webUrl) {
       throw new Error("DAN start endpoint returned empty auth URL");
@@ -143,21 +145,23 @@ class DanBackendProvider implements AuthProvider {
         },
       );
 
-      const regnum = String(finalized.registerNumber || finalized.regnum || "")
+      const registerNumber = String(
+        finalized.register_number || finalized.regnum || "",
+      )
         .trim()
         .toUpperCase()
         .replace(/\s+/g, "");
 
-      if (!regnum) {
+      if (!registerNumber) {
         throw new Error("Missing register number from DAN finalize");
       }
 
-      if (!/^[\p{Script=Cyrillic}A-Z0-9]{8,12}$/u.test(regnum)) {
+      if (!/^[\p{Script=Cyrillic}A-Z0-9]{8,12}$/u.test(registerNumber)) {
         throw new Error("Invalid register number from DAN finalize");
       }
 
       return {
-        registerNumber: regnum,
+        registerNumber,
         claims: {
           provider: "DAN",
           ...(finalized.claims || {}),

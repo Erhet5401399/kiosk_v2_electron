@@ -3,16 +3,42 @@ import { IPC } from '../core/constants';
 import { logger, parcel } from '../services';
 
 const log = logger.child('IPC:Parcel');
+const asList = <T>(payload: unknown): T[] =>
+  Array.isArray(payload)
+    ? payload as T[]
+    : Array.isArray((payload as { data?: unknown[] } | null)?.data)
+      ? ((payload as { data: T[] }).data)
+      : [];
 
 export function setupParcelHandlers() {
 
   ipcMain.handle(IPC.PARCEL_LIST, async (_, register: string) => {
     try {
       const data = await parcel.getParcels(register);
-      return data;
+      return asList(data);
     } catch (e) {
       log.error('Get parcels failed:', e as Error);
-      return { success: false, error: (e as Error).message };
+      return [];
+    }
+  });
+
+  ipcMain.handle(IPC.CATEGORY_LIST, async () => {
+    try {
+      const data = await parcel.getCategories();
+      return asList(data);
+    } catch (e) {
+      log.error('Get categories failed:', e as Error);
+      return [];
+    }
+  });
+
+  ipcMain.handle(IPC.CATEGORY_SERVICES, async (_, catId: number) => {
+    try {
+      const data = await parcel.getCategoryServices(catId);
+      return asList(data);
+    } catch (e) {
+      log.error('Get category services failed:', e as Error);
+      return [];
     }
   });
 
@@ -21,4 +47,6 @@ export function setupParcelHandlers() {
 
 export function cleanupParcelHandlers() {
   ipcMain.removeHandler(IPC.PARCEL_LIST);
+  ipcMain.removeHandler(IPC.CATEGORY_LIST);
+  ipcMain.removeHandler(IPC.CATEGORY_SERVICES);
 }

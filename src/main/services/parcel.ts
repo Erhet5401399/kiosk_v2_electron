@@ -1,4 +1,9 @@
-import { ApiResponse, Parcel } from '../../shared/types';
+import {
+  ApiResponse,
+  CategoryService,
+  Parcel,
+  ServiceCategory,
+} from '../../shared/types';
 import { api } from './api';
 import { logger } from './logger';
 
@@ -16,6 +21,21 @@ class ParcelService {
     
     const url = `/getParcels${query.toString() ? '?' + query.toString() : ''}`;
     this.log.debug('Fetching parcels:', url);
+    return api.get(url);
+  }
+
+  async getCategories(): Promise<ApiResponse<ServiceCategory[]> | ServiceCategory[]> {
+    const url = '/api/category';
+    this.log.debug('Fetching categories:', url);
+    return api.get(url);
+  }
+
+  async getCategoryServices(catId: number): Promise<ApiResponse<CategoryService[]> | CategoryService[]> {
+    const query = new URLSearchParams();
+    query.set('cat_id', String(catId));
+
+    const url = `/api/category/services?${query.toString()}`;
+    this.log.debug('Fetching category services:', url);
     return api.get(url);
   }
 }

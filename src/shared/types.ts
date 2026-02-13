@@ -4,10 +4,10 @@ export interface ApiResponse<T> {
   error?: string;
 }
 export interface TokenPayload {
-  accessToken: string;
-  refreshToken?: string;
-  expiresAt?: number;
-  issuedAt?: number;
+  access_token: string;
+  refresh_token?: string;
+  expires_at?: number;
+  issued_at?: number;
 }
 
 export interface DeviceInfo {
@@ -19,15 +19,15 @@ export interface DeviceInfo {
 }
 
 export interface DeviceConfig {
-  deviceName: string;
-  printerEnabled: boolean;
-  kioskMode: boolean;
-  refreshInterval: number;
-  maintenanceMode?: boolean;
+  device_name: string;
+  printer_enabled: boolean;
+  kiosk_mode: boolean;
+  refresh_interval: number;
+  maintenance_mode?: boolean;
   branding?: {
-    primaryColor?: string;
-    logoUrl?: string;
-    companyName?: string;
+    primary_color?: string;
+    logo_url?: string;
+    company_name?: string;
   };
 }
 
@@ -170,4 +170,28 @@ export interface Parcel {
   valid_from: string;
   valid_till: string;
   person_register: string;
+}
+
+export interface ServiceCategory {
+  id: number;
+  name?: string;
+  name_mn?: string;
+  name_en?: string;
+  icon?: string;
+  desc?: string;
+  status?: boolean;
+}
+
+export interface CategoryService {
+  id: number;
+  name_mn?: string;
+  name_en?: string;
+  curl?: string;
+  status?: boolean;
+  cat_id: number;
+  price?: string | number;
+  config?: {
+    steps?: string[];
+    initial?: Record<string, unknown>;
+  };
 }

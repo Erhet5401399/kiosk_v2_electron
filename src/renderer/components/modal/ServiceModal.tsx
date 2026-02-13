@@ -53,6 +53,7 @@ export function ServiceModal({
     cancel,
   } = useFlowEngine({
     serviceId: service.id,
+    customConfig: service.config,
     onComplete: onClose,
     onCancel: onClose,
   });
@@ -147,6 +148,20 @@ export function ServiceModal({
     goToNext();
   }, [engine, context, goToNext]);
 
+  const handleBackOrCancel = useCallback(() => {
+    const currentStepId = state.currentStepId;
+    const isFirstStep = !engine.canGoBack();
+    const isSuccessStep = currentStepId === 'success';
+    const isLastStep = engine.isOnFinalStep();
+
+    if (isFirstStep || isSuccessStep || isLastStep) {
+      cancel();
+      return;
+    }
+
+    goToBack();
+  }, [engine, state.currentStepId, cancel, goToBack]);
+
   const actions: StepActions = useMemo(() => ({
     onUpdateStepData: (data) => {
       if (data.paymentMethod) {
@@ -159,7 +174,7 @@ export function ServiceModal({
     onKeyboardAppend: appendKeyboardValue,
     onKeyboardBackspace: backspaceKeyboardValue,
     onNext: handleNext,
-    onBack: goToBack,
+    onBack: handleBackOrCancel,
     onGoToStep: goToStep,
     onComplete: complete,
     onCancel: cancel,
@@ -170,7 +185,7 @@ export function ServiceModal({
     appendKeyboardValue,
     backspaceKeyboardValue,
     handleNext,
-    goToBack,
+    handleBackOrCancel,
     goToStep,
     complete,
     cancel,

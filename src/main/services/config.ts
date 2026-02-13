@@ -6,11 +6,11 @@ import { device } from "./device";
 import { logger } from "./logger";
 
 const DEFAULT: DeviceConfig = {
-  deviceName: "Kiosk Device",
-  printerEnabled: true,
-  kioskMode: true,
-  refreshInterval: 60000,
-  maintenanceMode: false,
+  device_name: "Kiosk Device",
+  printer_enabled: true,
+  kiosk_mode: true,
+  refresh_interval: 60000,
+  maintenance_mode: false,
 };
 
 class ConfigService extends EventEmitter {
@@ -28,7 +28,7 @@ class ConfigService extends EventEmitter {
       await device.authenticate();
       this.config = await api.get<DeviceConfig>("/device/config");
       this.emit("updated", this.config);
-      this.log.info("Config loaded", { name: this.config.deviceName });
+      this.log.info("Config loaded", { name: this.config.device_name });
       this.scheduleRefresh();
       return this.config;
     } catch (e) {
@@ -41,7 +41,7 @@ class ConfigService extends EventEmitter {
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
     this.refreshTimer = setTimeout(
       () => this.fetch(),
-      this.config.refreshInterval || RUNTIME.CONFIG_REFRESH,
+      this.config.refresh_interval || RUNTIME.CONFIG_REFRESH,
     );
   }
 
@@ -49,10 +49,10 @@ class ConfigService extends EventEmitter {
     return this.config;
   }
   isMaintenanceMode() {
-    return this.config.maintenanceMode || false;
+    return this.config.maintenance_mode || false;
   }
   isPrinterEnabled() {
-    return this.config.printerEnabled;
+    return this.config.printer_enabled;
   }
 
   destroy() {

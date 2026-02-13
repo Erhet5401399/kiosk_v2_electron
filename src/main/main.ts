@@ -31,6 +31,7 @@ function setupSecurity() {
       const srcOrigin = src.startsWith("http") ? safeOrigin(src) : "";
       const allowed =
         src.startsWith("data:text/html") ||
+        src.startsWith("https://sso.gov.mn/") ||
         src.startsWith("https://kiosk.local/auth/dan/") ||
         (!!danAuthorizeOrigin && srcOrigin === danAuthorizeOrigin) ||
         (!!danRedirectOrigin && srcOrigin === danRedirectOrigin);

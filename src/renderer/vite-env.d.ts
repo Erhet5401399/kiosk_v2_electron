@@ -1,7 +1,9 @@
 // vite-env.d.ts
 import type {
+  CategoryService,
   Parcel,
   RuntimeSnapshot,
+  ServiceCategory,
   UpdateStatus,
   UserAuthChallenge,
   UserAuthMethod,
@@ -39,6 +41,8 @@ declare global {
       };
       parcel: {
         list: (register: string) => Promise<Parcel[]>;
+        categories: () => Promise<ServiceCategory[]>;
+        services: (catId: number) => Promise<CategoryService[]>;
       };
       auth: {
         listMethods: () => Promise<UserAuthMethod[]>;

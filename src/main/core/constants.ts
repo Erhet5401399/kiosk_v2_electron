@@ -62,6 +62,8 @@ export const IPC = {
   HEALTH: "health:status",
 
   PARCEL_LIST: "parcel:list",
+  CATEGORY_LIST: "category:list",
+  CATEGORY_SERVICES: "category:services",
 
   UPDATE_STATUS: "update:status",
   UPDATE_CHECK: "update:check",

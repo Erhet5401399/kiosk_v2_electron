@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { FlowEngine, type FlowState } from '../engine/FlowEngine';
-import type { StepContext, StepActions, ServiceFlowConfig } from '../../types/steps';
+import type { StepContext, ServiceFlowConfig } from '../../types/steps';
 
 interface UseFlowEngineOptions {
   serviceId: number;
@@ -37,7 +37,7 @@ export function useFlowEngine(options: UseFlowEngineOptions): UseFlowEngineRetur
       onComplete: options.onComplete,
       onCancel: options.onCancel,
     });
-  }, [options.serviceId]);
+  }, [options.customConfig, options.serviceId]);
 
   const state = engine.getState();
   const progress = engine.getProgress();

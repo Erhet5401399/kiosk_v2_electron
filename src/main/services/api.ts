@@ -49,12 +49,22 @@ class ApiClient {
   }
 
   private findMock(url: string): MockRoute | undefined {
-    return this.mockRoutes.find(route => {
-      if (typeof route.pattern === "string") {
-        return url === route.pattern || url.startsWith(route.pattern);
-      }
-      return route.pattern.test(url);
-    });
+    const exactString = this.mockRoutes.find(
+      (route) => typeof route.pattern === "string" && url === route.pattern,
+    );
+    if (exactString) return exactString;
+
+    const bestStringPrefix = this.mockRoutes
+      .filter(
+        (route): route is MockRoute & { pattern: string } =>
+          typeof route.pattern === "string" && url.startsWith(route.pattern),
+      )
+      .sort((a, b) => b.pattern.length - a.pattern.length)[0];
+    if (bestStringPrefix) return bestStringPrefix;
+
+    return this.mockRoutes.find(
+      (route) => route.pattern instanceof RegExp && route.pattern.test(url),
+    );
   }
 
   private makeRequest<T>(

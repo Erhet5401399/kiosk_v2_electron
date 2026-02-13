@@ -1,4 +1,11 @@
-import type { StepId, StepContext, StepConfig, ServiceFlowConfig, StepValidation } from '../../types/steps';
+import type {
+  StepId,
+  StepContext,
+  StepConfig,
+  ServiceFlowConfig,
+  StepValidation,
+  ServiceFlowStep,
+} from '../../types/steps';
 import { getStepConfig } from '../steps/registry';
 import { getServiceFlowConfig } from '../configs';
 
@@ -23,6 +30,7 @@ export interface FlowEngineOptions {
 export class FlowEngine {
   private state: FlowState;
   private config: ServiceFlowConfig;
+  private stepOverrides = new Map<StepId, Partial<StepConfig>>();
   private options: FlowEngineOptions;
 
   constructor(options: FlowEngineOptions) {
@@ -31,14 +39,33 @@ export class FlowEngine {
     this.state = this.createInitialState();
   }
 
+  private normalizeStepId(step: ServiceFlowStep): StepId {
+    return typeof step === 'string' ? step : step.id;
+  }
+
+  private buildStepOverrides(steps: ServiceFlowStep[]) {
+    this.stepOverrides.clear();
+    for (const step of steps) {
+      if (typeof step === 'string') continue;
+      if (!step.id) continue;
+      this.stepOverrides.set(step.id, {
+        ...(step.title ? { title: step.title } : {}),
+      });
+    }
+  }
+
   private createInitialState(): FlowState {
-    const steps = this.config.steps;
+    this.buildStepOverrides(this.config.steps);
+    const steps = this.config.steps.map((step) => this.normalizeStepId(step));
+    if (!steps.length) {
+      throw new Error(`Service flow has no steps: ${this.config.serviceId}`);
+    }
     return {
       currentStepIndex: 0,
-      currentStepId: steps[0],
+      currentStepId: steps[0]!,
       steps,
       stepData: { ...this.config.initialStepData },
-      history: [steps[0]],
+      history: [steps[0]!],
       isComplete: false,
       isCancelled: false,
     };
@@ -49,11 +76,17 @@ export class FlowEngine {
   }
 
   getCurrentStepConfig(): StepConfig {
-    return getStepConfig(this.state.currentStepId);
+    const base = getStepConfig(this.state.currentStepId);
+    const override = this.stepOverrides.get(this.state.currentStepId);
+    return override ? { ...base, ...override } : base;
   }
 
   getStepConfigs(): StepConfig[] {
-    return this.state.steps.map(stepId => getStepConfig(stepId));
+    return this.state.steps.map((stepId) => {
+      const base = getStepConfig(stepId);
+      const override = this.stepOverrides.get(stepId);
+      return override ? { ...base, ...override } : base;
+    });
   }
 
   getProgress(): { current: number; total: number; percentage: number } {
@@ -76,6 +109,10 @@ export class FlowEngine {
       service: context.service!,
       paymentMethod: context.paymentMethod ?? null,
       stepData: this.state.stepData,
+      keyboard: context.keyboard ?? {
+        activeTarget: null,
+        mode: 'alphanumeric',
+      },
     };
 
     return stepConfig.validate(fullContext);

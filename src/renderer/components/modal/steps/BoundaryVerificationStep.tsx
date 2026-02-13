@@ -10,7 +10,7 @@ interface BoundaryResult {
   discrepancyPercent: number;
 }
 
-export function BoundaryVerificationStep({ context, actions }: StepComponentProps) {
+export function BoundaryVerificationStep({ actions }: StepComponentProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [result, setResult] = useState<BoundaryResult | null>(null);
 

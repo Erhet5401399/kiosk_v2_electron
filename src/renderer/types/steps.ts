@@ -6,6 +6,11 @@ import type {
 } from './index';
 
 export type StepId = string;
+export type ServiceFlowStep = StepId | {
+  id: StepId;
+  title?: string;
+  data?: Record<string, unknown>;
+};
 
 export interface StepContext {
   service: Service;
@@ -48,7 +53,7 @@ export interface StepConfig {
 
 export interface ServiceFlowConfig {
   serviceId: number;
-  steps: StepId[];
+  steps: ServiceFlowStep[];
   initialStepData?: Record<string, unknown>;
 }
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { ApiResponse, Parcel } from '../../shared/types';
+import type { Parcel } from '../../shared/types';
 
 interface UseParcelsProps {
   register: string;
