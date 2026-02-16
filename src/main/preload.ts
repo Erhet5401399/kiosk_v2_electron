@@ -62,6 +62,20 @@ const api = {
     logout: () => ipcRenderer.invoke("user-auth:logout"),
   },
 
+  payment: {
+    createQpayInvoice: (req: {
+      paymentMethod: "qpay" | "qrcode";
+      serviceId?: number;
+      registerNumber?: string;
+      amount?: number;
+      metadata?: Record<string, unknown>;
+    }) => ipcRenderer.invoke("payment:qpay:create", req),
+    checkQpayInvoice: (req: {
+      paymentMethod: "qpay" | "qrcode";
+      invoiceId: string;
+    }) => ipcRenderer.invoke("payment:qpay:check", req),
+  },
+
   platform: {
     isElectron: true,
     platform: process.platform,

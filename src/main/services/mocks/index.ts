@@ -2,19 +2,20 @@ import { api } from "../api";
 import { logger } from "../logger";
 
 const log = logger.child("Mocks");
+const qpayCheckCounter = new Map<string, number>();
 
 export function registerMocks() {
-  // api.registerMock("/api/auth/kiosk/register/login", () => ({
-  //   access_token: "mock-token",
-  //   refresh_token: "mock-refresh",
-  //   expires_at: Date.now() + 3600_000,
-  // }));
+  api.registerMock("/api/auth/kiosk/register/login", () => ({
+    access_token: "mock-token",
+    refresh_token: "mock-refresh",
+    expires_at: Date.now() + 3600_000,
+  }));
 
-  // api.registerMock("/api/auth/kiosk/refresh/token", () => ({
-  //   access_token: "mock-token",
-  //   refresh_token: "mock-refresh",
-  //   expires_at: Date.now() + 3600_000,
-  // }));
+  api.registerMock("/api/auth/kiosk/refresh/token", () => ({
+    access_token: "mock-token",
+    refresh_token: "mock-refresh",
+    expires_at: Date.now() + 3600_000,
+  }));
 
   api.registerMock("/device/config", () => ({
     device_name: "Mock Kiosk",
@@ -154,6 +155,35 @@ export function registerMocks() {
     );
   });
 
+  api.registerMock("/api/payment/qpay/invoice", (_, __, body) => {
+    const payload = (body || {}) as { amount?: number; serviceId?: number };
+    const invoiceId = `INV-${Date.now()}`;
+    qpayCheckCounter.set(invoiceId, 0);
+
+    return {
+      invoiceId,
+      qrText: `qpay://invoice/${invoiceId}`,
+      amount: Number(payload.amount || 0),
+      status: "CREATED",
+      deeplink: `qpay://pay?invoice=${invoiceId}&service=${String(payload.serviceId || "")}`,
+    };
+  });
+
+  api.registerMock("/api/payment/qpay/invoice/check", (_, __, body) => {
+    const payload = (body || {}) as { invoiceId?: string };
+    const invoiceId = String(payload.invoiceId || "").trim();
+    const currentCount = qpayCheckCounter.get(invoiceId) || 0;
+    const nextCount = currentCount + 1;
+    qpayCheckCounter.set(invoiceId, nextCount);
+
+    const paid = nextCount >= 2;
+    return {
+      paid,
+      status: paid ? "PAID" : "PENDING",
+      paidAt: paid ? new Date().toISOString() : undefined,
+    };
+  });
+
   api.registerMock("/auth/user/dan/start", (_, __, body) => {
     const challengeId = String(
       (body as { challengeId?: string })?.challengeId || "",
@@ -230,5 +260,6 @@ export function registerMocks() {
 
 export function clearAllMocks() {
   api.clearMocks();
+  qpayCheckCounter.clear();
   log.info("All mocks cleared");
 }

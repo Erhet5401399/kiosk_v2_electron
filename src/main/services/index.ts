@@ -7,3 +7,4 @@ export { printer } from './printer';
 export { parcel } from './parcel';
 export { updater } from './updater';
 export { userAuth } from './auth';
+export { payment } from './payment';

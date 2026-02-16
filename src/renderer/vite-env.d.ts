@@ -1,6 +1,10 @@
 // vite-env.d.ts
 import type {
   CategoryService,
+  CheckQpayInvoiceRequest,
+  CheckQpayInvoiceResponse,
+  CreateQpayInvoiceRequest,
+  CreateQpayInvoiceResponse,
   Parcel,
   RuntimeSnapshot,
   ServiceCategory,
@@ -52,6 +56,14 @@ declare global {
         touch: () => Promise<UserAuthStatus>;
         logout: () => Promise<UserAuthStatus>;
       },
+      payment: {
+        createQpayInvoice: (
+          req: CreateQpayInvoiceRequest,
+        ) => Promise<CreateQpayInvoiceResponse | null>;
+        checkQpayInvoice: (
+          req: CheckQpayInvoiceRequest,
+        ) => Promise<CheckQpayInvoiceResponse>;
+      };
       platform: {
         isElectron: boolean;
         platform: NodeJS.Platform;

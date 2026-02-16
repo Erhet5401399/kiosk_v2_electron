@@ -195,3 +195,32 @@ export interface CategoryService {
     initial?: Record<string, unknown>;
   };
 }
+
+export interface CreateQpayInvoiceRequest {
+  paymentMethod: "qpay" | "qrcode";
+  serviceId?: number;
+  registerNumber?: string;
+  amount?: number;
+  metadata?: Record<string, unknown>;
+}
+
+export interface CreateQpayInvoiceResponse {
+  invoiceId: string;
+  qrText?: string;
+  qrImageUrl?: string;
+  qrImageBase64?: string;
+  deeplink?: string;
+  amount?: number;
+  status?: string;
+}
+
+export interface CheckQpayInvoiceRequest {
+  paymentMethod: "qpay" | "qrcode";
+  invoiceId: string;
+}
+
+export interface CheckQpayInvoiceResponse {
+  paid: boolean;
+  status?: string;
+  paidAt?: string;
+}
