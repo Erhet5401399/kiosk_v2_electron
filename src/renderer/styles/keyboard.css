@@ -169,14 +169,28 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  width: 100%;
+  max-width: 280px;
   border-left: 2px solid rgba(196, 196, 196, 0.1);
   padding-left: 16px;
 }
 
 .keyboard-numbers.numbers-full {
   flex: 1;
+  max-width: 420px;
   border-left: none;
   padding-left: 0;
+  margin: 0 auto;
+}
+
+.keyboard-numbers.numbers-full .key.backspace,
+.keyboard-numbers.numbers-full .key.keyboard-done {
+  flex: 1;
+}
+
+.keyboard-numbers.numbers-full .key.keyboard-done {
+  padding: 0;
+  min-width: 0;
 }
 
 .keyboard-row {
@@ -210,8 +224,12 @@
 
 .key.backspace {
   background: #d3dae6;
-  font-size: 1rem;
   flex: 0.2;
+}
+
+.key-backspace-icon {
+  width: 28px;
+  height: 28px;
 }
 
 .key.ghost {
@@ -247,6 +265,15 @@
   font-size: 1.1rem;
   cursor: pointer;
   flex: 0.2;
+}
+
+/* Keep numeric-only last row keys perfectly equal width: backspace | 0 | done */
+.keyboard-numbers.numbers-full .key.backspace,
+.keyboard-numbers.numbers-full .key.number-key,
+.keyboard-numbers.numbers-full .key.keyboard-done {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0;
 }
 
 .modal-keyboard-host {

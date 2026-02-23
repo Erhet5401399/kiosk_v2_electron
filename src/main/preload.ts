@@ -45,13 +45,12 @@ const api = {
   parcel: {
     list: (register: string) => ipcRenderer.invoke("parcel:list", register),
     categories: () => ipcRenderer.invoke("category:list"),
-    services: (catId: number) =>
-      ipcRenderer.invoke("category:services", catId),
   },
 
   auth: {
     listMethods: () => ipcRenderer.invoke("user-auth:methods"),
-    start: (methodId: string) => ipcRenderer.invoke("user-auth:start", methodId),
+    start: (req: { methodId: string; payload?: Record<string, unknown> }) =>
+      ipcRenderer.invoke("user-auth:start", req),
     verify: (req: {
       methodId: string;
       challengeId: string;

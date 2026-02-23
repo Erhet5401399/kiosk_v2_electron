@@ -7,7 +7,11 @@ import type {
 } from "../../../shared/types";
 import { ModalWrapper } from "./ModalWrapper";
 import { Button } from "../common";
+import { VirtualKeyboard } from "../keyboard";
 import { APP_NAME } from "../../constants";
+import { SmsAuthPanel } from "./auth/SmsAuthPanel";
+import { useSmsAuthKeyboard } from "./auth/useSmsAuthKeyboard";
+import { useSnackbar } from "../common";
 
 interface UserAuthModalProps {
   serviceName: string;
@@ -28,7 +32,6 @@ type WebViewElement = HTMLElement & {
 };
 
 export function UserAuthModal({
-  serviceName,
   onCancel,
   onSuccess,
 }: UserAuthModalProps) {
@@ -39,6 +42,10 @@ export function UserAuthModal({
   const [error, setError] = useState<string | null>(null);
   const [authMethodId, setAuthMethodId] = useState<string | null>(null);
   const [loginDeadline, setLoginDeadline] = useState<number | null>(null);
+
+  const smsKeyboard = useSmsAuthKeyboard();
+  const { showError, showSuccess } = useSnackbar();
+
   const webviewRef = useRef<WebViewElement | null>(null);
   const authInFlightRef = useRef(false);
 
@@ -46,7 +53,29 @@ export function UserAuthModal({
     () => methods.find((m) => m.id === authMethodId) || null,
     [methods, authMethodId],
   );
+  const smsMethod = useMemo(
+    () => methods.find((m) => m.id === "sms" && m.enabled) || null,
+    [methods],
+  );
+  const danMethod = useMemo(
+    () => methods.find((m) => m.id === "dan" && m.enabled) || null,
+    [methods],
+  );
+
+  const isSmsMethod = selectedMethod?.id === "sms";
+  const isSmsChallenge = challenge?.methodId === "sms";
+  const smsCodeSent = isSmsMethod && isSmsChallenge;
   const isMockChallenge = Boolean(challenge?.meta?.mock);
+
+  const startAuth = async (
+    methodId: string,
+    payload?: Record<string, unknown>,
+  ) => {
+    const started = await window.electron.auth.start({ methodId, payload });
+    setChallenge(started);
+    setLoginDeadline(started.expiresAt || Date.now() + 60_000);
+    return started;
+  };
 
   useEffect(() => {
     let active = true;
@@ -68,19 +97,21 @@ export function UserAuthModal({
         }
 
         setAuthMethodId(preferred.id);
-        const started = await window.electron.auth.start(preferred.id);
-        if (!active) return;
-        setChallenge(started);
-        setLoginDeadline(Date.now() + 60_000);
-
-        if (!started.webUrl) {
-          throw new Error(
-            `Method "${preferred.label}" is not configured for webview flow`,
-          );
+        if (preferred.type === "webview_oauth") {
+          const started = await startAuth(preferred.id);
+          if (!active) return;
+          if (!started.webUrl) {
+            throw new Error(
+              `Method "${preferred.label}" is not configured for webview flow`,
+            );
+          }
         }
       } catch (e) {
         if (!active) return;
-        setError((e as Error).message || "Failed to initialize authentication");
+        const message =
+          (e as Error).message || "Failed to initialize authentication";
+        setError(message);
+        showError(message);
       } finally {
         if (active) setInitializing(false);
       }
@@ -91,6 +122,34 @@ export function UserAuthModal({
       active = false;
     };
   }, []);
+
+  const changeMethod = async (nextMethod: UserAuthMethod) => {
+    if (loading || authMethodId === nextMethod.id || !nextMethod.enabled) return;
+    setAuthMethodId(nextMethod.id);
+    setChallenge(null);
+    setError(null);
+    smsKeyboard.setSmsCode("");
+    smsKeyboard.closeKeyboard();
+    setLoginDeadline(null);
+
+    if (nextMethod.type !== "webview_oauth") return;
+
+    setLoading(true);
+    try {
+      const started = await startAuth(nextMethod.id);
+      if (!started.webUrl) {
+        throw new Error(
+          `Method "${nextMethod.label}" is not configured for webview flow`,
+        );
+      }
+    } catch (e) {
+      const message = (e as Error).message || "Failed to start authentication";
+      setError(message);
+      showError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const verifyFromCallback = async (callbackUrl: string) => {
     if (!challenge || authInFlightRef.current) return;
@@ -107,10 +166,78 @@ export function UserAuthModal({
       if (!status.authenticated || !status.session) {
         throw new Error("Authentication failed");
       }
+      showSuccess("Authenticated successfully");
       onSuccess(status.session);
     } catch (e) {
-      setError((e as Error).message || "Authentication failed");
+      const message = (e as Error).message || "Authentication failed";
+      setError(message);
+      showError(message);
       authInFlightRef.current = false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendSmsCode = async () => {
+    const normalizedReg = smsKeyboard.registerNumber
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "");
+    const normalizedPhone = smsKeyboard.phoneNumber.replace(/[^\d]/g, "");
+    if (!normalizedReg || !normalizedPhone) {
+      const message = "Register number and phone number are required";
+      setError(message);
+      showError(message);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    smsKeyboard.setSmsCode("");
+    try {
+      await startAuth("sms", {
+        registerNumber: normalizedReg,
+        phoneNumber: normalizedPhone,
+      });
+      showSuccess("SMS code sent");
+      smsKeyboard.focusSmsCode();
+    } catch (e) {
+      setChallenge(null);
+      const message = (e as Error).message || "Failed to send SMS code";
+      setError(message);
+      showError(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifySmsCode = async () => {
+    if (!challenge || challenge.methodId !== "sms") return;
+    const normalizedCode = smsKeyboard.smsCode.replace(/[^\d]/g, "");
+    if (!normalizedCode) {
+      const message = "Enter SMS code";
+      setError(message);
+      showError(message);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const status = await window.electron.auth.verify({
+        methodId: challenge.methodId,
+        challengeId: challenge.challengeId,
+        payload: { sendCode: normalizedCode },
+      });
+      if (!status.authenticated || !status.session) {
+        throw new Error("Authentication failed");
+      }
+      showSuccess("Authenticated successfully");
+      onSuccess(status.session);
+    } catch (e) {
+      const message = (e as Error).message || "Authentication failed";
+      setError(message);
+      showError(message);
     } finally {
       setLoading(false);
     }
@@ -170,48 +297,119 @@ export function UserAuthModal({
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="service-modal-body-login">
-          {/* <div className="step-header">
-            <h1>Та нэвтрэх шаардлагатай</h1>
-            <p>{serviceName}</p>
-          </div> */}
-
-          <div className="auth-webview-card">
-            {/* <div className="input-value">
-              {selectedMethod?.label ? `Нэвтрэх төрөл: ${selectedMethod?.label}` : "Loading method..."}
-            </div> */}
-
-            {challenge?.webUrl ? (
-              <webview
-                className="auth-webview"
-                src={challenge.webUrl}
-                ref={(node) => {
-                  webviewRef.current = node as WebViewElement | null;
-                }}
-                partition="persist:user-auth"
+          {selectedMethod?.type === "webview_oauth" ? (
+            <div className="auth-webview-card auth-webview-card-full">
+              {challenge?.webUrl ? (
+                <webview
+                  className="auth-webview"
+                  src={challenge.webUrl}
+                  ref={(node) => {
+                    webviewRef.current = node as WebViewElement | null;
+                  }}
+                  partition="persist:user-auth"
+                />
+              ) : (
+                <div className="auth-webview-placeholder auth-webview-placeholder-full">
+                  {initializing
+                    ? "Preparing authentication..."
+                    : "Web authentication is unavailable."}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="auth-sms-layout">
+              <SmsAuthPanel
+                registerNumber={smsKeyboard.registerNumber}
+                phoneNumber={smsKeyboard.phoneNumber}
+                smsCode={smsKeyboard.smsCode}
+                keyboardTarget={smsKeyboard.keyboardTarget}
+                smsCodeSent={smsCodeSent}
+                hintText={
+                  smsCodeSent
+                    ? `Код ${String(challenge?.meta?.phoneMasked || "таны утас")} руу илгээгдлээ`
+                    : ""
+                }
+                onFocusRegister={smsKeyboard.focusRegister}
+                onFocusPhone={smsKeyboard.focusPhone}
+                onFocusSmsCode={smsKeyboard.focusSmsCode}
               />
-            ) : (
-              <div className="auth-webview-placeholder">
-                {initializing ? "Preparing authentication..." : "Web authentication is unavailable."}
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {error && <p className="updater-error">{error}</p>}
         </div>
 
         <div className="service-modal-footer">
           <div className="modal-footer">
             <Button variant="secondary" onClick={onCancel} disabled={loading}>
-              Цуцлах
+              Болих
             </Button>
-            <Button
-              onClick={isMockChallenge ? continueMockLogin : () => webviewRef.current?.reload()}
-              disabled={loading || (isMockChallenge ? !challenge?.callbackUrl : !challenge?.webUrl)}
-            >
-              {isMockChallenge ? "Mock login" : "Үргэлжлүүлэх"}
-            </Button>
+
+            {selectedMethod?.type === "webview_oauth" ? (
+              <>
+                {smsMethod && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => void changeMethod(smsMethod)}
+                    disabled={loading}
+                  >
+                    Нэг удаагийн кодоор нэвтрэх
+                  </Button>
+                )}
+                <Button
+                  onClick={
+                    isMockChallenge ? continueMockLogin : () => webviewRef.current?.reload()
+                  }
+                  disabled={
+                    loading ||
+                    (isMockChallenge ? !challenge?.callbackUrl : !challenge?.webUrl)
+                  }
+                >
+                  {isMockChallenge ? "Mock login" : "Reload"}
+                </Button>
+              </>
+            ) : smsCodeSent ? (
+              <Button
+                onClick={verifySmsCode}
+                disabled={loading || !smsKeyboard.smsCode.trim()}
+              >
+                Нэвтрэх
+              </Button>
+            ) : (
+              <>
+                {danMethod && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => void changeMethod(danMethod)}
+                    disabled={loading}
+                  >
+                    ДАН-аар нэвтрэх
+                  </Button>
+                )}
+                <Button
+                  onClick={sendSmsCode}
+                  disabled={
+                    loading ||
+                    !smsKeyboard.registerNumber.trim() ||
+                    !smsKeyboard.phoneNumber.trim()
+                  }
+                >
+                  Код авах
+                </Button>
+              </>
+            )}
           </div>
         </div>
+
+        {smsKeyboard.keyboardTarget && selectedMethod?.type !== "webview_oauth" && (
+          <div className="modal-keyboard-host">
+            <VirtualKeyboard
+              mode={smsKeyboard.keyboardMode}
+              onKeyClick={smsKeyboard.appendKeyboardValue}
+              onBackspace={smsKeyboard.backspaceKeyboardValue}
+              onDone={smsKeyboard.closeKeyboard}
+            />
+          </div>
+        )}
       </motion.div>
     </ModalWrapper>
   );

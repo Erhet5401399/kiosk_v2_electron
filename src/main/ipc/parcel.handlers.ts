@@ -32,21 +32,10 @@ export function setupParcelHandlers() {
     }
   });
 
-  ipcMain.handle(IPC.CATEGORY_SERVICES, async (_, catId: number) => {
-    try {
-      const data = await parcel.getCategoryServices(catId);
-      return asList(data);
-    } catch (e) {
-      log.error('Get category services failed:', e as Error);
-      return [];
-    }
-  });
-
   log.info('Parcel IPC handlers registered');
 }
 
 export function cleanupParcelHandlers() {
   ipcMain.removeHandler(IPC.PARCEL_LIST);
   ipcMain.removeHandler(IPC.CATEGORY_LIST);
-  ipcMain.removeHandler(IPC.CATEGORY_SERVICES);
 }

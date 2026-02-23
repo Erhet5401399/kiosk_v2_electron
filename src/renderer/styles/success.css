@@ -15,37 +15,32 @@
 }
 
 .success-icon {
-  width: 108px;
-  height: 108px;
+  width: 98px;
+  height: 98px;
   border-radius: 50%;
   margin-bottom: 14px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  background:
-    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.24) 75%),
-    linear-gradient(160deg, #20d46b, #17b95a);
+  background: linear-gradient(160deg, #22c55e, #16a34a);
   box-shadow:
-    0 16px 28px rgba(32, 212, 107, 0.24),
-    0 6px 14px rgba(16, 24, 40, 0.14),
-    inset 0 2px 0 rgba(255, 255, 255, 0.52);
+    0 12px 24px rgba(22, 163, 74, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
 .success-icon::after {
   content: '';
   position: absolute;
-  inset: -8px;
+  inset: -10px;
   border-radius: 50%;
-  border: 2px solid rgba(32, 212, 107, 0.24);
+  border: 2px solid rgba(22, 163, 74, 0.2);
 }
 
-.success-icon-mark {
+.success-icon-check {
+  width: 70px;
+  height: 70px;
   color: #ffffff;
-  font-size: 3.5rem;
-  line-height: 1;
-  font-weight: 900;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
 }
 
 .pdf-preview-container {

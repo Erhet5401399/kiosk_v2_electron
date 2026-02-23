@@ -88,10 +88,17 @@
 .modal-scroll-body {
   flex: 1;
   overflow-y: auto;
+  overflow-y: overlay;
   overflow-x: hidden;
-  scrollbar-width: thin;
+  scrollbar-width: none;
   display: flex;
   flex-direction: column;
+  overscroll-behavior: contain;
+}
+
+.modal-scroll-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .modal-scroll-body p {
@@ -126,14 +133,48 @@
   flex: 1;
   flex-direction: row;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 18px;
   flex-shrink: 0;
-  max-width: 560px;
-  padding: 24px 32px;
+  max-width: 760px;
+  padding: 20px 28px;
 }
 
 .modal-footer .btn {
   flex: 1 1 0;
+}
+
+.service-modal-footer .modal-footer .btn {
+  min-height: 72px;
+  border-radius: 16px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  box-shadow: none;
+}
+
+.service-modal-footer .modal-footer .btn.btn-primary {
+  background: var(--accent);
+  color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.service-modal-footer .modal-footer .btn.btn-primary:active {
+  background: #006ae0;
+}
+
+.service-modal-footer .modal-footer .btn.btn-secondary {
+  background: #e5e7eb;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+}
+
+.service-modal-footer .modal-footer .btn.btn-secondary:active {
+  background: #d1d5db;
+}
+
+.service-modal-footer .modal-footer .btn:disabled {
+  opacity: 0.45;
+  box-shadow: none;
 }
 
 .service-context-strip {
@@ -207,6 +248,10 @@
   gap: 12px;
 }
 
+.auth-webview-card-full {
+  min-height: 0;
+}
+
 .auth-webview {
   width: 100%;
   height: 100%;
@@ -226,4 +271,156 @@
   align-items: center;
   justify-content: center;
   font-size: var(--font-md);
+}
+
+.auth-webview-placeholder-full {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+
+.auth-method-selector {
+  display: flex;
+  gap: 10px;
+  margin: 8px 0 16px;
+}
+
+.auth-method-chip {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text);
+  font-weight: 700;
+  font-size: var(--font-sm);
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-method-chip.active {
+  border-color: var(--accent);
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--accent);
+}
+
+.auth-method-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.auth-sms-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px;
+  margin: 0;
+  width: min(680px, 100%);
+  border-radius: 20px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: linear-gradient(
+    180deg,
+    rgba(248, 250, 252, 0.95),
+    rgba(255, 255, 255, 0.98)
+  );
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+}
+
+.auth-sms-layout {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 24px 0;
+}
+
+.auth-sms-head h3 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.auth-sms-head p {
+  margin: 8px 0 2px;
+  font-size: var(--font-sm);
+  color: var(--muted);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.auth-sms-card .registration-input-field {
+  margin: 0;
+  padding: 18px 20px;
+  border: 2px solid rgba(148, 163, 184, 0.26);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.auth-sms-card .registration-input-field.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+}
+
+.auth-sms-card .registration-input-field .input-label {
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+}
+
+.auth-sms-card .registration-input-field .input-value {
+  font-size: 2rem;
+  font-weight: 700;
+  min-height: 2rem;
+  line-height: 1;
+  letter-spacing: 2px;
+  color: var(--text);
+}
+
+.auth-sms-card .registration-input-field .placeholder {
+  min-width: 100px;
+  display: inline-block;
+}
+
+.auth-sms-card .input-cursor {
+  height: 2rem;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: var(--font-sm);
+  font-weight: 700;
+  color: var(--text);
+}
+
+.auth-field input {
+  border: 1px solid rgba(15, 23, 42, 0.16);
+  border-radius: 12px;
+  font-size: var(--font-md);
+  padding: 12px 14px;
+  background: #ffffff;
+  color: var(--text);
+  outline: none;
+}
+
+.auth-field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
+}
+
+.auth-sms-card p.auth-hint {
+  margin: 6px 0 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.4;
+  background: rgba(14, 116, 144, 0.08);
+  border: 1px solid rgba(14, 116, 144, 0.22);
+  border-radius: 12px;
+  padding: 10px 12px 11px;
 }

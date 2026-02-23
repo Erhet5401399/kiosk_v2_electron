@@ -26,7 +26,8 @@ class ConfigService extends EventEmitter {
   async fetch(): Promise<DeviceConfig> {
     try {
       await device.authenticate();
-      this.config = await api.get<DeviceConfig>("/device/config");
+      const { data } = await api.post<{ data: DeviceConfig }>("/api/kiosk/config");
+      this.config = { ...DEFAULT, ...data };
       this.emit("updated", this.config);
       this.log.info("Config loaded", { name: this.config.device_name });
       this.scheduleRefresh();

@@ -36,8 +36,8 @@ class DeviceRuntime extends EventEmitter {
       deviceId: saved.deviceId,
     };
     if (this.mocksEnabled) {
-      registerMocks();
-      this.log.info("Mocks enabled via ENABLE_MOCKS");
+      const mode = registerMocks();
+      this.log.info("Mocks enabled via ENABLE_MOCKS", { mode });
     } else {
       clearAllMocks();
       this.log.info("Mocks disabled via ENABLE_MOCKS");

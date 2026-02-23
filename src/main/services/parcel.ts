@@ -1,6 +1,5 @@
 import {
   ApiResponse,
-  CategoryService,
   Parcel,
   ServiceCategory,
 } from '../../shared/types';
@@ -15,28 +14,25 @@ class ParcelService {
     return this.inst || (this.inst = new ParcelService());
   }
 
-  async getParcels(register: string): Promise<ApiResponse<Parcel[]>> {
+  async getParcels(register: string): Promise<ApiResponse<Parcel[]> | Parcel[]> {
+    const reg = String(register || "").trim().toUpperCase();
+    if (!reg) {
+      this.log.warn("Skipping parcel fetch: empty register number");
+      return [];
+    }
+
     const query = new URLSearchParams();
-    if (register) query.set('reg', register);
-    
+    query.set('register_number', reg);
+
     const url = `/api/kiosk/service/active/all/parcel?${query.toString()}`;
     this.log.debug('Fetching parcels:', url);
-    return api.get(url);
+    return api.post(url);
   }
 
   async getCategories(): Promise<ApiResponse<ServiceCategory[]> | ServiceCategory[]> {
-    const url = '/api/category';
+    const url = '/api/kiosk/service/category/tree';
     this.log.debug('Fetching categories:', url);
-    return api.get(url);
-  }
-
-  async getCategoryServices(catId: number): Promise<ApiResponse<CategoryService[]> | CategoryService[]> {
-    const query = new URLSearchParams();
-    query.set('cat_id', String(catId));
-
-    const url = `/api/category/services?${query.toString()}`;
-    this.log.debug('Fetching category services:', url);
-    return api.get(url);
+    return api.post(url);
   }
 }
 

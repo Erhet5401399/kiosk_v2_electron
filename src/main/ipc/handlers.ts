@@ -5,7 +5,7 @@ import { config, printer, logger, updater, userAuth } from '../services';
 import { windows } from '../windows/manager';
 import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 import { cleanupPaymentHandlers, setupPaymentHandlers } from './payment.handlers';
-import type { UserAuthVerifyRequest } from '../../shared/types';
+import type { UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
 const updaterStatusHandler = (status: unknown) => {
@@ -33,7 +33,7 @@ export function setupIPC() {
   ipcMain.handle(IPC.UPDATE_CHECK, () => updater.checkForUpdates());
   ipcMain.handle(IPC.UPDATE_INSTALL, () => updater.installNow());
   ipcMain.handle(IPC.USER_AUTH_METHODS, () => userAuth.listMethods());
-  ipcMain.handle(IPC.USER_AUTH_START, (_, methodId: string) => userAuth.start(methodId));
+  ipcMain.handle(IPC.USER_AUTH_START, (_, req: UserAuthStartRequest | string) => userAuth.start(req));
   ipcMain.handle(IPC.USER_AUTH_VERIFY, (_, req: UserAuthVerifyRequest) =>
     userAuth.verify(req),
   );

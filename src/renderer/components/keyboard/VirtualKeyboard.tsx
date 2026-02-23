@@ -27,6 +27,23 @@ export function VirtualKeyboard({
   onDone,
 }: VirtualKeyboardProps) {
   const showLetters = mode !== 'numeric';
+  const backspaceIcon = (
+    <svg
+      className="key-backspace-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <path
+        d="M20 12H7M7 12L12 7M7 12L12 17"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 
   return (
     <motion.div
@@ -48,8 +65,8 @@ export function VirtualKeyboard({
             ))}
             <div className="keyboard-row">
               <button className="key ghost" />
-              <button className="key backspace" onClick={onBackspace}>
-                Backspace
+              <button className="key backspace" onClick={onBackspace} aria-label="Backspace">
+                {backspaceIcon}
               </button>
               <button className="key keyboard-done" onClick={onDone}>
                 Done
@@ -61,28 +78,31 @@ export function VirtualKeyboard({
         <div className={`keyboard-numbers ${showLetters ? '' : 'numbers-full'}`}>
           {NUMBERS.map((row, i) => (
             <div key={i} className="keyboard-row">
-              {row.map((key, j) =>
-                key ? (
-                  <button key={key} className="key number-key" onClick={() => onKeyClick(key)}>
-                    {key}
+              {!showLetters && i === NUMBERS.length - 1 ? (
+                <>
+                  <button className="key backspace" onClick={onBackspace} aria-label="Backspace">
+                    {backspaceIcon}
                   </button>
-                ) : (
-                  <div key={`empty-${j}`} className="key-spacer" />
-                ),
+                  <button className="key number-key" onClick={() => onKeyClick("0")}>
+                    0
+                  </button>
+                  <button className="key keyboard-done" onClick={onDone}>
+                    Done
+                  </button>
+                </>
+              ) : (
+                row.map((key, j) =>
+                  key ? (
+                    <button key={key} className="key number-key" onClick={() => onKeyClick(key)}>
+                      {key}
+                    </button>
+                  ) : (
+                    <div key={`empty-${j}`} className="key-spacer" />
+                  ),
+                )
               )}
             </div>
           ))}
-
-          {!showLetters && (
-            <div className="keyboard-row">
-              <button className="key backspace" onClick={onBackspace}>
-                Backspace
-              </button>
-              <button className="key keyboard-done" onClick={onDone}>
-                Done
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </motion.div>

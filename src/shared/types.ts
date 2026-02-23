@@ -124,6 +124,11 @@ export interface UserAuthChallenge {
   meta?: Record<string, unknown>;
 }
 
+export interface UserAuthStartRequest {
+  methodId: string;
+  payload?: Record<string, unknown>;
+}
+
 export interface UserAuthVerifyRequest {
   methodId: string;
   challengeId: string;
@@ -180,6 +185,7 @@ export interface ServiceCategory {
   icon?: string;
   desc?: string;
   status?: boolean;
+  service?: CategoryService[];
 }
 
 export interface CategoryService {
@@ -190,8 +196,14 @@ export interface CategoryService {
   status?: boolean;
   cat_id: number;
   price?: string | number;
+  amount?: string | number | null;
+  paid?: boolean;
+  flow_config?: {
+    steps?: Array<string | { id?: string; title?: string }>;
+    initial_step_data?: Record<string, unknown>;
+  };
   config?: {
-    steps?: string[];
+    steps?: Array<string | { id?: string; title?: string }>;
     initial?: Record<string, unknown>;
   };
 }

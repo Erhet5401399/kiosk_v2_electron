@@ -142,10 +142,10 @@ class ApiClient {
 
   async healthCheck(): Promise<boolean> {
     try {
-      await timeout(this.request("GET", "/health"), 5000);
+      await timeout(this.request("POST", "/api/health"), 5000);
       return true;
     } catch {
-      return true;
+      return false;
     }
   }
 }

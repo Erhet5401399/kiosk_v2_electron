@@ -1,6 +1,5 @@
 // vite-env.d.ts
 import type {
-  CategoryService,
   CheckQpayInvoiceRequest,
   CheckQpayInvoiceResponse,
   CreateQpayInvoiceRequest,
@@ -11,6 +10,7 @@ import type {
   UpdateStatus,
   UserAuthChallenge,
   UserAuthMethod,
+  UserAuthStartRequest,
   UserAuthStatus,
   UserAuthVerifyRequest,
 } from "../shared/types";
@@ -46,11 +46,10 @@ declare global {
       parcel: {
         list: (register: string) => Promise<Parcel[]>;
         categories: () => Promise<ServiceCategory[]>;
-        services: (catId: number) => Promise<CategoryService[]>;
       };
       auth: {
         listMethods: () => Promise<UserAuthMethod[]>;
-        start: (methodId: string) => Promise<UserAuthChallenge>;
+        start: (req: UserAuthStartRequest) => Promise<UserAuthChallenge>;
         verify: (req: UserAuthVerifyRequest) => Promise<UserAuthStatus>;
         status: () => Promise<UserAuthStatus>;
         touch: () => Promise<UserAuthStatus>;

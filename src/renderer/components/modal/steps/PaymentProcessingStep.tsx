@@ -45,10 +45,10 @@ function CardProcessing({ onNext }: { onNext: () => void }) {
   }, [onNext]);
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="payment-processing">
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }} className="payment-processing">
       <div className="step-header">
         <div className="processing-spinner" style={{ marginBottom: 20 }} />
-        <h1>Processing card payment...</h1>
+        <h1>Та картаа уншуулна уу...</h1>
         <p>Please wait</p>
       </div>
     </motion.div>
@@ -151,7 +151,7 @@ function QpayProcessing({
   };
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="service-modal payment-processing-step">
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }} className="service-modal payment-processing-step">
       <div className="service-modal-body">
         <div className="step-header">
           <h1>Scan QPay QR to pay</h1>
@@ -230,7 +230,7 @@ export function PaymentProcessingStep({ context, actions }: StepComponentProps) 
   }
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="service-modal">
+    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }} className="service-modal">
       <div className="service-modal-body">
         <div className="step-header">
           <h1>Payment method is required</h1>

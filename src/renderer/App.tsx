@@ -51,14 +51,17 @@ export default function App() {
   }, [services]);
 
   const buildServiceFlowConfig = useCallback((svc: CategoryService) => {
-    const rawFlowConfig = svc.config;
+    const rawFlowConfig = svc.flow_config || svc.config;
     const rawSteps = rawFlowConfig?.steps;
+    const rawInitialStepData = (
+      svc.flow_config?.initial_step_data || svc.config?.initial || {}
+    ) as Record<string, unknown>;
 
     const toUnavailableFlow = (reason: string) => ({
       serviceId: svc.id,
       steps: ["service-unavailable"],
       initialStepData: {
-        ...(rawFlowConfig?.initial || {}),
+        ...rawInitialStepData,
         unavailableReason: reason,
       },
     });
@@ -68,7 +71,9 @@ export default function App() {
     }
 
     const steps = rawSteps
-      .map((step) => String(step || "").trim())
+      .map((step) =>
+        typeof step === "string" ? step : String(step?.id || "").trim(),
+      )
       .filter((step) => !!step);
 
     if (!steps.length) {
@@ -83,12 +88,12 @@ export default function App() {
     return {
       serviceId: svc.id,
       steps,
-      initialStepData: rawFlowConfig?.initial || {},
+      initialStepData: rawInitialStepData,
     };
   }, []);
 
   const loadCatalog = useCallback(async () => {
-    if (!window.electron?.parcel?.categories || !window.electron?.parcel?.services) {
+    if (!window.electron?.parcel?.categories) {
       return;
     }
 
@@ -117,18 +122,21 @@ export default function App() {
           : firstCategoryName,
       );
 
-      const rawServices = await Promise.all(
-        activeCategories.map((cat) => window.electron.parcel.services(cat.id)),
-      );
-
       const categoryNameById = new Map(
         mappedCategories
           .filter((cat) => cat.id != null)
           .map((cat) => [Number(cat.id), cat.name] as const),
       );
 
-      const mappedServices: Service[] = rawServices
-        .flat()
+      const mappedServices: Service[] = activeCategories
+        .flatMap((cat) =>
+          Array.isArray(cat.service)
+            ? cat.service.map((svc) => ({
+                ...svc,
+                cat_id: Number(svc.cat_id ?? cat.id),
+              }))
+            : [],
+        )
         .filter(
           (svc: CategoryService) => svc && svc.id != null && svc.status !== false,
         )
@@ -139,7 +147,7 @@ export default function App() {
           category: categoryNameById.get(Number(svc.cat_id)) || mappedCategories[0]?.name || "",
           name: String(svc.name_mn || svc.name_en || "").trim() || `Service ${svc.id}`,
           icon: "🧾",
-          price: String(svc.price ?? "0"),
+          price: String(svc.amount ?? svc.price ?? "0"),
           status: svc.status,
           config: buildServiceFlowConfig(svc),
         }));

@@ -11,6 +11,14 @@ export function useParcels({ register }: UseParcelsProps) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchParcels = useCallback(async () => {
+    const normalizedRegister = String(register || "").trim();
+    if (!normalizedRegister) {
+      setParcels([]);
+      setError(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -19,7 +27,7 @@ export function useParcels({ register }: UseParcelsProps) {
         throw new Error('Electron IPC not available');
       }
 
-      const response = await window.electron.parcel.list(register);
+      const response = await window.electron.parcel.list(normalizedRegister);
 
       if (response) {
         setParcels(response);

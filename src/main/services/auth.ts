@@ -3,6 +3,7 @@ import { AUTH } from "../core/constants";
 import type {
   UserAuthChallenge,
   UserAuthMethod,
+  UserAuthStartRequest,
   UserAuthSession,
   UserAuthStatus,
   UserAuthVerifyRequest,
@@ -17,7 +18,7 @@ type VerifyResult = {
 
 interface AuthProvider {
   getMethod(): UserAuthMethod;
-  startChallenge(): Promise<UserAuthChallenge>;
+  startChallenge(payload?: Record<string, unknown>): Promise<UserAuthChallenge>;
   verify(
     req: UserAuthVerifyRequest,
     challenge: UserAuthChallenge,
@@ -35,6 +36,12 @@ type DanFinalizeResponse = {
   register_number?: string;
   regnum?: string;
   claims?: Record<string, unknown>;
+};
+
+type ApiEnvelope<T = Record<string, unknown>> = {
+  status: boolean;
+  msg: string;
+  data: T;
 };
 
 class DanBackendProvider implements AuthProvider {
@@ -180,6 +187,169 @@ class DanBackendProvider implements AuthProvider {
   }
 }
 
+class SmsBackendProvider implements AuthProvider {
+  private method: UserAuthMethod = {
+    id: "sms",
+    label: "SMS",
+    type: "credentials",
+    enabled: true,
+  };
+
+  private readonly checkEndpoint = String(
+    process.env.SMS_CHECK_ENDPOINT ||
+      "/api/kiosk/service/register/phone/check",
+  ).trim();
+
+  private readonly sendEndpoint = String(
+    process.env.SMS_SEND_ENDPOINT || "/api/kiosk/service/confirm/sms/send",
+  ).trim();
+
+  private readonly verifyEndpoint = String(
+    process.env.SMS_VERIFY_ENDPOINT || "/api/kiosk/service/auth/login/check",
+  ).trim();
+
+  private readonly challengeTtlMs = Number(
+    process.env.SMS_CHALLENGE_TTL_MS || 5 * 60 * 1000,
+  );
+
+  private pending = new Map<
+    string,
+    { registerNumber: string; phoneNumber: string; expiresAt: number }
+  >();
+
+  getMethod(): UserAuthMethod {
+    return this.method;
+  }
+
+  async startChallenge(payload?: Record<string, unknown>): Promise<UserAuthChallenge> {
+    const registerNumber = this.normalizeRegisterNumber(payload?.registerNumber);
+    const phoneNumber = this.normalizePhoneNumber(payload?.phoneNumber);
+    if (!registerNumber || !phoneNumber) {
+      throw new Error("Register number and phone number are required");
+    }
+
+    await this.callSmsApi(this.checkEndpoint, { registerNumber, phoneNumber });
+    await this.callSmsApi(this.sendEndpoint, { registerNumber, phoneNumber });
+
+    const challengeId = crypto.randomUUID();
+    const expiresAt = Date.now() + this.challengeTtlMs;
+
+    this.pending.set(challengeId, { registerNumber, phoneNumber, expiresAt });
+    this.prunePending();
+
+    return {
+      methodId: this.method.id,
+      challengeId,
+      expiresAt,
+      meta: {
+        provider: "SMS",
+        flow: "phone_code",
+        phoneMasked: this.maskPhone(phoneNumber),
+      },
+    };
+  }
+
+  async verify(
+    req: UserAuthVerifyRequest,
+    challenge: UserAuthChallenge,
+  ): Promise<VerifyResult> {
+    const pending = this.pending.get(challenge.challengeId);
+    if (!pending) {
+      throw new Error("Invalid SMS challenge");
+    }
+    if (Date.now() > pending.expiresAt) {
+      this.pending.delete(challenge.challengeId);
+      throw new Error("SMS challenge expired");
+    }
+
+    const sendCode = String(req.payload.sendCode || "").trim();
+    if (!/^\d{4,6}$/.test(sendCode)) {
+      throw new Error("Invalid SMS code");
+    }
+
+    const verified = await this.callSmsApi<Record<string, unknown>>(
+      this.verifyEndpoint,
+      {
+        registerNumber: pending.registerNumber,
+        phoneNumber: pending.phoneNumber,
+        sendCode,
+      },
+    );
+
+    const registerNumber = String(
+      verified.register_number || verified.regnum || pending.registerNumber,
+    )
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "");
+
+    if (!registerNumber) {
+      throw new Error("Missing register number from SMS login");
+    }
+
+    this.pending.delete(challenge.challengeId);
+
+    return {
+      registerNumber,
+      claims: {
+        provider: "SMS",
+        phoneNumber: pending.phoneNumber,
+        ...verified,
+      },
+    };
+  }
+
+  private async callSmsApi<T = Record<string, unknown>>(
+    endpoint: string,
+    data: { registerNumber: string; phoneNumber: string; sendCode?: string },
+  ): Promise<T> {
+    const response = await api.post<ApiEnvelope<T>>(this.withParams(endpoint, data));
+    if (!response || response.status !== true) {
+      const message = String(response?.msg || "SMS authentication request failed");
+      throw new Error(message);
+    }
+    return (response.data || {}) as T;
+  }
+
+  private withParams(
+    endpoint: string,
+    data: { registerNumber: string; phoneNumber: string; sendCode?: string },
+  ): string {
+    const params = new URLSearchParams();
+    params.set("register_number", data.registerNumber);
+    params.set("phone_number", data.phoneNumber);
+    if (data.sendCode) {
+      params.set("send_code", data.sendCode);
+    }
+    return `${endpoint}?${params.toString()}`;
+  }
+
+  private normalizeRegisterNumber(value: unknown): string {
+    return String(value || "")
+      .trim()
+      .toUpperCase()
+      .replace(/\s+/g, "");
+  }
+
+  private normalizePhoneNumber(value: unknown): string {
+    return String(value || "").replace(/[^\d]/g, "");
+  }
+
+  private maskPhone(phoneNumber: string): string {
+    if (phoneNumber.length <= 4) {
+      return phoneNumber;
+    }
+    return `${"*".repeat(phoneNumber.length - 4)}${phoneNumber.slice(-4)}`;
+  }
+
+  private prunePending() {
+    const now = Date.now();
+    this.pending.forEach((item, id) => {
+      if (item.expiresAt <= now) this.pending.delete(id);
+    });
+  }
+}
+
 class UserAuthService {
   private static inst: UserAuthService;
   private log = logger.child("UserAuth");
@@ -195,6 +365,7 @@ class UserAuthService {
 
   private constructor() {
     this.registerProvider(new DanBackendProvider());
+    this.registerProvider(new SmsBackendProvider());
   }
 
   static get(): UserAuthService {
@@ -205,13 +376,15 @@ class UserAuthService {
     return [...this.providers.values()].map((provider) => provider.getMethod());
   }
 
-  async start(methodId: string): Promise<UserAuthChallenge> {
+  async start(req: UserAuthStartRequest | string): Promise<UserAuthChallenge> {
+    const methodId = typeof req === "string" ? req : req.methodId;
+    const payload = typeof req === "string" ? undefined : req.payload;
     const provider = this.providers.get(methodId);
     if (!provider) {
       throw new Error(`Unknown auth method: ${methodId}`);
     }
 
-    const challenge = await provider.startChallenge();
+    const challenge = await provider.startChallenge(payload);
     this.challenges.set(challenge.challengeId, {
       methodId: challenge.methodId,
       expiresAt: challenge.expiresAt,

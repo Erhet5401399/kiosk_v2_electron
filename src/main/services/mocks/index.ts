@@ -4,7 +4,14 @@ import { logger } from "../logger";
 const log = logger.child("Mocks");
 const qpayCheckCounter = new Map<string, number>();
 
-export function registerMocks() {
+export type MockMode = "all" | "auth";
+
+function parseMockModeFromEnv(raw: string | undefined): MockMode {
+  const value = String(raw || "all").trim().toLowerCase();
+  return value === "auth" ? "auth" : "all";
+}
+
+function registerDeviceAuthMocks() {
   api.registerMock("/api/auth/kiosk/register/login", () => ({
     access_token: "mock-token",
     refresh_token: "mock-refresh",
@@ -16,7 +23,9 @@ export function registerMocks() {
     refresh_token: "mock-refresh",
     expires_at: Date.now() + 3600_000,
   }));
+}
 
+function registerConfigMocks() {
   api.registerMock("/device/config", () => ({
     device_name: "Mock Kiosk",
     printer_enabled: true,
@@ -25,64 +34,52 @@ export function registerMocks() {
     maintenance_mode: false,
   }));
 
-  api.registerMock("/health", () => ({ status: "ok" }));
+  api.registerMock("/api/health", () => ({ status: "ok" }));
+}
 
-  api.registerMock("/api/category", () => [
-    { id: 1, name_mn: "e-mongolia", name_en: "e-mongolia", status: true },
-    { id: 2, name_mn: "land", name_en: "land", status: true },
-  ]);
-
-  api.registerMock("/api/category/services", (_, url) => {
-    const parsed = new URL(url, "http://localhost");
-    const catId = Number(parsed.searchParams.get("cat_id") || 0);
-
-    const byCategory: Record<number, unknown[]> = {
-      1: [
+function registerCatalogMocks() {
+  api.registerMock("/api/kiosk/service/category/tree", () => [
+    {
+      id: 1,
+      name_mn: "e-mongolia",
+      name_en: "e-mongolia",
+      status: true,
+      service: [],
+    },
+    {
+      id: 3,
+      name_mn: "Газрын үйлчилгээ",
+      name_en: "Land services",
+      status: true,
+      service: [
         {
-          id: 11,
-          name_mn: "Service A",
-          name_en: "Service A",
-          curl: "/pqrcode/a",
-          price: 5000,
+          id: 6,
+          cat_id: 3,
+          name_mn: "Үнэгүй газар өмчилсөн эсэх лавлагаа",
+          name_en: "",
+          curl: "/ref/owner",
+          amount: 0,
+          paid: true,
           status: true,
-          cat_id: 1,
-          config: {
-            steps: [
-              "land-parcel-select",
-              "payment-method",
-              "payment-processing",
-              "success",
-            ],
-            initial: {
+          flow_config: {
+            initial_step_data: {
               map_type: "cadastral",
             },
-          },
-        },
-      ],
-      2: [
-        {
-          id: 21,
-          name_mn: "Service B",
-          name_en: "Service B",
-          curl: "/pqrcode/b",
-          price: 3000,
-          status: true,
-          cat_id: 2,
-          config: {
             steps: [
-              "document-type-select",
-              "payment-method",
-              "payment-processing",
-              "success",
+              { id: "registration-input", title: "Рд оруулах" },
+              { id: "land-parcel-select", title: "Нэгж талбар сонгох" },
+              { id: "payment-method", title: "Төлбөрийн нөхцөл" },
+              { id: "payment-processing", title: "Төлбөр төлөлт" },
+              { id: "success", title: "Амжилттай" },
             ],
           },
         },
       ],
-    };
+    },
+  ]);
+}
 
-    return byCategory[catId] || [];
-  });
-
+function registerParcelMocks() {
   api.registerMock("/api/kiosk/service/active/all/parcel", (_, url) => {
     const parsed = new URL(url, "http://localhost");
     const reg = String(parsed.searchParams.get("reg") || "")
@@ -154,6 +151,10 @@ export function registerMocks() {
       (item) => String(item.person_register || "").trim().toUpperCase() === reg,
     );
   });
+}
+
+function registerPaymentMocks() {
+  qpayCheckCounter.clear();
 
   api.registerMock("/api/payment/qpay/invoice", (_, __, body) => {
     const payload = (body || {}) as { amount?: number; serviceId?: number };
@@ -183,7 +184,9 @@ export function registerMocks() {
       paidAt: paid ? new Date().toISOString() : undefined,
     };
   });
+}
 
+function registerUserAuthMocks() {
   api.registerMock("/auth/user/dan/start", (_, __, body) => {
     const challengeId = String(
       (body as { challengeId?: string })?.challengeId || "",
@@ -255,7 +258,106 @@ export function registerMocks() {
     };
   });
 
-  log.info("Mocks registered");
+  api.registerMock("/api/kiosk/service/register/phone/check", (_, url) => {
+    const parsed = new URL(url, "http://localhost");
+    const registerNumber = String(parsed.searchParams.get("register_number") || "")
+      .trim()
+      .toUpperCase();
+    const phoneNumber = String(parsed.searchParams.get("phone_number") || "")
+      .trim();
+
+    if (!registerNumber || !phoneNumber) {
+      throw new Error("Missing register_number or phone_number");
+    }
+
+    return {
+      status: true,
+      msg: "ok",
+      data: {
+        register_number: registerNumber,
+        phone_number: phoneNumber,
+      },
+    };
+  });
+
+  api.registerMock("/api/kiosk/service/confirm/sms/send", (_, url) => {
+    const parsed = new URL(url, "http://localhost");
+    const registerNumber = String(parsed.searchParams.get("register_number") || "")
+      .trim()
+      .toUpperCase();
+    const phoneNumber = String(parsed.searchParams.get("phone_number") || "")
+      .trim();
+
+    if (!registerNumber || !phoneNumber) {
+      throw new Error("Missing register_number or phone_number");
+    }
+
+    return {
+      status: true,
+      msg: "sent",
+      data: {
+        sent: true,
+        register_number: registerNumber,
+        phone_number: phoneNumber,
+        mock_code: "123456",
+      },
+    };
+  });
+
+  api.registerMock("/api/kiosk/service/auth/login/check", (_, url) => {
+    const parsed = new URL(url, "http://localhost");
+    const registerNumber = String(parsed.searchParams.get("register_number") || "")
+      .trim()
+      .toUpperCase();
+    const phoneNumber = String(parsed.searchParams.get("phone_number") || "")
+      .trim();
+    const sendCode = String(parsed.searchParams.get("send_code") || "").trim();
+
+    if (!registerNumber || !phoneNumber || !sendCode) {
+      throw new Error("Missing SMS login fields");
+    }
+    if (sendCode !== "123456") {
+      throw new Error("Invalid SMS code");
+    }
+
+    return {
+      status: true,
+      msg: "verified",
+      data: {
+        register_number: registerNumber,
+        claims: {
+          provider: "SMS",
+          phone: phoneNumber,
+          mock: true,
+        },
+      },
+    };
+  });
+}
+
+export function registerMocks(options?: { mode?: MockMode }) {
+  api.clearMocks();
+  qpayCheckCounter.clear();
+
+  const mode = options?.mode || parseMockModeFromEnv(process.env.MOCK_MODE);
+
+  if (mode === "auth") {
+    registerUserAuthMocks();
+    log.info("Mocks registered", { mode, mocked: ["user_auth"] });
+    return mode;
+  }
+
+  registerDeviceAuthMocks();
+  registerConfigMocks();
+  registerCatalogMocks();
+  registerParcelMocks();
+  registerPaymentMocks();
+  registerUserAuthMocks();
+  log.info("Mocks registered", {
+    mode,
+    mocked: ["device_auth", "config", "catalog", "parcel", "payment", "user_auth"],
+  });
+  return mode;
 }
 
 export function clearAllMocks() {
