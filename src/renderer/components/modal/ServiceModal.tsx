@@ -19,7 +19,10 @@ interface ServiceModalProps {
   userClaims?: Record<string, unknown>;
   sessionExpiresAt?: number;
   onSessionExpired?: () => void;
-  onPrint: (registerNumber: string, documentBase64?: string) => void;
+  onPrint: (
+    registerNumber: string,
+    documentBase64?: string,
+  ) => Promise<{ success: boolean; error?: string }>;
   onClose: () => void;
 }
 
@@ -194,11 +197,10 @@ export function ServiceModal({
   const stepConfigs = engine.getStepConfigs();
   const currentConfig = engine.getCurrentStepConfig();
 
-  const handlePrintAndClose = () => {
+  const handlePrintAndClose = async () => {
     const currentRegister = (state.stepData.registerNumber as string) || registerNumber;
     const documentBase64 = String(state.stepData.documentBase64 || "").trim();
-    onPrint(currentRegister, documentBase64 || undefined);
-    complete();
+    return onPrint(currentRegister, documentBase64 || undefined);
   };
 
   return (

@@ -33,7 +33,11 @@ declare global {
         refresh: () => Promise<void>;
       };
       printer: {
-        print: (req: { content: string }) => Promise<string>;
+        print: (req: { content: string }) => Promise<{
+          success: boolean;
+          jobId?: string;
+          error?: string;
+        }>;
         list: () => Promise<string[]>;
       };
       health: {

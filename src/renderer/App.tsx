@@ -308,8 +308,15 @@ export default function App() {
     setShowPromotionModal(false);
   }, []);
 
-  const handlePrintAndClose = async (registerNumber: string, documentBase64?: string) => {
-    if (selectedService) {
+  const handlePrintAndClose = async (
+    registerNumber: string,
+    documentBase64?: string,
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!selectedService) {
+      return { success: false, error: "Service not selected." };
+    }
+
+    try {
       const normalizedDocument = String(documentBase64 || "").trim();
       if (normalizedDocument) {
         const printableHtml = buildPrintableHtmlFromBase64(normalizedDocument);
@@ -319,7 +326,9 @@ export default function App() {
           `Service: ${selectedService.name}\nRegister: ${registerNumber}\nPrice: ${selectedService.price}`,
         );
       }
-      handleCloseModal();
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: (error as Error).message || "Printing failed." };
     }
   };
 

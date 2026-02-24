@@ -20,7 +20,9 @@ import {
   ServiceUnavailableStep,
 } from '../components/modal/steps';
 
-export type StepComponent = ComponentType<StepComponentProps & { onPrint?: () => void }>;
+export type StepComponent = ComponentType<
+  StepComponentProps & { onPrint?: () => Promise<{ success: boolean; error?: string }> }
+>;
 
 export type StepDefinition = StepConfig & {
   component: StepComponent;

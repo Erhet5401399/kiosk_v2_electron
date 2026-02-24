@@ -3,7 +3,7 @@ import { getStepComponent } from '../../flows';
 import { StateCard } from '../common';
 
 interface StepRendererProps extends StepComponentProps {
-  onPrint?: () => void;
+  onPrint?: () => Promise<{ success: boolean; error?: string }>;
 }
 
 export function StepRenderer({ context, actions, config, onPrint }: StepRendererProps) {

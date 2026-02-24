@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
 
 interface SuccessStepExtraProps {
-  onPrint?: () => void;
+  onPrint?: () => Promise<{ success: boolean; error?: string }>;
 }
+
+type PrintState = 'idle' | 'printing' | 'success' | 'error';
 
 export function SuccessStep({
   context,
@@ -12,10 +15,30 @@ export function SuccessStep({
   onPrint,
 }: StepComponentProps & SuccessStepExtraProps) {
   const { service } = context;
+  const [printState, setPrintState] = useState<PrintState>('idle');
+  const [printMessage, setPrintMessage] = useState('');
 
-  const handlePrint = () => {
-    onPrint?.();
-    actions.onComplete();
+  const isPrinting = printState === 'printing';
+
+  const handlePrint = async () => {
+    if (!onPrint || isPrinting) return;
+
+    setPrintState('printing');
+    setPrintMessage('Хэвлэлийн хүсэлтийг илгээж байна...');
+
+    const result = await onPrint();
+
+    if (!result.success) {
+      setPrintState('error');
+      setPrintMessage(result.error || 'Хэвлэх үед алдаа гарлаа.');
+      return;
+    }
+
+    setPrintState('success');
+    setPrintMessage('Хэвлэх ажил илгээгдлээ. Түр хүлээнэ үү...');
+    window.setTimeout(() => {
+      actions.onComplete();
+    }, 1200);
   };
 
   return (
@@ -57,15 +80,28 @@ export function SuccessStep({
           <h1>Төлбөр амжилттай</h1>
           <p>Таны баримт бэлэн боллоо</p>
           <p className="success-service-name">{service.name}</p>
+          {printState !== 'idle' && (
+            <p
+              style={{
+                marginTop: '10px',
+                color: printState === 'error' ? '#dc2626' : '#14532d',
+                fontWeight: 600,
+              }}
+            >
+              {printMessage}
+            </p>
+          )}
         </div>
       </div>
 
       <div className="service-modal-footer">
         <div className="modal-footer">
-          <Button variant="secondary" onClick={actions.onComplete}>
+          <Button variant="secondary" onClick={actions.onComplete} disabled={isPrinting}>
             Дуусгах
           </Button>
-          <Button onClick={handlePrint}>Хэвлэх</Button>
+          <Button onClick={handlePrint} disabled={isPrinting || printState === 'success'}>
+            {isPrinting ? 'Хэвлэж байна...' : printState === 'error' ? 'Дахин хэвлэх' : 'Хэвлэх'}
+          </Button>
         </div>
       </div>
     </motion.div>
