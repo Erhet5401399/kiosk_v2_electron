@@ -4,7 +4,7 @@ import type {
   StepConfig,
   StepContext,
   StepValidation,
-} from '../../types/steps';
+} from '../types/steps';
 import {
   RegistrationInputStep,
   PaymentMethodStep,
@@ -18,7 +18,7 @@ import {
   ConfirmationStep,
   PrintOptionsStep,
   ServiceUnavailableStep,
-} from '../../components/modal/steps';
+} from '../components/modal/steps';
 
 export type StepComponent = ComponentType<StepComponentProps & { onPrint?: () => void }>;
 

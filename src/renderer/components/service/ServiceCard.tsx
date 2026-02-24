@@ -1,4 +1,5 @@
 import type { Service } from "../../types";
+import { formatServicePrice } from "../../utils";
 import { ArrowIcon } from "../common";
 
 interface ServiceCardProps {
@@ -17,7 +18,7 @@ export function ServiceCard({ service, onSelect }: ServiceCardProps) {
         <p>{service.desc}</p>
       </div>
       <div className="card-footer">
-        <span className="price">{service.price}</span>
+        <span className="price">{formatServicePrice(service.price)}</span>
         <div className="select-btn">
           <span>Үйлчилгээ авах</span>
           <ArrowIcon />

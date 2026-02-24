@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
-import { FlowEngine, type FlowState } from '../engine/FlowEngine';
-import type { StepContext, ServiceFlowConfig } from '../../types/steps';
+import { FlowEngine, type FlowState } from './FlowEngine';
+import type { StepContext, ServiceFlowConfig } from '../types/steps';
 
 interface UseFlowEngineOptions {
   serviceId: number;

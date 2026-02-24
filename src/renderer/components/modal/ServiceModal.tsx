@@ -11,7 +11,7 @@ import { VirtualKeyboard } from '../keyboard';
 import { ModalWrapper } from './ModalWrapper';
 import { StepRenderer } from './StepRenderer';
 import { FlowProgressBar } from './FlowProgressBar';
-import { useFlowEngine } from '../../flows/hooks/useFlowEngine';
+import { useFlowEngine } from '../../flows';
 
 interface ServiceModalProps {
   service: Service;

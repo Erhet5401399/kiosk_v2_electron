@@ -1,5 +1,5 @@
 import type { StepComponentProps } from '../../types/steps';
-import { getStepComponent } from '../../flows/steps/definitions';
+import { getStepComponent } from '../../flows';
 import { StateCard } from '../common';
 
 interface StepRendererProps extends StepComponentProps {
@@ -27,4 +27,4 @@ export function StepRenderer({ context, actions, config, onPrint }: StepRenderer
   return <Component context={context} actions={actions} config={config} onPrint={onPrint} />;
 }
 
-export { registerStepComponent, hasStepComponent } from '../../flows/steps/definitions';
+export { registerStepComponent, hasStepComponent } from '../../flows';

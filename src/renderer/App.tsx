@@ -6,7 +6,7 @@ import type {
   UserAuthSession,
   UserAuthStatus,
 } from "../shared/types";
-import type { Service } from "./types";
+import type { Service, ServiceFlowStep } from "./types";
 import { CATEGORIES, SERVICES, STATE_LABELS } from "./constants";
 import { useElectron, useUpdater } from "./hooks";
 import {
@@ -17,7 +17,7 @@ import {
 } from "./components/layout";
 import { ServiceList } from "./components/service";
 import { ServiceModal, UserAuthModal } from "./components/modal";
-import { hasStepDefinition } from "./flows/steps/definitions";
+import { hasStepDefinition } from "./flows";
 import "./styles/index.css";
 
 export default function App() {
@@ -70,17 +70,28 @@ export default function App() {
       return toUnavailableFlow("No flow steps returned from backend.");
     }
 
-    const steps = rawSteps
-      .map((step) =>
-        typeof step === "string" ? step : String(step?.id || "").trim(),
-      )
-      .filter((step) => !!step);
+    const steps: ServiceFlowStep[] = rawSteps
+      .map((step) => {
+        if (typeof step === "string") {
+          const id = step.trim();
+          return id || null;
+        }
+
+        const id = String(step?.id || "").trim();
+        if (!id) return null;
+
+        const title = String(step?.title || "").trim();
+        return title ? { id, title } : id;
+      })
+      .filter((step): step is ServiceFlowStep => Boolean(step));
 
     if (!steps.length) {
       return toUnavailableFlow("Flow steps are empty.");
     }
 
-    const unknownStep = steps.find((step) => !hasStepDefinition(step));
+    const unknownStep = steps
+      .map((step) => (typeof step === "string" ? step : step.id))
+      .find((stepId) => !hasStepDefinition(stepId));
     if (unknownStep) {
       return toUnavailableFlow(`Unknown flow step: ${unknownStep}`);
     }

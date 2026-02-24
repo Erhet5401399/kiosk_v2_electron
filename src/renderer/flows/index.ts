@@ -1,15 +1,16 @@
-export { FlowEngine } from './engine/FlowEngine';
-export type { FlowState } from './engine/FlowEngine';
+export { FlowEngine } from './FlowEngine';
+export type { FlowState } from './FlowEngine';
 
-export { useFlowEngine } from './hooks/useFlowEngine';
+export { useFlowEngine } from './useFlowEngine';
 
-export { STEP_REGISTRY, getStepConfig, registerStep } from './steps/registry';
-export { STEP_DEFINITIONS, getStepDefinition, registerStepDefinition } from './steps/definitions';
+export { STEP_REGISTRY, getStepConfig, registerStep } from './stepRegistry';
+export { STEP_DEFINITIONS, getStepDefinition, registerStepDefinition, hasStepDefinition } from './stepDefinitions';
+export { getStepComponent, registerStepComponent, hasStepComponent } from './stepDefinitions';
 
-export { 
-  getServiceFlowConfig, 
-  createServiceFlowConfig 
-} from './configs';
+export {
+  getServiceFlowConfig,
+  createServiceFlowConfig
+} from './serviceFlowConfig';
 
 export type {
   StepId,

@@ -5,9 +5,9 @@ import type {
   ServiceFlowConfig,
   StepValidation,
   ServiceFlowStep,
-} from '../../types/steps';
-import { getStepConfig } from '../steps/registry';
-import { getServiceFlowConfig } from '../configs';
+} from '../types/steps';
+import { getStepConfig } from './stepRegistry';
+import { getServiceFlowConfig } from './serviceFlowConfig';
 
 export interface FlowState {
   currentStepIndex: number;

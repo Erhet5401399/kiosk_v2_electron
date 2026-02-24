@@ -1,5 +1,5 @@
-export { CATEGORIES } from "./categories";
-export { SERVICES } from "./services";
+export const APP_NAME = "Эрхэт киоск";
+
 export { MONGOLIAN_KEYBOARD } from "./keyboard";
 
 export const STATE_LABELS: Record<string, string> = {
@@ -22,5 +22,3 @@ export const INITIAL_SNAPSHOT = {
   uptime: 0,
   startedAt: 0,
 };
-
-export const APP_NAME = "Эрхэт киоск";

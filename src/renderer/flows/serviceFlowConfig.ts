@@ -1,15 +1,9 @@
-import type { ServiceFlowConfig, ServiceFlowStep } from '../../types/steps';
-
-const DEFAULT_FLOW: ServiceFlowStep[] = [
-  'registration-input',
-  'confirmation',
-  'success',
-];
+import type { ServiceFlowConfig, ServiceFlowStep } from '../types/steps';
 
 export function getServiceFlowConfig(serviceId: number): ServiceFlowConfig {
   return {
     serviceId,
-    steps: DEFAULT_FLOW,
+    steps: [],
     initialStepData: {},
   };
 }
