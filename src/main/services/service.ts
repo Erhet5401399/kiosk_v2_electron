@@ -9,33 +9,52 @@ class ServiceApiService {
     return this.inst || (this.inst = new ServiceApiService());
   }
 
-  private normalizeBase64(payload: unknown): string {
-    if (typeof payload === "string") {
-      const normalized = payload.trim();
-      if (!normalized) return "";
-
-      const maybeHtml = normalized.toLowerCase();
-      if (
-        maybeHtml.startsWith("<!doctype html") ||
-        maybeHtml.startsWith("<html") ||
-        maybeHtml.includes("<body")
-      ) {
-        return Buffer.from(normalized, "utf8").toString("base64");
-      }
-
-      return normalized;
-    }
+  private toStringPayload(payload: unknown): string {
+    if (typeof payload === "string") return payload;
 
     const asRecord = payload as Record<string, unknown> | null;
-    const direct = typeof asRecord?.base64 === "string" ? asRecord.base64 : "";
-    if (direct) return direct.trim();
+    if (!asRecord) return "";
 
-    const data = asRecord?.data as unknown;
-    if (typeof data === "string") return data.trim();
-    if (data && typeof (data as Record<string, unknown>).base64 === "string") {
-      return String((data as Record<string, unknown>).base64).trim();
-    }
+    if (typeof asRecord.base64 === "string") return asRecord.base64;
+    if (typeof asRecord.hex === "string") return asRecord.hex;
+    if (typeof asRecord.html === "string") return asRecord.html;
+    if (typeof asRecord.data === "string") return asRecord.data;
     return "";
+  }
+
+  private isHtml(value: string): boolean {
+    const lower = value.trim().toLowerCase();
+    return (
+      lower.startsWith("<!doctype html") ||
+      lower.startsWith("<html") ||
+      lower.includes("<body")
+    );
+  }
+
+  private toHexCompact(value: string): string {
+    const unwrapped = value.trim().replace(/^["'`]+|["'`]+$/g, "");
+    const no0x = unwrapped.replace(/0x/gi, "");
+    const noSlashX = no0x.replace(/\\x/gi, "");
+    const compact = noSlashX.replace(/[,\s:;_-]/g, "");
+    if (!compact || compact.length % 2 !== 0) return "";
+    return /^[0-9a-f]+$/i.test(compact) ? compact : "";
+  }
+
+  private normalizeDocumentToBase64(payload: unknown): string {
+    const raw = this.toStringPayload(payload).trim();
+    if (!raw) return "";
+
+    if (this.isHtml(raw)) {
+      return Buffer.from(raw, "utf8").toString("base64");
+    }
+
+    const hex = this.toHexCompact(raw);
+    if (hex) {
+      return Buffer.from(hex, "hex").toString("base64");
+    }
+
+    // Already base64 (e.g. JVBER...)
+    return raw.replace(/^["'`]+|["'`]+$/g, "");
   }
 
   async getFreeLandOwnerReference(register: string): Promise<string> {
@@ -52,7 +71,7 @@ class ServiceApiService {
 
     try {
       const payload = await api.postText(url);
-      return this.normalizeBase64(payload);
+      return this.normalizeDocumentToBase64(payload);
     } catch (error) {
       this.log.error("Failed to fetch free land owner reference", error as Error);
       return "";
