@@ -47,6 +47,11 @@ const api = {
     categories: () => ipcRenderer.invoke("category:list"),
   },
 
+  service: {
+    freeLandOwnerReference: (register: string) =>
+      ipcRenderer.invoke("service:free-land-owner-reference", register),
+  },
+
   promotion: {
     list: () => ipcRenderer.invoke("promotion:list"),
     refresh: () => ipcRenderer.invoke("promotion:refresh"),

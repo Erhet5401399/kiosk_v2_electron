@@ -19,7 +19,7 @@ interface ServiceModalProps {
   userClaims?: Record<string, unknown>;
   sessionExpiresAt?: number;
   onSessionExpired?: () => void;
-  onPrint: (registerNumber: string) => void;
+  onPrint: (registerNumber: string, documentBase64?: string) => void;
   onClose: () => void;
 }
 
@@ -196,7 +196,8 @@ export function ServiceModal({
 
   const handlePrintAndClose = () => {
     const currentRegister = (state.stepData.registerNumber as string) || registerNumber;
-    onPrint(currentRegister);
+    const documentBase64 = String(state.stepData.documentBase64 || "").trim();
+    onPrint(currentRegister, documentBase64 || undefined);
     complete();
   };
 

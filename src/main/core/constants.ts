@@ -63,6 +63,7 @@ export const IPC = {
 
   PARCEL_LIST: "parcel:list",
   CATEGORY_LIST: "category:list",
+  SERVICE_FREE_LAND_OWNER_REFERENCE: "service:free-land-owner-reference",
   PROMOTION_LIST: "promotion:list",
   PROMOTION_REFRESH: "promotion:refresh",
   PROMOTION_EVENT: "promotion:event",

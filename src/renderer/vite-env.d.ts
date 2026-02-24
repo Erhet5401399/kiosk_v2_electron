@@ -49,6 +49,9 @@ declare global {
         list: (register: string) => Promise<Parcel[]>;
         categories: () => Promise<ServiceCategory[]>;
       };
+      service: {
+        freeLandOwnerReference: (register: string) => Promise<string>;
+      };
       promotion: {
         list: () => Promise<PromotionPlaylist>;
         refresh: () => Promise<PromotionPlaylist>;

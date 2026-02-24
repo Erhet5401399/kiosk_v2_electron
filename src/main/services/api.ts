@@ -111,6 +111,43 @@ class ApiClient {
     });
   }
 
+  private makeRequestText(
+    method: Method,
+    url: string,
+    body?: unknown,
+  ): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const fullUrl = url.startsWith("http") ? url : `${this.baseUrl}${url}`;
+      this.log.debug(`${method} ${url}`);
+
+      const req = net.request({ method, url: fullUrl });
+      req.setHeader("Content-Type", "application/json");
+      if (this.token) req.setHeader("Authorization", `Bearer ${this.token}`);
+
+      let data = "";
+      req.on("response", (res) => {
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(String(data || "").trim());
+            return;
+          }
+
+          if (res.statusCode === 401) {
+            reject(new AuthError(ERROR.AUTH_EXPIRED));
+            return;
+          }
+
+          reject(new ApiError(res.statusCode, `HTTP ${res.statusCode}`, data));
+        });
+      });
+
+      req.on("error", (e) => reject(new NetworkError(e.message)));
+      if (body) req.write(JSON.stringify(body));
+      req.end();
+    });
+  }
+
   async request<T>(method: Method, url: string, body?: unknown): Promise<T> {
     const mock = this.findMock(url);
     if (mock) {
@@ -127,8 +164,31 @@ class ApiClient {
     });
   }
 
+  async requestText(method: Method, url: string, body?: unknown): Promise<string> {
+    const mock = this.findMock(url);
+    if (mock) {
+      this.log.debug(`[MOCK] ${method} ${url}`);
+      const result = await Promise.resolve(mock.handler(method, url, body));
+      return typeof result === "string" ? result : JSON.stringify(result);
+    }
+
+    const exec = () =>
+      timeout(this.makeRequestText(method, url, body), API.TIMEOUT);
+
+    return retry(exec, API.RETRY_ATTEMPTS, API.RETRY_DELAY).catch((e) => {
+      this.log.error(`${method} ${url} failed`, e);
+      throw e;
+    });
+  }
+
   get<T>(url: string) {
     return this.request<T>("GET", url);
+  }
+  getText(url: string) {
+    return this.requestText("GET", url);
+  }
+  postText(url: string, body?: unknown) {
+    return this.requestText("POST", url, body);
   }
   post<T>(url: string, body?: unknown) {
     return this.request<T>("POST", url, body);

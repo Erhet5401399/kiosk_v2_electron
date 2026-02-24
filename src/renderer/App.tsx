@@ -18,6 +18,7 @@ import {
 import { ServiceList } from "./components/service";
 import { PromotionModal, ServiceModal, UserAuthModal } from "./components/modal";
 import { hasStepDefinition } from "./flows";
+import { buildPrintableHtmlFromBase64 } from "./utils";
 import "./styles/index.css";
 
 const IDLE_PROMOTION_MS = Number(import.meta.env.VITE_PROMOTION_IDLE_MS || 23_000);
@@ -307,11 +308,17 @@ export default function App() {
     setShowPromotionModal(false);
   }, []);
 
-  const handlePrintAndClose = async (registerNumber: string) => {
+  const handlePrintAndClose = async (registerNumber: string, documentBase64?: string) => {
     if (selectedService) {
-      await handlePrint(
-        `Service: ${selectedService.name}\nRegister: ${registerNumber}\nPrice: ${selectedService.price}`,
-      );
+      const normalizedDocument = String(documentBase64 || "").trim();
+      if (normalizedDocument) {
+        const printableHtml = buildPrintableHtmlFromBase64(normalizedDocument);
+        await handlePrint(printableHtml);
+      } else {
+        await handlePrint(
+          `Service: ${selectedService.name}\nRegister: ${registerNumber}\nPrice: ${selectedService.price}`,
+        );
+      }
       handleCloseModal();
     }
   };

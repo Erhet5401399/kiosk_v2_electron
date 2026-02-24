@@ -3,9 +3,11 @@ import { IPC } from '../core/constants';
 import { runtime } from '../runtime';
 import { config, printer, logger, promotion, updater, userAuth } from '../services';
 import { windows } from '../windows/manager';
+import { cleanupCategoryHandlers, setupCategoryHandlers } from './category.handlers';
 import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 import { cleanupPaymentHandlers, setupPaymentHandlers } from './payment.handlers';
 import { cleanupPromotionHandlers, setupPromotionHandlers } from './promotion.handlers';
+import { cleanupServiceHandlers, setupServiceHandlers } from './service.handlers';
 import type { PromotionEvent, UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
@@ -56,6 +58,8 @@ export function setupIPC() {
   }));
 
   setupParcelHandlers();
+  setupCategoryHandlers();
+  setupServiceHandlers();
   setupPaymentHandlers();
   setupPromotionHandlers();
 
@@ -70,6 +74,8 @@ export function setupIPC() {
 
 export function cleanupIPC() {
   cleanupParcelHandlers();
+  cleanupCategoryHandlers();
+  cleanupServiceHandlers();
   cleanupPaymentHandlers();
   cleanupPromotionHandlers();
   ipcMain.removeHandler(IPC.RUNTIME_SNAPSHOT);

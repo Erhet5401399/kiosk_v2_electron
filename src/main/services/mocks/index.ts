@@ -153,6 +153,21 @@ function registerParcelMocks() {
   });
 }
 
+function registerServiceMocks() {
+  // 1x1 transparent png (base64 only response contract)
+  const sampleBase64 =
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+Q3QAAAAASUVORK5CYII=";
+
+  api.registerMock("/api/kiosk/service/free/land/owner/reference", (_, url) => {
+    const parsed = new URL(url, "http://localhost");
+    const registerNumber = String(parsed.searchParams.get("register_number") || "").trim();
+    if (!registerNumber) {
+      return "";
+    }
+    return sampleBase64;
+  });
+}
+
 function registerPaymentMocks() {
   qpayCheckCounter.clear();
 
@@ -193,7 +208,7 @@ function registerPromotionMocks() {
       {
         id: "promo-1",
         title: "Kiosk Promo 1",
-        src: "https://www.pexels.com/download/video/33448185/",
+        src: "https://www.pexels.com/download/video/35797550/",
         mimeType: "video/mp4",
         active: true,
         order: 1,
@@ -201,7 +216,7 @@ function registerPromotionMocks() {
       {
         id: "promo-2",
         title: "Kiosk Promo 2",
-        src: "https://www.pexels.com/download/video/5642531/",
+        src: "https://www.pexels.com/download/video/34039826/",
         mimeType: "video/mp4",
         active: true,
         order: 2,
@@ -368,7 +383,7 @@ export function registerMocks(options?: { mode?: MockMode }) {
   if (mode === "auth") {
     registerPromotionMocks();
     registerUserAuthMocks();
-    log.info("Mocks registered", { mode, mocked: ["promotion", "user_auth"] });
+    log.info("Mocks registered", { mode, mocked: ["service", "promotion", "user_auth"] });
     return mode;
   }
 
@@ -376,12 +391,13 @@ export function registerMocks(options?: { mode?: MockMode }) {
   registerConfigMocks();
   registerCatalogMocks();
   registerParcelMocks();
+  registerServiceMocks();
   registerPaymentMocks();
   registerPromotionMocks();
   registerUserAuthMocks();
   log.info("Mocks registered", {
     mode,
-    mocked: ["device_auth", "config", "catalog", "parcel", "payment", "promotion", "user_auth"],
+    mocked: ["device_auth", "config", "catalog", "parcel", "service", "payment", "promotion", "user_auth"],
   });
   return mode;
 }

@@ -10,6 +10,7 @@ import {
   PaymentProcessingStep,
   SuccessStep,
   LandParcelSelectStep,
+  FreeLandOwnerReferenceStep,
   DocumentTypeSelectStep,
   OwnershipCheckStep,
   BoundaryVerificationStep,
@@ -34,6 +35,18 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       const { stepData } = context;
       if (!stepData.selectedParcel) {
         return { isValid: false, errorMessage: 'Газрын нэгж талбар сонгоно уу.' };
+      }
+      return { isValid: true };
+    },
+  },
+  'free-land-owner-reference': {
+    id: 'free-land-owner-reference',
+    title: '',
+    component: FreeLandOwnerReferenceStep,
+    validate: (context: StepContext): StepValidation => {
+      const base64 = String(context.stepData.documentBase64 || "").trim();
+      if (!base64) {
+        return { isValid: false, errorMessage: 'Something wrong.' };
       }
       return { isValid: true };
     },

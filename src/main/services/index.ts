@@ -9,3 +9,4 @@ export { updater } from './updater';
 export { userAuth } from './auth';
 export { payment } from './payment';
 export { promotion } from './promotion';
+export { serviceApi } from './service';

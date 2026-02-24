@@ -6,12 +6,12 @@ interface SuccessStepExtraProps {
   onPrint?: () => void;
 }
 
-export function SuccessStep({ 
-  context, 
+export function SuccessStep({
+  context,
   actions,
   onPrint,
 }: StepComponentProps & SuccessStepExtraProps) {
-  const { service, stepData } = context;
+  const { service } = context;
 
   const handlePrint = () => {
     onPrint?.();
@@ -22,7 +22,7 @@ export function SuccessStep({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
+      transition={{ type: 'spring', bounce: 0, stiffness: 320, damping: 34 }}
       className="service-modal"
     >
       <div className="service-modal-body">
@@ -50,47 +50,13 @@ export function SuccessStep({
                 strokeLinejoin="round"
                 initial={{ pathLength: 0 }}
                 animate={{ pathLength: 1 }}
-                transition={{ delay: 0.16, duration: 0.34, ease: "easeOut" }}
+                transition={{ delay: 0.16, duration: 0.34, ease: 'easeOut' }}
               />
             </motion.svg>
           </motion.div>
           <h1>Төлбөр амжилттай</h1>
           <p>Таны баримт бэлэн боллоо</p>
-        </div>
-
-        <div className="pdf-preview-container">
-          <div className="pdf-mock-page">
-            <div className="pdf-header">
-              <img
-                src="https://burtgel.gov.mn/uploads/site/995/post/new_602f1c5d8d5b9a6a1c5c8f5e64d79787575c4ee8.png"
-                alt="Soyombo"
-                className="pdf-logo"
-              />
-              <div>
-                <h4>ГАЗРЫН ХАРИЛЦАА, ГЕОДЕЗИ, ЗУРАГ ЗҮЙН ГАЗАР</h4>
-                <p>Албан ёсны баримт бичиг</p>
-              </div>
-            </div>
-            <hr />
-            <div className="pdf-content">
-              <div className="pdf-row">
-                <span>Үйлчилгээ:</span>
-                <strong>{service.name}</strong>
-              </div>
-              <div className="pdf-row">
-                <span>Регистрийн дугаар:</span>
-                <strong>{String(stepData.registerNumber || "")}</strong>
-              </div>
-              <div className="pdf-row">
-                <span>Огноо:</span>
-                <strong>{new Date().toLocaleDateString()}</strong>
-              </div>
-              <div className="pdf-row">
-                <span>Төлөв:</span>
-                <strong style={{ color: 'green' }}>Баталгаажсан</strong>
-              </div>
-            </div>
-          </div>
+          <p className="success-service-name">{service.name}</p>
         </div>
       </div>
 
@@ -105,4 +71,3 @@ export function SuccessStep({
     </motion.div>
   );
 }
-
