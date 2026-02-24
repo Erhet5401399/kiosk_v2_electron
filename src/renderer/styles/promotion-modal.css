@@ -23,8 +23,8 @@
   justify-content: center;
   background: linear-gradient(
     180deg,
-    rgba(2, 6, 23, 0.1) 0%,
-    rgba(2, 6, 23, 0.55) 60%,
+    rgba(2, 6, 23, 0.01) 0%,
+    rgba(2, 6, 23, 0.25) 60%,
     rgba(2, 6, 23, 0.85) 100%
   );
   padding: 56px 32px;
@@ -57,6 +57,9 @@
 }
 
 .promotion-start-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-width: min(90vw, 460px);
   min-height: 88px;
   border: none;
@@ -67,10 +70,85 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   cursor: pointer;
-  transition: all 0.2s ease;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+    0 10px 24px rgba(14, 86, 208, 0.34),
+    0 0 24px rgba(14, 86, 208, 0.24);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  animation: promotion-btn-glow 2.6s ease-in-out infinite;
+}
+
+.promotion-start-btn::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  z-index: -1;
+  background: radial-gradient(
+    circle at center,
+    rgba(66, 137, 240, 0.42) 0%,
+    rgba(44, 107, 202, 0.2) 42%,
+    rgba(44, 107, 202, 0) 74%
+  );
+  filter: blur(12px);
+  opacity: 0.5;
+}
+
+.promotion-start-btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 28%,
+    rgba(255, 255, 255, 0.18) 50%,
+    rgba(255, 255, 255, 0.1) 72%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-18deg);
+  animation: promotion-btn-shine 2.9s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .promotion-start-btn:active {
   opacity: 0.7;
   transform: scale(0.98);
+}
+
+@keyframes promotion-btn-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.15) inset,
+      0 10px 24px rgba(14, 86, 208, 0.34),
+      0 0 24px rgba(14, 86, 208, 0.24);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.17) inset,
+      0 13px 28px rgba(14, 86, 208, 0.42),
+      0 0 32px rgba(14, 86, 208, 0.3);
+  }
+}
+
+@keyframes promotion-btn-shine {
+  0% {
+    left: -75%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  55% {
+    left: 115%;
+    opacity: 0;
+  }
+  100% {
+    left: 115%;
+    opacity: 0;
+  }
 }

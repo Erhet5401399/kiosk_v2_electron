@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PromotionVideo } from "../../../shared/types";
 
 interface PromotionModalProps {
@@ -19,6 +19,7 @@ export function PromotionModal({
   statusText = "",
   onGetStarted,
 }: PromotionModalProps) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const playlist = useMemo(
     () => videos.filter((video) => Boolean(String(video.src || "").trim())),
     [videos],
@@ -26,8 +27,21 @@ export function PromotionModal({
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [playlist.length]);
+    setCurrentIndex((prev) => {
+      if (!playlist.length) return 0;
+      return prev >= playlist.length ? 0 : prev;
+    });
+  }, [playlist]);
+
+  useEffect(() => {
+    return () => {
+      const video = videoRef.current;
+      if (!video) return;
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, []);
 
   const currentVideo = playlist[currentIndex];
 
@@ -40,17 +54,18 @@ export function PromotionModal({
     <section className="promotion-modal" onPointerDown={onGetStarted}>
       {currentVideo ? (
         <video
-          key={currentVideo.id}
+          ref={videoRef}
+          key={`${currentVideo.id}-${currentVideo.src}-${currentIndex}`}
           className="promotion-video"
+          src={currentVideo.src}
           autoPlay
           muted
           loop={playlist.length <= 1}
+          preload="auto"
           playsInline
           onEnded={goToNext}
           onError={goToNext}
-        >
-          <source src={currentVideo.src} type={resolveMimeType(currentVideo)} />
-        </video>
+        />
       ) : (
         <div className="promotion-video promotion-fallback" />
       )}

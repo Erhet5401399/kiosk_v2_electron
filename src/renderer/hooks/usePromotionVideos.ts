@@ -38,7 +38,9 @@ export function usePromotionVideos() {
     if (!window.electron?.promotion?.onStatus) return;
 
     const unsubscribe = window.electron.promotion.onStatus((event: PromotionEvent) => {
-      setVideos(event.playlist?.videos || []);
+      setVideos((prev) =>
+        Array.isArray(event.playlist?.videos) ? event.playlist.videos : prev,
+      );
       setIsLoading(event.syncing);
       setStatusText(
         event.error
