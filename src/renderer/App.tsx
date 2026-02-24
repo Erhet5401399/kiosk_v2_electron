@@ -245,12 +245,6 @@ export default function App() {
     }
   }, [hasBlockingModal]);
 
-  useEffect(() => {
-    if (snapshot.state !== "ready") return;
-    if (hasBlockingModal) return;
-    setShowPromotionModal(true);
-  }, [snapshot.state, hasBlockingModal]);
-
   const dismissPromotionModal = useCallback(() => {
     setLastInteractionAt(Date.now());
     setShowPromotionModal(false);
@@ -278,10 +272,14 @@ export default function App() {
 
   const handleCloseModal = () => {
     setSelectedService(null);
+    setLastInteractionAt(Date.now());
+    setShowPromotionModal(false);
   };
 
   const handleAuthCancel = () => {
     setPendingService(null);
+    setLastInteractionAt(Date.now());
+    setShowPromotionModal(false);
   };
 
   const handleAuthSuccess = (session: UserAuthSession) => {
@@ -292,6 +290,8 @@ export default function App() {
     });
     setSelectedService(pendingService);
     setPendingService(null);
+    setLastInteractionAt(Date.now());
+    setShowPromotionModal(false);
   };
 
   const handleSessionExpired = useCallback(() => {
@@ -303,6 +303,8 @@ export default function App() {
       reason: "expired",
     });
     void window.electron?.auth?.logout().catch(() => {});
+    setLastInteractionAt(Date.now());
+    setShowPromotionModal(false);
   }, []);
 
   const handlePrintAndClose = async (registerNumber: string) => {
