@@ -50,6 +50,11 @@ const api = {
   promotion: {
     list: () => ipcRenderer.invoke("promotion:list"),
     refresh: () => ipcRenderer.invoke("promotion:refresh"),
+    onStatus: (cb: (status: unknown) => void) => {
+      const handler = (_: unknown, status: unknown) => cb(status);
+      ipcRenderer.on("promotion:event", handler);
+      return () => ipcRenderer.removeListener("promotion:event", handler);
+    },
   },
 
   auth: {

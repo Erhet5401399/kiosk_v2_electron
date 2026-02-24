@@ -5,6 +5,7 @@ import type {
   CreateQpayInvoiceRequest,
   CreateQpayInvoiceResponse,
   Parcel,
+  PromotionEvent,
   PromotionPlaylist,
   RuntimeSnapshot,
   ServiceCategory,
@@ -51,6 +52,7 @@ declare global {
       promotion: {
         list: () => Promise<PromotionPlaylist>;
         refresh: () => Promise<PromotionPlaylist>;
+        onStatus: (callback: (status: PromotionEvent) => void) => () => void;
       };
       auth: {
         listMethods: () => Promise<UserAuthMethod[]>;

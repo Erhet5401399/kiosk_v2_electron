@@ -1,16 +1,19 @@
 import { ipcMain } from 'electron';
 import { IPC } from '../core/constants';
 import { runtime } from '../runtime';
-import { config, printer, logger, updater, userAuth } from '../services';
+import { config, printer, logger, promotion, updater, userAuth } from '../services';
 import { windows } from '../windows/manager';
 import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 import { cleanupPaymentHandlers, setupPaymentHandlers } from './payment.handlers';
 import { cleanupPromotionHandlers, setupPromotionHandlers } from './promotion.handlers';
-import type { UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
+import type { PromotionEvent, UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
 const updaterStatusHandler = (status: unknown) => {
   windows.broadcast(IPC.UPDATE_EVENT, status);
+};
+const promotionStateHandler = (event: PromotionEvent) => {
+  windows.broadcast(IPC.PROMOTION_EVENT, event);
 };
 
 export function setupIPC() {
@@ -60,6 +63,7 @@ export function setupIPC() {
     windows.broadcast(IPC.RUNTIME_UPDATE, snapshot);
   });
   updater.on('status', updaterStatusHandler);
+  promotion.on('state', promotionStateHandler);
 
   log.info('IPC handlers registered');
 }
@@ -86,4 +90,5 @@ export function cleanupIPC() {
   ipcMain.removeHandler(IPC.USER_AUTH_LOGOUT);
   ipcMain.removeHandler(IPC.HEALTH);
   updater.removeListener('status', updaterStatusHandler);
+  promotion.removeListener('state', promotionStateHandler);
 }

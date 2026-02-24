@@ -252,3 +252,9 @@ export interface PromotionPlaylist {
   version?: string;
   fetchedAt: number;
 }
+
+export interface PromotionEvent {
+  playlist: PromotionPlaylist;
+  syncing: boolean;
+  error?: string;
+}

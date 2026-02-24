@@ -6,7 +6,7 @@ import { pathToFileURL } from "node:url";
 import { setupIPC, cleanupIPC } from "./ipc/handlers";
 import { runtime } from "./runtime";
 import { windows } from "./windows/manager";
-import { logger, updater } from "./services";
+import { logger, promotion, updater } from "./services";
 import { APP } from "./core/constants";
 
 const log = logger.child("Main");
@@ -148,6 +148,7 @@ async function shutdown(code = 0) {
   log.info("Shutting down");
 
   try {
+    promotion.destroy();
     updater.destroy();
     protocol.unhandle(MEDIA_SCHEME);
     await runtime.shutdown();
@@ -176,6 +177,7 @@ async function init() {
   runtime.on("shutdown", () => windows.closeAll());
 
   await runtime.start();
+  await promotion.start();
   await updater.start();
   log.info("Application ready");
 }

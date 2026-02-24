@@ -1,26 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import type { PromotionVideo } from "../../shared/types";
-
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000;
-
-const BROWSER_FALLBACK_VIDEOS: PromotionVideo[] = [
-  {
-    id: "fallback-1",
-    title: "Fallback Promo 1",
-    src: "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
-    mimeType: "video/mp4",
-    active: true,
-    order: 1,
-  },
-  {
-    id: "fallback-2",
-    title: "Fallback Promo 2",
-    src: "https://samplelib.com/lib/preview/mp4/sample-15s.mp4",
-    mimeType: "video/mp4",
-    active: true,
-    order: 2,
-  },
-];
+import type { PromotionEvent, PromotionVideo } from "../../shared/types";
 
 export function usePromotionVideos() {
   const [videos, setVideos] = useState<PromotionVideo[]>([]);
@@ -29,9 +8,9 @@ export function usePromotionVideos() {
 
   const load = useCallback(async (forceRefresh = false) => {
     if (!window.electron?.promotion) {
-      setVideos(BROWSER_FALLBACK_VIDEOS);
+      setVideos([]);
       setIsLoading(false);
-      setStatusText("");
+      setStatusText("No promotion videos available.");
       return;
     }
 
@@ -56,14 +35,21 @@ export function usePromotionVideos() {
 
   useEffect(() => {
     void load(false);
+    if (!window.electron?.promotion?.onStatus) return;
 
-    const interval = window.setInterval(() => {
-      void load(true);
-    }, REFRESH_INTERVAL_MS);
+    const unsubscribe = window.electron.promotion.onStatus((event: PromotionEvent) => {
+      setVideos(event.playlist?.videos || []);
+      setIsLoading(event.syncing);
+      setStatusText(
+        event.error
+          ? `Promotion update failed: ${event.error}`
+          : event.syncing
+            ? "Updating promotion videos..."
+            : (event.playlist?.videos?.length ? "" : "No promotion videos available."),
+      );
+    });
 
-    return () => {
-      window.clearInterval(interval);
-    };
+    return unsubscribe;
   }, [load]);
 
   return {

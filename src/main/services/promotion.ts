@@ -1,9 +1,10 @@
 import { app, net } from "electron";
 import { createHash } from "node:crypto";
+import { EventEmitter } from "node:events";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import type { PromotionPlaylist, PromotionVideo } from "../../shared/types";
+import type { PromotionEvent, PromotionPlaylist, PromotionVideo } from "../../shared/types";
 import { API } from "../core/constants";
 import { api } from "./api";
 import { logger } from "./logger";
@@ -16,12 +17,16 @@ const PROMOTION_ENDPOINT = "/api/kiosk/promotion/videos";
 const CACHE_DIRNAME = "promotion-videos";
 const MANIFEST_FILENAME = "playlist.json";
 const MEDIA_SCHEME = "kiosk-media";
+const SYNC_INTERVAL_MS = Number(process.env.PROMOTION_SYNC_INTERVAL_MS || 5 * 60 * 1000);
 
-class PromotionService {
+class PromotionService extends EventEmitter {
   private static inst: PromotionService;
   private log = logger.child("Promotion");
   private cache: PromotionPlaylist = { videos: [], fetchedAt: 0 };
   private hydrated = false;
+  private syncing = false;
+  private syncTimer: NodeJS.Timeout | null = null;
+  private started = false;
 
   private get cacheDir(): string {
     return path.join(app.getPath("userData"), CACHE_DIRNAME);
@@ -33,6 +38,19 @@ class PromotionService {
 
   static get(): PromotionService {
     return this.inst || (this.inst = new PromotionService());
+  }
+
+  private constructor() {
+    super();
+  }
+
+  private emitState(error?: string): void {
+    const payload: PromotionEvent = {
+      playlist: { ...this.cache, videos: [...this.cache.videos] },
+      syncing: this.syncing,
+      ...(error ? { error } : {}),
+    };
+    this.emit("state", payload);
   }
 
   private async ensureCacheDir(): Promise<void> {
@@ -157,6 +175,7 @@ class PromotionService {
       if (manifestChanged) {
         await this.persistManifest(this.cache);
       }
+      this.emitState();
     } catch {
       // no local manifest yet
     }
@@ -272,6 +291,12 @@ class PromotionService {
   }
 
   async refresh(): Promise<PromotionPlaylist> {
+    if (this.syncing) {
+      return this.cache;
+    }
+
+    this.syncing = true;
+    this.emitState();
     try {
       const payload = await api.post<PromotionApiResponse>(PROMOTION_ENDPOINT);
       const manifest = this.normalizeManifest(payload);
@@ -293,10 +318,16 @@ class PromotionService {
       this.cache = playlist;
       await this.persistManifest(playlist);
       await this.cleanupUnusedFiles(downloaded.map((video) => video.src));
+      this.emitState();
       return this.cache;
     } catch (error) {
+      const message = (error as Error).message;
       this.log.error("Failed to refresh promotion videos", error as Error);
+      this.emitState(message);
       return this.cache;
+    } finally {
+      this.syncing = false;
+      this.emitState();
     }
   }
 
@@ -310,6 +341,25 @@ class PromotionService {
     }
 
     return this.refresh();
+  }
+
+  async start(): Promise<void> {
+    if (this.started) return;
+    this.started = true;
+
+    await this.list();
+    this.syncTimer = setInterval(() => {
+      void this.refresh();
+    }, SYNC_INTERVAL_MS);
+  }
+
+  destroy(): void {
+    if (this.syncTimer) {
+      clearInterval(this.syncTimer);
+      this.syncTimer = null;
+    }
+    this.started = false;
+    this.removeAllListeners("state");
   }
 }
 
