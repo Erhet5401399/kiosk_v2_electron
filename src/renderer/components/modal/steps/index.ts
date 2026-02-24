@@ -3,6 +3,7 @@ export { PaymentProcessingStep } from './PaymentProcessingStep';
 export { SuccessStep } from './SuccessStep';
 export { LandParcelSelectStep } from './LandParcelSelectStep';
 export { FreeLandOwnerReferenceStep } from './FreeLandOwnerReferenceStep';
+export { CadastralMapStep } from './CadastralMapStep';
 export { DocumentTypeSelectStep } from './DocumentTypeSelectStep';
 export { OwnershipCheckStep } from './OwnershipCheckStep';
 export { BoundaryVerificationStep } from './BoundaryVerificationStep';

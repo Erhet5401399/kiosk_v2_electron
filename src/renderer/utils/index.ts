@@ -78,10 +78,6 @@ export function buildPrintableHtmlFromBase64(base64: string): string {
   const src = buildDataUriFromBase64(base64);
   if (!src) return '';
 
-  if (src.startsWith('data:text/html')) {
-    return decodeBase64Utf8(base64);
-  }
-
   return `
     <!doctype html>
     <html>
@@ -89,7 +85,7 @@ export function buildPrintableHtmlFromBase64(base64: string): string {
         <meta charset="utf-8" />
         <style>
           html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
-          body { display: flex; align-items: center; justify-content: center; background: #fff; }
+          body { display: flex; align-items: center; justify-content: center; background: #fff; font-family: "Segoe UI", Arial, sans-serif; }
           .doc-frame, .doc-image { width: 100%; height: 100%; border: 0; }
           .doc-image { object-fit: contain; }
         </style>

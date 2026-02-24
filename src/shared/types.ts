@@ -34,7 +34,7 @@ export interface DeviceConfig {
 export interface PrintJob {
   id: string;
   content: string;
-  type: "html" | "text" | "pdf";
+  type: "html" | "text" | "pdf" | "pdf_base64";
   copies: number;
   priority: "low" | "normal" | "high";
   status: "queued" | "printing" | "completed" | "failed" | "cancelled";

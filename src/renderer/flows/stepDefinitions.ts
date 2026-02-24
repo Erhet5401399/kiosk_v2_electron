@@ -11,6 +11,7 @@ import {
   SuccessStep,
   LandParcelSelectStep,
   FreeLandOwnerReferenceStep,
+  CadastralMapStep,
   DocumentTypeSelectStep,
   OwnershipCheckStep,
   BoundaryVerificationStep,
@@ -45,6 +46,18 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
     id: 'free-land-owner-reference',
     title: '',
     component: FreeLandOwnerReferenceStep,
+    validate: (context: StepContext): StepValidation => {
+      const base64 = String(context.stepData.documentBase64 || "").trim();
+      if (!base64) {
+        return { isValid: false, errorMessage: 'Something wrong.' };
+      }
+      return { isValid: true };
+    },
+  },
+  'cadastral-map': {
+    id: 'cadastral-map',
+    title: '',
+    component: CadastralMapStep,
     validate: (context: StepContext): StepValidation => {
       const base64 = String(context.stepData.documentBase64 || "").trim();
       if (!base64) {

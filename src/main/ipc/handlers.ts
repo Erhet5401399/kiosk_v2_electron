@@ -23,7 +23,7 @@ export function setupIPC() {
   ipcMain.handle(IPC.RUNTIME_RETRY, () => runtime.retry());
   ipcMain.handle(IPC.RUNTIME_RESET, () => runtime.reset());
 
-  ipcMain.handle(IPC.PRINT, async (_, req: { content: string; type?: 'html' | 'text' | 'pdf'; copies?: number; priority?: 'low' | 'normal' | 'high' }) => {
+  ipcMain.handle(IPC.PRINT, async (_, req: { content: string; type?: 'html' | 'text' | 'pdf' | 'pdf_base64'; copies?: number; priority?: 'low' | 'normal' | 'high' }) => {
     try {
       const jobId = await printer.print(req.content, req.type, { copies: req.copies, priority: req.priority });
       return { success: true, jobId };

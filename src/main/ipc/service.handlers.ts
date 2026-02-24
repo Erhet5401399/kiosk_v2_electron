@@ -8,10 +8,14 @@ export function setupServiceHandlers() {
   ipcMain.handle(IPC.SERVICE_FREE_LAND_OWNER_REFERENCE, async (_, register: string) => {
     return serviceApi.getFreeLandOwnerReference(register);
   });
+  ipcMain.handle(IPC.SERVICE_CADASTRAL_MAP, async (_, parcelId: string) => {
+    return serviceApi.getCadastralMap(parcelId);
+  });
 
   log.info("Service IPC handlers registered");
 }
 
 export function cleanupServiceHandlers() {
   ipcMain.removeHandler(IPC.SERVICE_FREE_LAND_OWNER_REFERENCE);
+  ipcMain.removeHandler(IPC.SERVICE_CADASTRAL_MAP);
 }

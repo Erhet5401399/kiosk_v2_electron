@@ -33,7 +33,12 @@ declare global {
         refresh: () => Promise<void>;
       };
       printer: {
-        print: (req: { content: string }) => Promise<{
+        print: (req: {
+          content: string;
+          type?: "html" | "text" | "pdf" | "pdf_base64";
+          copies?: number;
+          priority?: "low" | "normal" | "high";
+        }) => Promise<{
           success: boolean;
           jobId?: string;
           error?: string;
@@ -55,6 +60,7 @@ declare global {
       };
       service: {
         freeLandOwnerReference: (register: string) => Promise<string>;
+        cadastralMap: (parcelId: string) => Promise<string>;
       };
       promotion: {
         list: () => Promise<PromotionPlaylist>;

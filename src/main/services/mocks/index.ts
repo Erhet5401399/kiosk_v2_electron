@@ -157,6 +157,9 @@ function registerServiceMocks() {
   // 1x1 transparent png (base64 only response contract)
   const sampleBase64 =
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+Q3QAAAAASUVORK5CYII=";
+  const samplePdfBase64 =
+    "JVBERi0xLjQKJeLjz9MKMSAwIG9iago8PC9UeXBlL0NhdGFsb2cvUGFnZXMgMiAwIFI+PgplbmRvYmoKMiAwIG9iago8PC9UeXBlL1BhZ2VzL0tpZHMgWzMgMCBSXS9Db3VudCAxPj4KZW5kb2JqCjMgMCBvYmoKPDwvVHlwZS9QYWdlL1BhcmVudCAyIDAgUi9NZWRpYUJveCBbMCAwIDIwMCAyMDBdL0NvbnRlbnRzIDQgMCBSL1Jlc291cmNlcyA8PC9Gb250IDw8L0YxIDUgMCBSPj4+Pj4+CmVuZG9iago0IDAgb2JqCjw8L0xlbmd0aCA0ND4+CnN0cmVhbQpCVAovRjEgMTIgVGYKNzIgMTIwIFRkCihDYWRhc3RyYWwgTWFwKSBUagpFVAplbmRzdHJlYW0KZW5kb2JqCjUgMCBvYmoKPDwvVHlwZS9Gb250L1N1YnR5cGUvVHlwZTEvQmFzZUZvbnQvSGVsdmV0aWNhPj4KZW5kb2JqCnhyZWYKMCA2CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxNSAwMDAwMCBuIAowMDAwMDAwMDY0IDAwMDAwIG4gCjAwMDAwMDAxMjEgMDAwMDAgbiAKMDAwMDAwMDI0NyAwMDAwMCBuIAowMDAwMDAwMzQyIDAwMDAwIG4gCnRyYWlsZXIKPDwvU2l6ZSA2L1Jvb3QgMSAwIFI+PgpzdGFydHhyZWYKNDEyCiUlRU9G";
+  const samplePdfHex = Buffer.from(samplePdfBase64, "base64").toString("hex");
 
   api.registerMock("/api/kiosk/service/free/land/owner/reference", (_, url) => {
     const parsed = new URL(url, "http://localhost");
@@ -165,6 +168,15 @@ function registerServiceMocks() {
       return "";
     }
     return sampleBase64;
+  });
+
+  api.registerMock("/api/kiosk/service/print/cadastral/map", (_, url) => {
+    const parsed = new URL(url, "http://localhost");
+    const parcelId = String(parsed.searchParams.get("parcel_id") || "").trim();
+    if (!parcelId) {
+      return "";
+    }
+    return Buffer.from(samplePdfHex, "hex");
   });
 }
 

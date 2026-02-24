@@ -30,7 +30,10 @@ export function useElectron() {
     );
   }, []);
 
-  const handlePrint = async (content: string): Promise<string | undefined> => {
+  const handlePrint = async (
+    content: string,
+    type: "html" | "text" | "pdf" | "pdf_base64" = "html",
+  ): Promise<string | undefined> => {
     if (!window.electron) {
       alert('Баримт хэвлэх команд илгээгдлээ!');
       return undefined;
@@ -38,6 +41,7 @@ export function useElectron() {
 
     const result = (await window.electron.printer.print({
       content,
+      type,
     })) as PrintResponse;
 
     if (result?.success === false) {

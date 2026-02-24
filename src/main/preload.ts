@@ -50,6 +50,8 @@ const api = {
   service: {
     freeLandOwnerReference: (register: string) =>
       ipcRenderer.invoke("service:free-land-owner-reference", register),
+    cadastralMap: (parcelId: string) =>
+      ipcRenderer.invoke("service:cadastral-map", parcelId),
   },
 
   promotion: {

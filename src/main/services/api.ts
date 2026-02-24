@@ -148,6 +148,52 @@ class ApiClient {
     });
   }
 
+  private makeRequestBuffer(
+    method: Method,
+    url: string,
+    body?: unknown,
+  ): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const fullUrl = url.startsWith("http") ? url : `${this.baseUrl}${url}`;
+      this.log.debug(`${method} ${url}`);
+
+      const req = net.request({ method, url: fullUrl });
+      req.setHeader("Content-Type", "application/json");
+      if (this.token) req.setHeader("Authorization", `Bearer ${this.token}`);
+
+      const chunks: Buffer[] = [];
+      req.on("response", (res) => {
+        res.on("data", (chunk) => {
+          chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+        });
+        res.on("end", () => {
+          const payload = Buffer.concat(chunks);
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(payload);
+            return;
+          }
+
+          if (res.statusCode === 401) {
+            reject(new AuthError(ERROR.AUTH_EXPIRED));
+            return;
+          }
+
+          reject(
+            new ApiError(
+              res.statusCode,
+              `HTTP ${res.statusCode}`,
+              payload.toString("utf8"),
+            ),
+          );
+        });
+      });
+
+      req.on("error", (e) => reject(new NetworkError(e.message)));
+      if (body) req.write(JSON.stringify(body));
+      req.end();
+    });
+  }
+
   async request<T>(method: Method, url: string, body?: unknown): Promise<T> {
     const mock = this.findMock(url);
     if (mock) {
@@ -181,6 +227,25 @@ class ApiClient {
     });
   }
 
+  async requestBuffer(method: Method, url: string, body?: unknown): Promise<Buffer> {
+    const mock = this.findMock(url);
+    if (mock) {
+      this.log.debug(`[MOCK] ${method} ${url}`);
+      const result = await Promise.resolve(mock.handler(method, url, body));
+      if (Buffer.isBuffer(result)) return result;
+      if (typeof result === "string") return Buffer.from(result, "utf8");
+      return Buffer.from(JSON.stringify(result), "utf8");
+    }
+
+    const exec = () =>
+      timeout(this.makeRequestBuffer(method, url, body), API.TIMEOUT);
+
+    return retry(exec, API.RETRY_ATTEMPTS, API.RETRY_DELAY).catch((e) => {
+      this.log.error(`${method} ${url} failed`, e);
+      throw e;
+    });
+  }
+
   get<T>(url: string) {
     return this.request<T>("GET", url);
   }
@@ -189,6 +254,9 @@ class ApiClient {
   }
   postText(url: string, body?: unknown) {
     return this.requestText("POST", url, body);
+  }
+  postBuffer(url: string, body?: unknown) {
+    return this.requestBuffer("POST", url, body);
   }
   post<T>(url: string, body?: unknown) {
     return this.request<T>("POST", url, body);

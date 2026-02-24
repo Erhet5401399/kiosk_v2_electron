@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 type SmsField = "registerNumber" | "phoneNumber" | "smsCode";
 
 interface SmsAuthPanelProps {
@@ -53,6 +55,12 @@ export function SmsAuthPanel({
   onFocusPhone,
   onFocusSmsCode,
 }: SmsAuthPanelProps) {
+  useEffect(() => {
+    onFocusRegister();
+    // Run once on open; do not re-focus on every re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="auth-sms-card">
       <div className="auth-sms-head">

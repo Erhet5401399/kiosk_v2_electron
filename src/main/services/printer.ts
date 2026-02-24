@@ -45,7 +45,7 @@ class PrinterService extends EventEmitter {
 
   async print(
     content: string,
-    type: "html" | "text" | "pdf" = "html",
+    type: "html" | "text" | "pdf" | "pdf_base64" = "html",
     opts: Partial<PrintJob> = {},
   ): Promise<string> {
     if (this.queue.length >= PRINTER.MAX_QUEUE) {
@@ -130,10 +130,17 @@ class PrinterService extends EventEmitter {
     let pdfPath: string | null = null;
 
     try {
-      pdfPath =
-        job.type === "pdf"
-          ? job.content
-          : await this.htmlToPdf(job.content, job.type === "text");
+      if (job.type === "pdf") {
+        pdfPath = job.content;
+      } else if (job.type === "pdf_base64") {
+        const normalized = String(job.content || "").trim();
+        const base64 = normalized.replace(/^data:application\/pdf;base64,/i, "");
+        const pdfBuffer = Buffer.from(base64, "base64");
+        pdfPath = path.join(app.getPath("temp"), `print_${Date.now()}.pdf`);
+        fs.writeFileSync(pdfPath, pdfBuffer);
+      } else {
+        pdfPath = await this.htmlToPdf(job.content, job.type === "text");
+      }
 
       for (let i = 0; i < job.copies; i++) {
         await print(pdfPath, { printer: printerName });

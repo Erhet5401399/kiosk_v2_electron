@@ -41,6 +41,10 @@ class ServiceApiService {
   }
 
   private normalizeDocumentToBase64(payload: unknown): string {
+    if (Buffer.isBuffer(payload)) {
+      return payload.toString("base64");
+    }
+
     const raw = this.toStringPayload(payload).trim();
     if (!raw) return "";
 
@@ -74,6 +78,27 @@ class ServiceApiService {
       return this.normalizeDocumentToBase64(payload);
     } catch (error) {
       this.log.error("Failed to fetch free land owner reference", error as Error);
+      return "";
+    }
+  }
+
+  async getCadastralMap(parcelId: string): Promise<string> {
+    const parcel = String(parcelId || "").trim();
+    if (!parcel) {
+      this.log.warn("Skipping cadastral map: empty parcel id");
+      return "";
+    }
+
+    const query = new URLSearchParams();
+    query.set("parcel_id", parcel);
+    const url = `/api/kiosk/service/print/cadastral/map?${query.toString()}`;
+    this.log.debug("Fetching cadastral map", { url });
+
+    try {
+      const payload = await api.postBuffer(url);
+      return this.normalizeDocumentToBase64(payload);
+    } catch (error) {
+      this.log.error("Failed to fetch cadastral map", error as Error);
       return "";
     }
   }

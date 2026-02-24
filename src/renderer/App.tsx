@@ -18,7 +18,7 @@ import {
 import { ServiceList } from "./components/service";
 import { PromotionModal, ServiceModal, UserAuthModal } from "./components/modal";
 import { hasStepDefinition } from "./flows";
-import { buildPrintableHtmlFromBase64 } from "./utils";
+import { buildPrintableHtmlFromBase64, detectBase64ContentKind } from "./utils";
 import "./styles/index.css";
 
 const IDLE_PROMOTION_MS = Number(import.meta.env.VITE_PROMOTION_IDLE_MS || 23_000);
@@ -319,11 +319,17 @@ export default function App() {
     try {
       const normalizedDocument = String(documentBase64 || "").trim();
       if (normalizedDocument) {
-        const printableHtml = buildPrintableHtmlFromBase64(normalizedDocument);
-        await handlePrint(printableHtml);
+        const docKind = detectBase64ContentKind(normalizedDocument);
+        if (docKind === "pdf") {
+          await handlePrint(normalizedDocument, "pdf_base64");
+        } else {
+          const printableHtml = buildPrintableHtmlFromBase64(normalizedDocument);
+          await handlePrint(printableHtml, "html");
+        }
       } else {
         await handlePrint(
           `Service: ${selectedService.name}\nRegister: ${registerNumber}\nPrice: ${selectedService.price}`,
+          "text",
         );
       }
       return { success: true };
