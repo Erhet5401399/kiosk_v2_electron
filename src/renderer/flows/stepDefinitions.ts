@@ -6,7 +6,6 @@ import type {
   StepValidation,
 } from '../types/steps';
 import {
-  RegistrationInputStep,
   PaymentMethodStep,
   PaymentProcessingStep,
   SuccessStep,
@@ -27,19 +26,6 @@ export type StepDefinition = StepConfig & {
 };
 
 export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
-  'registration-input': {
-    id: 'registration-input',
-    title: 'Регистрийн мэдээлэл',
-    component: RegistrationInputStep,
-    validate: (context: StepContext): StepValidation => {
-      const { stepData } = context;
-      const registerNumber = stepData.registerNumber as string;
-      if (!registerNumber || registerNumber.length < 10) {
-        return { isValid: false, errorMessage: 'Регистрийн дугаараа зөв оруулна уу.' };
-      }
-      return { isValid: true };
-    },
-  },
   'land-parcel-select': {
     id: 'land-parcel-select',
     title: 'Газрын нэгж талбар сонгох',
