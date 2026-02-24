@@ -1,0 +1,76 @@
+.promotion-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  overflow: hidden;
+  background: #000;
+}
+
+.promotion-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promotion-fallback {
+}
+
+.promotion-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: linear-gradient(
+    180deg,
+    rgba(2, 6, 23, 0.1) 0%,
+    rgba(2, 6, 23, 0.55) 60%,
+    rgba(2, 6, 23, 0.85) 100%
+  );
+  padding: 56px 32px;
+}
+
+.promotion-content {
+  width: min(860px, 100%);
+  text-align: center;
+  color: #fff;
+}
+
+.promotion-status {
+  margin: 0 0 14px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.promotion-content h2 {
+  margin: 0 0 8px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.promotion-content p {
+  margin: 0 0 24px;
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.promotion-start-btn {
+  min-width: min(90vw, 460px);
+  min-height: 88px;
+  border: none;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: clamp(1.1rem, 2.5vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.promotion-start-btn:active {
+  opacity: 0.7;
+  transform: scale(0.98);
+}

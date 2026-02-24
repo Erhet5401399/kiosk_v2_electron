@@ -236,3 +236,19 @@ export interface CheckQpayInvoiceResponse {
   status?: string;
   paidAt?: string;
 }
+
+export interface PromotionVideo {
+  id: string;
+  title?: string;
+  src: string;
+  mimeType?: string;
+  active?: boolean;
+  order?: number;
+  updatedAt?: string;
+}
+
+export interface PromotionPlaylist {
+  videos: PromotionVideo[];
+  version?: string;
+  fetchedAt: number;
+}

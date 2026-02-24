@@ -1,5 +1,8 @@
 import "dotenv/config";
-import { app, dialog } from "electron";
+import { app, dialog, net, protocol } from "electron";
+import { promises as fs } from "node:fs";
+import * as path from "node:path";
+import { pathToFileURL } from "node:url";
 import { setupIPC, cleanupIPC } from "./ipc/handlers";
 import { runtime } from "./runtime";
 import { windows } from "./windows/manager";
@@ -8,6 +11,54 @@ import { APP } from "./core/constants";
 
 const log = logger.child("Main");
 let quitting = false;
+const PROMOTION_CACHE_DIR = "promotion-videos";
+const MEDIA_SCHEME = "kiosk-media";
+
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: MEDIA_SCHEME,
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+    },
+  },
+]);
+
+function resolvePromotionMediaPath(requestUrl: string): string {
+  const parsed = new URL(requestUrl);
+  const fileName = decodeURIComponent(path.basename(parsed.pathname || ""));
+  if (!fileName) {
+    throw new Error("Missing promotion media filename");
+  }
+
+  const cacheDir = path.join(app.getPath("userData"), PROMOTION_CACHE_DIR);
+  const targetPath = path.join(cacheDir, fileName);
+  const normalizedCacheDir = path.resolve(cacheDir);
+  const normalizedTarget = path.resolve(targetPath);
+  if (!normalizedTarget.startsWith(normalizedCacheDir)) {
+    throw new Error("Invalid promotion media path");
+  }
+  return normalizedTarget;
+}
+
+function setupMediaProtocol() {
+  protocol.handle(MEDIA_SCHEME, async (request) => {
+    try {
+      const targetPath = resolvePromotionMediaPath(request.url);
+      await fs.access(targetPath);
+      return net.fetch(pathToFileURL(targetPath).toString());
+    } catch (error) {
+      log.warn("Failed to serve local promotion media", {
+        url: request.url,
+        error: (error as Error).message,
+      });
+      return new Response("Not Found", { status: 404 });
+    }
+  });
+}
 
 function setupSecurity() {
   const safeOrigin = (value: string): string => {
@@ -98,6 +149,7 @@ async function shutdown(code = 0) {
 
   try {
     updater.destroy();
+    protocol.unhandle(MEDIA_SCHEME);
     await runtime.shutdown();
     cleanupIPC();
     await logger.close();
@@ -113,6 +165,7 @@ async function init() {
   });
 
   setupSecurity();
+  setupMediaProtocol();
   setupCrashHandling();
   if (!setupSingleInstance()) return;
 

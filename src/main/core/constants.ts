@@ -63,6 +63,8 @@ export const IPC = {
 
   PARCEL_LIST: "parcel:list",
   CATEGORY_LIST: "category:list",
+  PROMOTION_LIST: "promotion:list",
+  PROMOTION_REFRESH: "promotion:refresh",
   PAYMENT_QPAY_CREATE: "payment:qpay:create",
   PAYMENT_QPAY_CHECK: "payment:qpay:check",
 

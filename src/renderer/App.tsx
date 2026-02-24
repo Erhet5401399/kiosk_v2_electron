@@ -6,9 +6,9 @@ import type {
   UserAuthSession,
   UserAuthStatus,
 } from "../shared/types";
-import type { Service, ServiceFlowStep } from "./types";
-import { CATEGORIES, SERVICES, STATE_LABELS } from "./constants";
-import { useElectron, useUpdater } from "./hooks";
+import type { Category, Service, ServiceFlowConfig, ServiceFlowStep } from "./types";
+import { STATE_LABELS } from "./constants";
+import { useElectron, usePromotionVideos, useUpdater } from "./hooks";
 import {
   PromoSection,
   Sidebar,
@@ -16,28 +16,37 @@ import {
   StatusBar,
 } from "./components/layout";
 import { ServiceList } from "./components/service";
-import { ServiceModal, UserAuthModal } from "./components/modal";
+import { PromotionModal, ServiceModal, UserAuthModal } from "./components/modal";
 import { hasStepDefinition } from "./flows";
 import "./styles/index.css";
+
+const IDLE_PROMOTION_MS = Number(import.meta.env.VITE_PROMOTION_IDLE_MS || 23_000);
 
 export default function App() {
   const { snapshot, handlePrint } = useElectron();
   const { updateStatus, checkForUpdates } = useUpdater();
+  const {
+    videos: promotionVideos,
+    isLoading: isPromotionLoading,
+    statusText: promotionStatusText,
+  } = usePromotionVideos();
 
-  const [categories, setCategories] = useState(CATEGORIES);
-  const [services, setServices] = useState(SERVICES);
-  const [selectedCategory, setSelectedCategory] = useState(
-    CATEGORIES[0]?.name || "All",
-  );
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [pendingService, setPendingService] = useState<Service | null>(null);
+  const [showPromotionModal, setShowPromotionModal] = useState(false);
+  const [lastInteractionAt, setLastInteractionAt] = useState(() => Date.now());
   const [authStatus, setAuthStatus] = useState<UserAuthStatus>({
     authenticated: false,
     session: null,
     reason: "not_authenticated",
   });
+  const hasBlockingModal = Boolean(selectedService || pendingService);
 
   const filteredServices = useMemo(() => {
+    if (!selectedCategory) return services;
     return services.filter((s) => s.category === selectedCategory);
   }, [selectedCategory, services]);
 
@@ -50,14 +59,14 @@ export default function App() {
     }, {});
   }, [services]);
 
-  const buildServiceFlowConfig = useCallback((svc: CategoryService) => {
+  const buildServiceFlowConfig = useCallback((svc: CategoryService): ServiceFlowConfig => {
     const rawFlowConfig = svc.flow_config || svc.config;
     const rawSteps = rawFlowConfig?.steps;
     const rawInitialStepData = (
       svc.flow_config?.initial_step_data || svc.config?.initial || {}
     ) as Record<string, unknown>;
 
-    const toUnavailableFlow = (reason: string) => ({
+    const toUnavailableFlow = (reason: string): ServiceFlowConfig => ({
       serviceId: svc.id,
       steps: ["service-unavailable"],
       initialStepData: {
@@ -70,20 +79,22 @@ export default function App() {
       return toUnavailableFlow("No flow steps returned from backend.");
     }
 
-    const steps: ServiceFlowStep[] = rawSteps
-      .map((step) => {
-        if (typeof step === "string") {
-          const id = step.trim();
-          return id || null;
+    const steps: ServiceFlowStep[] = [];
+    for (const rawStep of rawSteps) {
+      if (typeof rawStep === "string") {
+        const id = rawStep.trim();
+        if (id) {
+          steps.push(id);
         }
+        continue;
+      }
 
-        const id = String(step?.id || "").trim();
-        if (!id) return null;
+      const id = String(rawStep?.id || "").trim();
+      if (!id) continue;
 
-        const title = String(step?.title || "").trim();
-        return title ? { id, title } : id;
-      })
-      .filter((step): step is ServiceFlowStep => Boolean(step));
+      const title = String(rawStep?.title || "").trim();
+      steps.push(title ? { id, title } : id);
+    }
 
     if (!steps.length) {
       return toUnavailableFlow("Flow steps are empty.");
@@ -199,7 +210,55 @@ export default function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const registerActivity = () => {
+      setLastInteractionAt(Date.now());
+      setShowPromotionModal(false);
+    };
+
+    window.addEventListener("pointerdown", registerActivity);
+    window.addEventListener("keydown", registerActivity);
+    window.addEventListener("touchstart", registerActivity);
+
+    return () => {
+      window.removeEventListener("pointerdown", registerActivity);
+      window.removeEventListener("keydown", registerActivity);
+      window.removeEventListener("touchstart", registerActivity);
+    };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (hasBlockingModal) return;
+      if (Date.now() - lastInteractionAt < IDLE_PROMOTION_MS) return;
+      setShowPromotionModal(true);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [hasBlockingModal, lastInteractionAt]);
+
+  useEffect(() => {
+    if (hasBlockingModal) {
+      setShowPromotionModal(false);
+    }
+  }, [hasBlockingModal]);
+
+  useEffect(() => {
+    if (snapshot.state !== "ready") return;
+    if (hasBlockingModal) return;
+    setShowPromotionModal(true);
+  }, [snapshot.state, hasBlockingModal]);
+
+  const dismissPromotionModal = useCallback(() => {
+    setLastInteractionAt(Date.now());
+    setShowPromotionModal(false);
+  }, []);
+
   const handleServiceSelect = async (service: Service) => {
+    dismissPromotionModal();
+
     if (!window.electron?.auth) {
       setSelectedService(service);
       return;
@@ -277,6 +336,15 @@ export default function App() {
       </div>
 
       <AnimatePresence>
+        {showPromotionModal && !hasBlockingModal && (
+          <PromotionModal
+            videos={promotionVideos}
+            isLoading={isPromotionLoading}
+            statusText={promotionStatusText}
+            onGetStarted={dismissPromotionModal}
+          />
+        )}
+
         {pendingService && (
           <UserAuthModal
             serviceName={pendingService.name}

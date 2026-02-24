@@ -186,6 +186,30 @@ function registerPaymentMocks() {
   });
 }
 
+function registerPromotionMocks() {
+  api.registerMock("/api/kiosk/promotion/videos", () => ({
+    version: "mock-v1",
+    videos: [
+      {
+        id: "promo-1",
+        title: "Kiosk Promo 1",
+        src: "https://www.pexels.com/download/video/33448185/",
+        mimeType: "video/mp4",
+        active: true,
+        order: 1,
+      },
+      {
+        id: "promo-2",
+        title: "Kiosk Promo 2",
+        src: "https://www.pexels.com/download/video/5642531/",
+        mimeType: "video/mp4",
+        active: true,
+        order: 2,
+      },
+    ],
+  }));
+}
+
 function registerUserAuthMocks() {
   api.registerMock("/auth/user/dan/start", (_, __, body) => {
     const challengeId = String(
@@ -342,8 +366,9 @@ export function registerMocks(options?: { mode?: MockMode }) {
   const mode = options?.mode || parseMockModeFromEnv(process.env.MOCK_MODE);
 
   if (mode === "auth") {
+    registerPromotionMocks();
     registerUserAuthMocks();
-    log.info("Mocks registered", { mode, mocked: ["user_auth"] });
+    log.info("Mocks registered", { mode, mocked: ["promotion", "user_auth"] });
     return mode;
   }
 
@@ -352,10 +377,11 @@ export function registerMocks(options?: { mode?: MockMode }) {
   registerCatalogMocks();
   registerParcelMocks();
   registerPaymentMocks();
+  registerPromotionMocks();
   registerUserAuthMocks();
   log.info("Mocks registered", {
     mode,
-    mocked: ["device_auth", "config", "catalog", "parcel", "payment", "user_auth"],
+    mocked: ["device_auth", "config", "catalog", "parcel", "payment", "promotion", "user_auth"],
   });
   return mode;
 }

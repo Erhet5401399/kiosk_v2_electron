@@ -5,6 +5,7 @@ import type {
   CreateQpayInvoiceRequest,
   CreateQpayInvoiceResponse,
   Parcel,
+  PromotionPlaylist,
   RuntimeSnapshot,
   ServiceCategory,
   UpdateStatus,
@@ -46,6 +47,10 @@ declare global {
       parcel: {
         list: (register: string) => Promise<Parcel[]>;
         categories: () => Promise<ServiceCategory[]>;
+      };
+      promotion: {
+        list: () => Promise<PromotionPlaylist>;
+        refresh: () => Promise<PromotionPlaylist>;
       };
       auth: {
         listMethods: () => Promise<UserAuthMethod[]>;

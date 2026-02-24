@@ -47,6 +47,11 @@ const api = {
     categories: () => ipcRenderer.invoke("category:list"),
   },
 
+  promotion: {
+    list: () => ipcRenderer.invoke("promotion:list"),
+    refresh: () => ipcRenderer.invoke("promotion:refresh"),
+  },
+
   auth: {
     listMethods: () => ipcRenderer.invoke("user-auth:methods"),
     start: (req: { methodId: string; payload?: Record<string, unknown> }) =>

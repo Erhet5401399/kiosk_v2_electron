@@ -5,6 +5,7 @@ import { config, printer, logger, updater, userAuth } from '../services';
 import { windows } from '../windows/manager';
 import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 import { cleanupPaymentHandlers, setupPaymentHandlers } from './payment.handlers';
+import { cleanupPromotionHandlers, setupPromotionHandlers } from './promotion.handlers';
 import type { UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
@@ -53,6 +54,7 @@ export function setupIPC() {
 
   setupParcelHandlers();
   setupPaymentHandlers();
+  setupPromotionHandlers();
 
   runtime.on('state-change', (snapshot) => {
     windows.broadcast(IPC.RUNTIME_UPDATE, snapshot);
@@ -65,6 +67,7 @@ export function setupIPC() {
 export function cleanupIPC() {
   cleanupParcelHandlers();
   cleanupPaymentHandlers();
+  cleanupPromotionHandlers();
   ipcMain.removeHandler(IPC.RUNTIME_SNAPSHOT);
   ipcMain.removeHandler(IPC.RUNTIME_RETRY);
   ipcMain.removeHandler(IPC.RUNTIME_RESET);
