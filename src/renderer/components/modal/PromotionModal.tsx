@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PromotionVideo } from "../../../shared/types";
 
 interface PromotionModalProps {
@@ -8,11 +8,6 @@ interface PromotionModalProps {
   onGetStarted: () => void;
 }
 
-function resolveMimeType(video: PromotionVideo): string {
-  if (video.mimeType) return video.mimeType;
-  return "video/mp4";
-}
-
 export function PromotionModal({
   videos,
   isLoading = false,
@@ -20,6 +15,7 @@ export function PromotionModal({
   onGetStarted,
 }: PromotionModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const isSwitching = useRef(false);
   const playlist = useMemo(
     () => videos.filter((video) => Boolean(String(video.src || "").trim())),
     [videos],
@@ -45,17 +41,21 @@ export function PromotionModal({
 
   const currentVideo = playlist[currentIndex];
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (!playlist.length) return;
+    if (isSwitching.current) return;
+    isSwitching.current = true;
     setCurrentIndex((prev) => (prev + 1) % playlist.length);
-  };
+    setTimeout(() => {
+    isSwitching.current = false;
+  }, 100);
+  }, [playlist.length]);
 
   return (
     <section className="promotion-modal" onPointerDown={onGetStarted}>
       {currentVideo ? (
         <video
           ref={videoRef}
-          key={`${currentVideo.id}-${currentVideo.src}-${currentIndex}`}
           className="promotion-video"
           src={currentVideo.src}
           autoPlay

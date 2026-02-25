@@ -220,18 +220,10 @@ function registerPromotionMocks() {
       {
         id: "promo-1",
         title: "Kiosk Promo 1",
-        src: "https://www.pexels.com/download/video/35797550/",
+        src: "https://www.pexels.com/download/video/8879540/",
         mimeType: "video/mp4",
         active: true,
         order: 1,
-      },
-      {
-        id: "promo-2",
-        title: "Kiosk Promo 2",
-        src: "https://www.pexels.com/download/video/34039826/",
-        mimeType: "video/mp4",
-        active: true,
-        order: 2,
       },
     ],
   }));
