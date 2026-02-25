@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import type {
   CategoryService,
+  PrinterDevice,
   ServiceCategory,
   UserAuthSession,
   UserAuthStatus,
@@ -50,6 +51,8 @@ export default function App() {
     session: null,
     reason: "not_authenticated",
   });
+  const [connectedPrinterName, setConnectedPrinterName] = useState<string>("");
+  const [isPrinterConnected, setIsPrinterConnected] = useState(false);
   const hasBlockingModal = Boolean(selectedService || pendingService);
 
   const filteredServices = useMemo(() => {
@@ -229,6 +232,46 @@ export default function App() {
   useEffect(() => {
     void loadCatalog();
   }, [loadCatalog]);
+
+  useEffect(() => {
+    if (!window.electron?.printer?.list) return;
+
+    let active = true;
+    const lexmarkPattern = /\bLexmark\b/i;
+
+    const pickPrinter = (printers: PrinterDevice[]): PrinterDevice | null => {
+      return (
+        printers.find((printer) => lexmarkPattern.test(String(printer.name || ""))) ||
+        printers.find((printer) => printer.isDefault) ||
+        printers[0] ||
+        null
+      );
+    };
+
+    const refreshPrinters = async () => {
+      try {
+        const printers = await window.electron.printer.list();
+        if (!active) return;
+        const selected = pickPrinter(Array.isArray(printers) ? printers : []);
+        setConnectedPrinterName(selected?.name || "");
+        setIsPrinterConnected(Boolean(selected));
+      } catch {
+        if (!active) return;
+        setConnectedPrinterName("");
+        setIsPrinterConnected(false);
+      }
+    };
+
+    void refreshPrinters();
+    const timer = window.setInterval(() => {
+      void refreshPrinters();
+    }, 15000);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, []);
 
   useEffect(() => {
     if (!window.electron?.auth) return;
@@ -428,7 +471,8 @@ export default function App() {
       <StatusBar
         deviceState={STATE_LABELS[snapshot.state]}
         deviceId={snapshot.deviceId}
-        uptime={snapshot.uptime}
+        printerLabel={connectedPrinterName}
+        printerConnected={isPrinterConnected}
         updaterStatus={updateStatus}
         onUpdateCheck={checkForUpdates}
       />

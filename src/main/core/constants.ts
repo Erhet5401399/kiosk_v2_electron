@@ -41,7 +41,7 @@ export const UPDATER = {
 } as const;
 
 export const PRINTER = {
-  PATTERN: /Lexmark\s*MS430/i,
+  PATTERN: /\bLexmark\b/i,
   TIMEOUT: 60000,
   MAX_QUEUE: 100,
   RETRY_ATTEMPTS: 3,

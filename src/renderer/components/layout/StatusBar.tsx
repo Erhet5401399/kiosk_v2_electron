@@ -3,7 +3,8 @@ import type { UpdateStatus } from '../../../shared/types';
 interface StatusBarProps {
   deviceState?: string;
   deviceId?: string;
-  uptime?: number;
+  printerLabel?: string;
+  printerConnected?: boolean;
   updaterStatus: UpdateStatus;
   onUpdateCheck: () => Promise<void>;
 }
@@ -19,26 +20,11 @@ const UPDATER_LABELS: Record<UpdateStatus['state'], string> = {
   error: 'Error',
 };
 
-function formatUptime(totalSeconds?: number): string {
-  if (!totalSeconds || totalSeconds < 0) return '--';
-  const seconds = Math.floor(totalSeconds);
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
-
-  if (hours > 0) {
-    return `${hours}h ${minutes.toString().padStart(2, '0')}m`;
-  }
-  if (minutes > 0) {
-    return `${minutes}m ${secs.toString().padStart(2, '0')}s`;
-  }
-  return `${secs}s`;
-}
-
 export function StatusBar({
   deviceState,
   deviceId,
-  uptime,
+  printerLabel,
+  printerConnected,
   updaterStatus,
   onUpdateCheck,
 }: StatusBarProps) {
@@ -64,8 +50,10 @@ export function StatusBar({
           <strong className="status-value status-id">{deviceId || 'Unknown'}</strong>
         </span>
         <span className="status-item">
-          <span className="status-label">Uptime</span>
-          <strong className="status-value">{formatUptime(uptime)}</strong>
+          <span className="status-label">Printer</span>
+          <strong className="status-value">
+            {printerConnected ? `Connected: ${printerLabel || "Unknown"}` : "Disconnected"}
+          </strong>
         </span>
       </div>
 

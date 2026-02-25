@@ -128,45 +128,49 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
-      className="service-modal"
+      className="service-modal document-preview-step"
     >
-      <div className="service-modal-body">
+      <div className="service-modal-body document-preview-body">
         <div className="step-header">
           <h1>{config.title || ""}</h1>
           <p>Please verify the document preview.</p>
         </div>
 
         {isLoading ? (
-          <div className="loading-container">
+          <div className="loading-container document-preview-fill">
             <div className="processing-spinner" />
             <p>Loading...</p>
           </div>
         ) : error ? (
-          <StateCard
-            title="Document unavailable"
-            description="The document could not be loaded."
-            detail={error}
-            tone="warning"
-          />
+          <div className="document-preview-fill">
+            <StateCard
+              title="Document unavailable"
+              description="The document could not be loaded."
+              detail={error}
+              tone="warning"
+            />
+          </div>
         ) : !base64 ? (
-          <StateCard
-            title="No document found"
-            description="No document data was returned."
-            tone="warning"
-          />
+          <div className="document-preview-fill">
+            <StateCard
+              title="No document found"
+              description="No document data was returned."
+              tone="warning"
+            />
+          </div>
         ) : (
-          <div className="result-details">
+          <div className="result-details document-preview-fill">
             {previewKind === "pdf" || previewKind === "html" ? (
               <iframe
                 title="Document Preview"
                 src={previewSrc}
-                style={{ width: "100%", height: "520px", border: "none" }}
+                className="document-preview-frame"
               />
             ) : (
               <img
                 src={previewSrc}
                 alt="Document Preview"
-                style={{ width: "100%", maxHeight: "520px", objectFit: "contain" }}
+                className="document-preview-image"
               />
             )}
           </div>
