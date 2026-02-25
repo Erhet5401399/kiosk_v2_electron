@@ -10,8 +10,6 @@ import {
   PaymentProcessingStep,
   SuccessStep,
   LandParcelSelectStep,
-  FreeLandOwnerReferenceStep,
-  CadastralMapStep,
   DocumentTypeSelectStep,
   OwnershipCheckStep,
   BoundaryVerificationStep,
@@ -19,6 +17,7 @@ import {
   ConfirmationStep,
   PrintOptionsStep,
   ServiceUnavailableStep,
+  DocumentPreviewStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -45,7 +44,7 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
   'free-land-owner-reference': {
     id: 'free-land-owner-reference',
     title: '',
-    component: FreeLandOwnerReferenceStep,
+    component: DocumentPreviewStep,
     validate: (context: StepContext): StepValidation => {
       const base64 = String(context.stepData.documentBase64 || "").trim();
       if (!base64) {
@@ -57,7 +56,19 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
   'cadastral-map': {
     id: 'cadastral-map',
     title: '',
-    component: CadastralMapStep,
+    component: DocumentPreviewStep,
+    validate: (context: StepContext): StepValidation => {
+      const base64 = String(context.stepData.documentBase64 || "").trim();
+      if (!base64) {
+        return { isValid: false, errorMessage: 'Something wrong.' };
+      }
+      return { isValid: true };
+    },
+  },
+  'document-preview': {
+    id: 'document-preview',
+    title: '',
+    component: DocumentPreviewStep,
     validate: (context: StepContext): StepValidation => {
       const base64 = String(context.stepData.documentBase64 || "").trim();
       if (!base64) {

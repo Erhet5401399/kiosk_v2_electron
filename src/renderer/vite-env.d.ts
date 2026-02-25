@@ -59,8 +59,11 @@ declare global {
         categories: () => Promise<ServiceCategory[]>;
       };
       service: {
-        freeLandOwnerReference: (register: string) => Promise<string>;
-        cadastralMap: (parcelId: string) => Promise<string>;
+        getDocument: (request: {
+          endpoint: string;
+          method?: "GET" | "POST";
+          params?: Record<string, unknown>;
+        }) => Promise<string>;
       };
       promotion: {
         list: () => Promise<PromotionPlaylist>;

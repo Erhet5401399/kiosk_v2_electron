@@ -51,6 +51,30 @@ export function PromotionModal({
   }, 100);
   }, [playlist.length]);
 
+  const handleVideoEnded = useCallback(() => {
+    if (playlist.length > 1) {
+      goToNext();
+      return;
+    }
+
+    const video = videoRef.current;
+    if (!video) return;
+
+    // Fallback for sources where native loop is unreliable in kiosk runtime.
+    video.currentTime = 0;
+    void video.play().catch(() => {});
+  }, [goToNext, playlist.length]);
+
+  const handleVideoPause = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (playlist.length !== 1) return;
+    if (!video.ended) return;
+
+    video.currentTime = 0;
+    void video.play().catch(() => {});
+  }, [playlist.length]);
+
   return (
     <section className="promotion-modal" onPointerDown={onGetStarted}>
       {currentVideo ? (
@@ -60,10 +84,11 @@ export function PromotionModal({
           src={currentVideo.src}
           autoPlay
           muted
-          loop={playlist.length <= 1}
+          loop={false}
           preload="auto"
           playsInline
-          onEnded={goToNext}
+          onEnded={handleVideoEnded}
+          onPause={handleVideoPause}
           onError={goToNext}
         />
       ) : (

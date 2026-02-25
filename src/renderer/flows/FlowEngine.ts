@@ -50,6 +50,7 @@ export class FlowEngine {
       if (!step.id) continue;
       this.stepOverrides.set(step.id, {
         ...(step.title ? { title: step.title } : {}),
+        ...(step.document ? { document: step.document } : {}),
       });
     }
   }

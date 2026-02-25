@@ -4,9 +4,47 @@ import type { StepComponentProps } from "../../../types/steps";
 import { Button, StateCard } from "../../common";
 import { buildDataUriFromBase64, detectBase64ContentKind } from "../../../utils";
 
-export function CadastralMapStep({ context, actions }: StepComponentProps) {
-  const selectedParcel = String(context.stepData.selectedParcel || "").trim();
+export function DocumentPreviewStep({ context, actions, config }: StepComponentProps) {
   const existingBase64 = String(context.stepData.documentBase64 || "").trim();
+  const existingRequestKey = String(context.stepData.documentRequestKey || "").trim();
+  const documentConfig = config.document;
+
+  const resolvedRequest = useMemo(() => {
+    if (!documentConfig?.endpoint) {
+      return { request: null, missing: ["endpoint"] as string[] };
+    }
+
+    const requestedParams = documentConfig.params || [];
+    const params: Record<string, string> = {};
+    const missing: string[] = [];
+
+    requestedParams.forEach((paramKey) => {
+      const key = String(paramKey || "").trim();
+      if (!key) return;
+      const rawValue = context.stepData[key];
+      const normalizedValue = String(rawValue ?? "").trim();
+
+      if (!normalizedValue) {
+        missing.push(key);
+        return;
+      }
+
+      params[key] = normalizedValue;
+    });
+
+    const request = {
+      endpoint: documentConfig.endpoint,
+      method: documentConfig.method || "POST",
+      params,
+    };
+
+    return { request, missing };
+  }, [context.stepData, documentConfig]);
+
+  const requestKey = useMemo(() => {
+    if (!resolvedRequest.request) return "";
+    return JSON.stringify(resolvedRequest.request);
+  }, [resolvedRequest.request]);
 
   const [base64, setBase64] = useState(existingBase64);
   const [isLoading, setIsLoading] = useState(false);
@@ -16,12 +54,25 @@ export function CadastralMapStep({ context, actions }: StepComponentProps) {
     let active = true;
 
     const run = async () => {
-      if (!selectedParcel) {
-        setError("Нэгж талбар сонгогдоогүй байна.");
+      if (!documentConfig?.endpoint) {
+        setBase64("");
+        setError("Document endpoint is not configured.");
         return;
       }
 
-      if (existingBase64) {
+      if (resolvedRequest.missing.length > 0) {
+        setBase64("");
+        setError(`Missing required fields: ${resolvedRequest.missing.join(", ")}`);
+        return;
+      }
+
+      if (!resolvedRequest.request) {
+        setBase64("");
+        setError("Unable to build document request.");
+        return;
+      }
+
+      if (existingBase64 && existingRequestKey && existingRequestKey === requestKey) {
         setBase64(existingBase64);
         setError(null);
         return;
@@ -31,12 +82,12 @@ export function CadastralMapStep({ context, actions }: StepComponentProps) {
       setError(null);
 
       try {
-        const response = await window.electron.service.cadastralMap(selectedParcel);
+        const response = await window.electron.service.getDocument(resolvedRequest.request);
         if (!active) return;
 
         const normalized = String(response || "").trim();
         if (!normalized) {
-          setError("Кадастрын зураг олдсонгүй.");
+          setError("Document not found.");
           setBase64("");
           return;
         }
@@ -44,11 +95,12 @@ export function CadastralMapStep({ context, actions }: StepComponentProps) {
         setBase64(normalized);
         actions.onUpdateStepData({
           documentBase64: normalized,
+          documentRequestKey: requestKey,
         });
       } catch (err) {
         if (!active) return;
         setBase64("");
-        setError((err as Error)?.message || "Кадастрын зураг ачаалахад алдаа гарлаа.");
+        setError((err as Error)?.message || "Failed to load document.");
       } finally {
         if (active) {
           setIsLoading(false);
@@ -60,13 +112,13 @@ export function CadastralMapStep({ context, actions }: StepComponentProps) {
     return () => {
       active = false;
     };
-  }, [actions, existingBase64, selectedParcel]);
+  }, [actions, documentConfig?.endpoint, existingBase64, existingRequestKey, requestKey, resolvedRequest]);
 
   const dataUri = useMemo(() => buildDataUriFromBase64(base64), [base64]);
   const previewKind = useMemo(() => detectBase64ContentKind(base64), [base64]);
   const previewSrc = useMemo(() => {
     if (previewKind === "pdf") {
-      return `${dataUri}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`;
+      return `${dataUri}#toolbar=0&navpanes=0&scrollbar=0`;
     }
     return dataUri;
   }, [dataUri, previewKind]);
@@ -80,41 +132,41 @@ export function CadastralMapStep({ context, actions }: StepComponentProps) {
     >
       <div className="service-modal-body">
         <div className="step-header">
-          <h1>Кадастрын зураг</h1>
-          <p>Сонгосон нэгж талбарын кадастрын зургийг шалгана уу.</p>
+          <h1>{config.title || ""}</h1>
+          <p>Please verify the document preview.</p>
         </div>
 
         {isLoading ? (
           <div className="loading-container">
             <div className="processing-spinner" />
-            <p>Түр хүлээнэ үү...</p>
+            <p>Loading...</p>
           </div>
         ) : error ? (
           <StateCard
-            title="Кадастрын зураг олдсонгүй"
-            description="Баримт татаж чадсангүй."
+            title="Document unavailable"
+            description="The document could not be loaded."
             detail={error}
             tone="warning"
           />
         ) : !base64 ? (
           <StateCard
-            title="Баримт хоосон байна"
-            description="Сонгосон нэгж талбарт баримтын өгөгдөл олдсонгүй."
+            title="No document found"
+            description="No document data was returned."
             tone="warning"
           />
         ) : (
           <div className="result-details">
             {previewKind === "pdf" || previewKind === "html" ? (
               <iframe
-                title="Cadastral Map"
+                title="Document Preview"
                 src={previewSrc}
-                style={{ width: "100%", height: "520px", border: "none", borderRadius: "12px" }}
+                style={{ width: "100%", height: "520px", border: "none" }}
               />
             ) : (
               <img
                 src={previewSrc}
-                alt="Cadastral Map"
-                style={{ width: "100%", maxHeight: "520px", objectFit: "contain", borderRadius: "12px" }}
+                alt="Document Preview"
+                style={{ width: "100%", maxHeight: "520px", objectFit: "contain" }}
               />
             )}
           </div>
@@ -124,10 +176,10 @@ export function CadastralMapStep({ context, actions }: StepComponentProps) {
       <div className="service-modal-footer">
         <div className="modal-footer">
           <Button variant="secondary" onClick={actions.onBack}>
-            Буцах
+            Back
           </Button>
           <Button onClick={actions.onNext} disabled={!base64 || Boolean(error)}>
-            Үргэлжлүүлэх
+            Continue
           </Button>
         </div>
       </div>

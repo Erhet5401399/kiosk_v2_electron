@@ -6,10 +6,18 @@ import type {
 } from './index';
 
 export type StepId = string;
+export type DocumentHttpMethod = "GET" | "POST";
+
+export interface DocumentRequestConfig {
+  endpoint: string;
+  method?: DocumentHttpMethod;
+  params?: string[];
+}
+
 export type ServiceFlowStep = StepId | {
   id: StepId;
   title?: string;
-  data?: Record<string, unknown>;
+  document?: DocumentRequestConfig;
 };
 
 export interface StepContext {
@@ -46,6 +54,7 @@ export interface StepValidation {
 export interface StepConfig {
   id: StepId;
   title: string;
+  document?: DocumentRequestConfig;
   validate?: (context: StepContext) => StepValidation;
   onEnter?: (context: StepContext) => void;
   onExit?: (context: StepContext) => void;

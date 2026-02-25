@@ -199,11 +199,31 @@ export interface CategoryService {
   amount?: string | number | null;
   paid?: boolean;
   flow_config?: {
-    steps?: Array<string | { id?: string; title?: string }>;
+    steps?: Array<
+      string | {
+        id?: string;
+        title?: string;
+        document?: {
+          endpoint?: string;
+          method?: "GET" | "POST";
+          params?: string[];
+        };
+      }
+    >;
     initial_step_data?: Record<string, unknown>;
   };
   config?: {
-    steps?: Array<string | { id?: string; title?: string }>;
+    steps?: Array<
+      string | {
+        id?: string;
+        title?: string;
+        document?: {
+          endpoint?: string;
+          method?: "GET" | "POST";
+          params?: string[];
+        };
+      }
+    >;
     initial?: Record<string, unknown>;
   };
 }

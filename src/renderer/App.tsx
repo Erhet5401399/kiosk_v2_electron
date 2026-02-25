@@ -6,7 +6,13 @@ import type {
   UserAuthSession,
   UserAuthStatus,
 } from "../shared/types";
-import type { Category, Service, ServiceFlowConfig, ServiceFlowStep } from "./types";
+import type {
+  Category,
+  Service,
+  ServiceFlowConfig,
+  ServiceFlowStep,
+  DocumentRequestConfig,
+} from "./types";
 import { STATE_LABELS } from "./constants";
 import { useElectron, usePromotionVideos, useUpdater } from "./hooks";
 import {
@@ -94,7 +100,36 @@ export default function App() {
       if (!id) continue;
 
       const title = String(rawStep?.title || "").trim();
-      steps.push(title ? { id, title } : id);
+      const rawDocument = rawStep?.document;
+      const document: DocumentRequestConfig | undefined = (
+        rawDocument &&
+        typeof rawDocument === "object" &&
+        !Array.isArray(rawDocument) &&
+        typeof rawDocument.endpoint === "string"
+      ) ? {
+        endpoint: rawDocument.endpoint,
+        ...(rawDocument.method === "GET" || rawDocument.method === "POST"
+          ? { method: rawDocument.method }
+          : {}),
+        ...(rawDocument.params &&
+        Array.isArray(rawDocument.params)
+          ? {
+            params: rawDocument.params
+              .map((param) => String(param || "").trim())
+              .filter((param) => param.length > 0),
+          }
+          : {}),
+      } : undefined;
+
+      if (title || document) {
+        steps.push({
+          id,
+          ...(title ? { title } : {}),
+          ...(document ? { document } : {}),
+        });
+      } else {
+        steps.push(id);
+      }
     }
 
     if (!steps.length) {

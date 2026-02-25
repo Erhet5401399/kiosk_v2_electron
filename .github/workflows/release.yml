@@ -1,0 +1,38 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Set Repository Metadata
+        shell: pwsh
+        run: |
+          $repo = "${{ github.repository }}"
+          npm pkg set repository.type=git
+          npm pkg set repository.url="https://github.com/$repo.git"
+
+      - name: Build And Publish
+        run: npm run release:github
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

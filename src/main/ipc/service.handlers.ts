@@ -1,21 +1,18 @@
 import { ipcMain } from "electron";
 import { IPC } from "../core/constants";
 import { logger, serviceApi } from "../services";
+import type { GetDocumentRequest } from "../services/service";
 
 const log = logger.child("IPC:Service");
 
 export function setupServiceHandlers() {
-  ipcMain.handle(IPC.SERVICE_FREE_LAND_OWNER_REFERENCE, async (_, register: string) => {
-    return serviceApi.getFreeLandOwnerReference(register);
-  });
-  ipcMain.handle(IPC.SERVICE_CADASTRAL_MAP, async (_, parcelId: string) => {
-    return serviceApi.getCadastralMap(parcelId);
+  ipcMain.handle(IPC.SERVICE_GET_DOCUMENT, async (_, request: GetDocumentRequest) => {
+    return serviceApi.getDocument(request);
   });
 
   log.info("Service IPC handlers registered");
 }
 
 export function cleanupServiceHandlers() {
-  ipcMain.removeHandler(IPC.SERVICE_FREE_LAND_OWNER_REFERENCE);
-  ipcMain.removeHandler(IPC.SERVICE_CADASTRAL_MAP);
+  ipcMain.removeHandler(IPC.SERVICE_GET_DOCUMENT);
 }

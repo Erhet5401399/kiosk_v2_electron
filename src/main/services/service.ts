@@ -1,6 +1,14 @@
 import { api } from "./api";
 import { logger } from "./logger";
 
+type DocumentMethod = "GET" | "POST";
+
+export interface GetDocumentRequest {
+  endpoint: string;
+  method?: DocumentMethod;
+  params?: Record<string, unknown>;
+}
+
 class ServiceApiService {
   private static inst: ServiceApiService;
   private log = logger.child("ServiceApi");
@@ -61,47 +69,63 @@ class ServiceApiService {
     return raw.replace(/^["'`]+|["'`]+$/g, "");
   }
 
-  async getFreeLandOwnerReference(register: string): Promise<string> {
-    const reg = String(register || "").trim().toUpperCase();
-    if (!reg) {
-      this.log.warn("Skipping free land owner reference: empty register number");
+  private normalizeDocumentEndpoint(endpoint: string): string {
+    const trimmed = String(endpoint || "").trim();
+    if (!trimmed) return "";
+
+    const withLeadingSlash = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+    const servicePrefix = "/api/kiosk/service";
+
+    const logicalEndpoint = withLeadingSlash.startsWith(`${servicePrefix}/`)
+      ? withLeadingSlash.slice(servicePrefix.length)
+      : withLeadingSlash;
+
+    return `${servicePrefix}${logicalEndpoint}`;
+  }
+
+  private buildDocumentUrl(url: string, params?: Record<string, unknown>): string {
+    const query = new URLSearchParams();
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value == null) return;
+        const normalized = String(value).trim();
+        if (!normalized) return;
+        query.set(key, normalized);
+      });
+    }
+
+    const queryString = query.toString();
+    return queryString ? `${url}?${queryString}` : url;
+  }
+
+  async getDocument(request: GetDocumentRequest): Promise<string> {
+    const endpoint = this.normalizeDocumentEndpoint(request.endpoint);
+    if (!endpoint) {
+      this.log.warn("Blocked document request for invalid endpoint", {
+        endpoint: request.endpoint,
+      });
       return "";
     }
 
-    const query = new URLSearchParams();
-    query.set("register_number", reg);
-    const url = `/api/kiosk/service/free/land/owner/reference?${query.toString()}`;
-    this.log.debug("Fetching free land owner reference", { url });
+    const method = String(request.method || "POST").toUpperCase() as DocumentMethod;
+    if (method !== "GET" && method !== "POST") {
+      this.log.warn("Blocked document request for unsupported method", { method });
+      return "";
+    }
+
+    const url = this.buildDocumentUrl(endpoint, request.params);
+    this.log.debug("Fetching document", { method, url });
 
     try {
-      const payload = await api.postText(url);
+      const payload = await api.requestBuffer(method, url);
       return this.normalizeDocumentToBase64(payload);
     } catch (error) {
-      this.log.error("Failed to fetch free land owner reference", error as Error);
+      this.log.error("Failed to fetch document", error as Error);
       return "";
     }
   }
 
-  async getCadastralMap(parcelId: string): Promise<string> {
-    const parcel = String(parcelId || "").trim();
-    if (!parcel) {
-      this.log.warn("Skipping cadastral map: empty parcel id");
-      return "";
-    }
-
-    const query = new URLSearchParams();
-    query.set("parcel_id", parcel);
-    const url = `/api/kiosk/service/print/cadastral/map?${query.toString()}`;
-    this.log.debug("Fetching cadastral map", { url });
-
-    try {
-      const payload = await api.postBuffer(url);
-      return this.normalizeDocumentToBase64(payload);
-    } catch (error) {
-      this.log.error("Failed to fetch cadastral map", error as Error);
-      return "";
-    }
-  }
 }
 
 export const serviceApi = ServiceApiService.get();
