@@ -62,7 +62,7 @@ export function OwnershipCheckStep({ context, actions }: StepComponentProps) {
               </div>
               <div className="result-row">
                 <span>Регистр:</span>
-                <strong>{String(context.stepData.registerNumber || "")}</strong>
+                <strong>{String(context.stepData.register_number || "")}</strong>
               </div>
             </div>
           </div>
@@ -82,3 +82,4 @@ export function OwnershipCheckStep({ context, actions }: StepComponentProps) {
     </motion.div>
   );
 }
+

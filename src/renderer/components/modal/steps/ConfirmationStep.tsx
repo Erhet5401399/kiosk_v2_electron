@@ -34,12 +34,12 @@ export function ConfirmationStep({ context, actions }: StepComponentProps) {
             <h3>Хэрэглэгчийн мэдээлэл</h3>
             <div className="info-row">
               <span>Регистр:</span>
-              <strong>{String(stepData.registerNumber || '')}</strong>
+              <strong>{String(stepData.register_number || '')}</strong>
             </div>
-            {stepData.selectedParcel ? (
+            {stepData.parcel_id ? (
               <div className="info-row">
                 <span>Газрын нэгж:</span>
-                <strong>{String(stepData.selectedParcel)}</strong>
+                <strong>{String(stepData.parcel_id)}</strong>
               </div>
             ) : null}
             {stepData.documentType ? (
@@ -63,3 +63,5 @@ export function ConfirmationStep({ context, actions }: StepComponentProps) {
     </motion.div>
   );
 }
+
+

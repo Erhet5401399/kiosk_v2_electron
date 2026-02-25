@@ -88,7 +88,7 @@ function QpayProcessing({
       const createdRaw = await window.electron.payment.createQpayInvoice({
         paymentMethod: "qpay",
         serviceId: context.service.id,
-        registerNumber: String(context.stepData.registerNumber || ""),
+        registerNumber: String(context.stepData.register_number || ""),
         amount: toAmount(context.service.price),
         metadata: { stepId: "payment-processing" },
       });

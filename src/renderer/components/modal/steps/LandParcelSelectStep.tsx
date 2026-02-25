@@ -6,13 +6,13 @@ import { useParcels } from '../../../hooks';
 
 export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
-  const registerNumber = (stepData.registerNumber as string) ?? '';
-  const selectedParcel = stepData.selectedParcel as string | undefined;
+  const registerNumber = (stepData.register_number as string) ?? '';
+  const selectedParcel = stepData.parcel_id as string | undefined;
 
   const { parcels, isLoading } = useParcels({ register: registerNumber });
 
   const handleSelectParcel = (parcelId: string) => {
-    actions.onUpdateStepData({ selectedParcel: parcelId });
+    actions.onUpdateStepData({ parcel_id: parcelId });
   };
 
   return (

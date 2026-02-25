@@ -77,7 +77,7 @@ export function ServiceModal({
     };
 
     updateStepData({
-      registerNumber: resolvedRegister,
+      register_number: resolvedRegister,
       citizen,
     });
   }, [registerNumber, userClaims, updateStepData]);
@@ -198,7 +198,7 @@ export function ServiceModal({
   const currentConfig = engine.getCurrentStepConfig();
 
   const handlePrintAndClose = async () => {
-    const currentRegister = (state.stepData.registerNumber as string) || registerNumber;
+    const currentRegister = (state.stepData.register_number as string) || registerNumber;
     const documentBase64 = String(state.stepData.documentBase64 || "").trim();
     return onPrint(currentRegister, documentBase64 || undefined);
   };

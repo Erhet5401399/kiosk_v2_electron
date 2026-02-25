@@ -35,7 +35,7 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
     component: LandParcelSelectStep,
     validate: (context: StepContext): StepValidation => {
       const { stepData } = context;
-      if (!stepData.selectedParcel) {
+      if (!stepData.parcel_id) {
         return { isValid: false, errorMessage: 'Газрын нэгж талбар сонгоно уу.' };
       }
       return { isValid: true };
@@ -170,3 +170,4 @@ export function registerStepComponent(stepId: string, component: StepComponent):
     component,
   };
 }
+

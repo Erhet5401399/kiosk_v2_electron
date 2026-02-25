@@ -46,7 +46,7 @@ export function PaymentInfoStep({ context, actions }: StepComponentProps) {
       <div className='service-modal-body'>
         <div className="step-header">
           <h1>Газрын төлбөрийн мэдээлэл</h1>
-          <p>Регистр: {String(context.stepData.registerNumber || '')}</p>
+          <p>Регистр: {String(context.stepData.register_number || '')}</p>
         </div>
 
         {isLoading ? (
@@ -98,3 +98,4 @@ export function PaymentInfoStep({ context, actions }: StepComponentProps) {
     </motion.div>
   );
 }
+
