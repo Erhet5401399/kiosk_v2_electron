@@ -6,20 +6,11 @@ import { logger } from "./logger";
 
 type Method = "GET" | "POST" | "PUT" | "DELETE";
 
-type MockHandler<T = unknown> = (method: Method, url: string, body?: unknown) => T | Promise<T>;
-
-interface MockRoute {
-  pattern: string | RegExp;
-  handler: MockHandler;
-}
-
 class ApiClient {
   private static inst: ApiClient;
   private baseUrl = API.BASE_URL;
   private token: string | null = null;
   private log = logger.child("API");
-  private mockRoutes: MockRoute[] = [];
-  private useMockFallback = process.env.NODE_ENV === "development";
 
   static get(): ApiClient {
     return this.inst || (this.inst = new ApiClient());
@@ -27,44 +18,6 @@ class ApiClient {
 
   setToken(token: string | null) {
     this.token = token;
-  }
-
-  setMockFallback(enabled: boolean) {
-    this.useMockFallback = enabled;
-  }
-
-  registerMock(pattern: string | RegExp, handler: MockHandler) {
-    this.mockRoutes.push({ pattern, handler });
-    this.log.debug(`Mock registered: ${pattern}`);
-  }
-
-  clearMocks() {
-    this.mockRoutes = [];
-  }
-
-  removeMock(pattern: string | RegExp) {
-    this.mockRoutes = this.mockRoutes.filter(r => 
-      r.pattern.toString() !== pattern.toString()
-    );
-  }
-
-  private findMock(url: string): MockRoute | undefined {
-    const exactString = this.mockRoutes.find(
-      (route) => typeof route.pattern === "string" && url === route.pattern,
-    );
-    if (exactString) return exactString;
-
-    const bestStringPrefix = this.mockRoutes
-      .filter(
-        (route): route is MockRoute & { pattern: string } =>
-          typeof route.pattern === "string" && url.startsWith(route.pattern),
-      )
-      .sort((a, b) => b.pattern.length - a.pattern.length)[0];
-    if (bestStringPrefix) return bestStringPrefix;
-
-    return this.mockRoutes.find(
-      (route) => route.pattern instanceof RegExp && route.pattern.test(url),
-    );
   }
 
   private makeRequest<T>(
@@ -195,12 +148,6 @@ class ApiClient {
   }
 
   async request<T>(method: Method, url: string, body?: unknown): Promise<T> {
-    const mock = this.findMock(url);
-    if (mock) {
-      this.log.debug(`[MOCK] ${method} ${url}`);
-      return Promise.resolve(mock.handler(method, url, body) as T);
-    }
-
     const exec = () =>
       timeout(this.makeRequest<T>(method, url, body), API.TIMEOUT);
 
@@ -211,13 +158,6 @@ class ApiClient {
   }
 
   async requestText(method: Method, url: string, body?: unknown): Promise<string> {
-    const mock = this.findMock(url);
-    if (mock) {
-      this.log.debug(`[MOCK] ${method} ${url}`);
-      const result = await Promise.resolve(mock.handler(method, url, body));
-      return typeof result === "string" ? result : JSON.stringify(result);
-    }
-
     const exec = () =>
       timeout(this.makeRequestText(method, url, body), API.TIMEOUT);
 
@@ -228,15 +168,6 @@ class ApiClient {
   }
 
   async requestBuffer(method: Method, url: string, body?: unknown): Promise<Buffer> {
-    const mock = this.findMock(url);
-    if (mock) {
-      this.log.debug(`[MOCK] ${method} ${url}`);
-      const result = await Promise.resolve(mock.handler(method, url, body));
-      if (Buffer.isBuffer(result)) return result;
-      if (typeof result === "string") return Buffer.from(result, "utf8");
-      return Buffer.from(JSON.stringify(result), "utf8");
-    }
-
     const exec = () =>
       timeout(this.makeRequestBuffer(method, url, body), API.TIMEOUT);
 

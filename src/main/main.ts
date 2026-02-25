@@ -1,4 +1,4 @@
-import "dotenv/config";
+import "./env";
 import { app, dialog, net, protocol } from "electron";
 import { promises as fs } from "node:fs";
 import * as path from "node:path";

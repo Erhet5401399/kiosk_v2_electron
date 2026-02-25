@@ -5,7 +5,6 @@ import { UpdateStatus } from "../../shared/types";
 import { UPDATER } from "../core/constants";
 import { logger } from "./logger";
 
-const MOCK_AVAILABLE = process.env.MOCK_UPDATE_AVAILABLE === "true";
 const FORCE_UPDATES_IN_DEV = process.env.FORCE_UPDATES_IN_DEV === "true";
 const AUTO_INSTALL_ON_DOWNLOAD =
   process.env.AUTO_INSTALL_ON_DOWNLOAD !== "false";
@@ -21,7 +20,6 @@ class UpdaterService extends EventEmitter {
   private status: UpdateStatus = {
     state: "idle",
     currentVersion: app.getVersion(),
-    mock: MOCK_AVAILABLE,
   };
 
   static get(): UpdaterService {
@@ -35,13 +33,6 @@ class UpdaterService extends EventEmitter {
   async start() {
     if (this.started) return;
     this.started = true;
-
-    if (MOCK_AVAILABLE) {
-      this.log.info("Updater running in mock mode");
-      this.scheduleChecks();
-      setTimeout(() => this.checkForUpdates(), 1000);
-      return;
-    }
 
     if (!app.isPackaged && !FORCE_UPDATES_IN_DEV) {
       this.log.info("Auto updates disabled in development");
@@ -67,11 +58,6 @@ class UpdaterService extends EventEmitter {
     });
 
     try {
-      if (MOCK_AVAILABLE) {
-        await this.runMockCheck();
-        return this.getStatus();
-      }
-
       if (!this.updater) return this.getStatus();
       await this.updater.checkForUpdates();
       return this.getStatus();
@@ -90,17 +76,6 @@ class UpdaterService extends EventEmitter {
 
     this.updateStatus({ state: "installing" });
     this.log.info("Installing downloaded update");
-
-    if (MOCK_AVAILABLE) {
-      this.status.currentVersion =
-        this.status.availableVersion || this.status.currentVersion;
-      this.updateStatus({
-        state: "up_to_date",
-        availableVersion: undefined,
-        percent: 100,
-      });
-      return true;
-    }
 
     if (!this.updater) return false;
     setImmediate(() => this.updater?.quitAndInstall(false, true));
@@ -164,36 +139,6 @@ class UpdaterService extends EventEmitter {
     });
   }
 
-  private async runMockCheck() {
-    const nextVersion = this.bumpPatchVersion(this.status.currentVersion);
-
-    this.updateStatus({
-      state: "available",
-      availableVersion: nextVersion,
-      percent: 0,
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    this.updateStatus({
-      state: "downloading",
-      availableVersion: nextVersion,
-      downloadedBytes: 1024 * 1024,
-      totalBytes: 8 * 1024 * 1024,
-      percent: 12.5,
-    });
-
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-    this.updateStatus({
-      state: "downloaded",
-      availableVersion: nextVersion,
-      downloadedBytes: 8 * 1024 * 1024,
-      totalBytes: 8 * 1024 * 1024,
-      percent: 100,
-    });
-
-    this.maybeInstallByPolicy();
-  }
-
   private maybeInstallByPolicy() {
     if (!AUTO_INSTALL_ON_DOWNLOAD) return;
     if (this.installTimer) clearInterval(this.installTimer);
@@ -210,12 +155,6 @@ class UpdaterService extends EventEmitter {
 
     void tryInstall();
     this.installTimer = setInterval(() => void tryInstall(), 60_000);
-  }
-
-  private bumpPatchVersion(version: string): string {
-    const parts = version.split(".");
-    const patch = Number(parts[2]) || 0;
-    return `${parts[0] || "0"}.${parts[1] || "0"}.${patch + 1}`;
   }
 
   private scheduleChecks() {

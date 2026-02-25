@@ -76,7 +76,6 @@ export function StatusBar({
         <span className="updater-version">
           v{updaterStatus.currentVersion}
           {updaterStatus.availableVersion ? ` -> v${updaterStatus.availableVersion}` : ''}
-          {updaterStatus.mock ? ' [mock]' : ''}
         </span>
         {updaterStatus.error && (
           <span className="updater-error">{updaterStatus.error}</span>

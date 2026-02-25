@@ -29,7 +29,6 @@ type DanStartResponse = {
   auth_url?: string;
   callback_url?: string;
   expires_at?: number;
-  mock?: boolean;
 };
 
 type DanFinalizeResponse = {
@@ -108,7 +107,6 @@ class DanBackendProvider implements AuthProvider {
       meta: {
         provider: "DAN",
         flow: "backend_oauth",
-        mock: !!started.mock,
       },
     };
   }
@@ -211,6 +209,11 @@ class SmsBackendProvider implements AuthProvider {
   private readonly challengeTtlMs = Number(
     process.env.SMS_CHALLENGE_TTL_MS || 5 * 60 * 1000,
   );
+  private readonly bypassEnabled = String(process.env.SMS_AUTH_BYPASS || "false")
+    .trim()
+    .toLowerCase() === "true";
+  private readonly bypassCode = String(process.env.SMS_AUTH_BYPASS_CODE || "123456")
+    .trim();
 
   private pending = new Map<
     string,
@@ -228,8 +231,10 @@ class SmsBackendProvider implements AuthProvider {
       throw new Error("Register number and phone number are required");
     }
 
-    await this.callSmsApi(this.checkEndpoint, { registerNumber, phoneNumber });
-    await this.callSmsApi(this.sendEndpoint, { registerNumber, phoneNumber });
+    if (!this.bypassEnabled) {
+      await this.callSmsApi(this.checkEndpoint, { registerNumber, phoneNumber });
+      await this.callSmsApi(this.sendEndpoint, { registerNumber, phoneNumber });
+    }
 
     const challengeId = crypto.randomUUID();
     const expiresAt = Date.now() + this.challengeTtlMs;
@@ -267,14 +272,16 @@ class SmsBackendProvider implements AuthProvider {
       throw new Error("Invalid SMS code");
     }
 
-    const verified = await this.callSmsApi<Record<string, unknown>>(
-      this.verifyEndpoint,
-      {
-        registerNumber: pending.registerNumber,
-        phoneNumber: pending.phoneNumber,
-        sendCode,
-      },
-    );
+    const verified = this.bypassEnabled
+      ? this.verifyBypassCode(sendCode, pending.registerNumber)
+      : await this.callSmsApi<Record<string, unknown>>(
+        this.verifyEndpoint,
+        {
+          registerNumber: pending.registerNumber,
+          phoneNumber: pending.phoneNumber,
+          sendCode,
+        },
+      );
 
     const registerNumber = String(
       verified.register_number || verified.regnum || pending.registerNumber,
@@ -347,6 +354,20 @@ class SmsBackendProvider implements AuthProvider {
     this.pending.forEach((item, id) => {
       if (item.expiresAt <= now) this.pending.delete(id);
     });
+  }
+
+  private verifyBypassCode(sendCode: string, registerNumber: string): Record<string, unknown> {
+    if (sendCode !== this.bypassCode) {
+      throw new Error("Invalid SMS code");
+    }
+
+    return {
+      register_number: registerNumber,
+      claims: {
+        provider: "SMS",
+        bypass: true,
+      },
+    };
   }
 }
 

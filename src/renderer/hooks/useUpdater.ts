@@ -4,7 +4,6 @@ import type { UpdateStatus } from '../../shared/types';
 const INITIAL_UPDATER_STATUS: UpdateStatus = {
   state: 'idle',
   currentVersion: '0.0.0',
-  mock: false,
 };
 
 export function useUpdater() {

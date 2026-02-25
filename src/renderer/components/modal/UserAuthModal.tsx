@@ -65,7 +65,6 @@ export function UserAuthModal({
   const isSmsMethod = selectedMethod?.id === "sms";
   const isSmsChallenge = challenge?.methodId === "sms";
   const smsCodeSent = isSmsMethod && isSmsChallenge;
-  const isMockChallenge = Boolean(challenge?.meta?.mock);
 
   const startAuth = async (
     methodId: string,
@@ -275,15 +274,6 @@ export function UserAuthModal({
     };
   }, [challenge]);
 
-  const continueMockLogin = () => {
-    if (!challenge?.callbackUrl) return;
-    const callback = new URL(challenge.callbackUrl);
-    callback.searchParams.set("challenge", challenge.challengeId);
-    callback.searchParams.set("status", "1");
-    callback.searchParams.set("code", "mock-dan-code");
-    void verifyFromCallback(callback.toString());
-  };
-
   return (
     <ModalWrapper
       onClose={onCancel}
@@ -356,15 +346,10 @@ export function UserAuthModal({
                   </Button>
                 )}
                 <Button
-                  onClick={
-                    isMockChallenge ? continueMockLogin : () => webviewRef.current?.reload()
-                  }
-                  disabled={
-                    loading ||
-                    (isMockChallenge ? !challenge?.callbackUrl : !challenge?.webUrl)
-                  }
+                  onClick={() => webviewRef.current?.reload()}
+                  disabled={loading || !challenge?.webUrl}
                 >
-                  {isMockChallenge ? "Mock login" : "Reload"}
+                  Reload
                 </Button>
               </>
             ) : smsCodeSent ? (

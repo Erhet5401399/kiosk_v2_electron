@@ -75,7 +75,6 @@ export interface UpdateStatus {
   percent?: number;
   lastCheckedAt?: number;
   error?: string;
-  mock: boolean;
 }
 
 export type LogLevel = "debug" | "info" | "warn" | "error" | "fatal";

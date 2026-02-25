@@ -26,6 +26,7 @@
     "files": [
       "dist-electron/**/*",
       "dist/**/*",
+      ".env",
       "package.json"
     ],
     "win": {
