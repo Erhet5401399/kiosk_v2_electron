@@ -19,7 +19,7 @@ class PaymentService {
   async createQpayInvoice(
     req: CreateQpayInvoiceRequest,
   ): Promise<ApiResponse<CreateQpayInvoiceResponse> | CreateQpayInvoiceResponse> {
-    const url = "/api/payment/qpay/invoice";
+    const url = "/api/qpay/create/invoice";
     this.log.debug("Creating QPay invoice:", url);
     return api.post(url, req);
   }
@@ -27,7 +27,7 @@ class PaymentService {
   async checkQpayInvoice(
     req: CheckQpayInvoiceRequest,
   ): Promise<ApiResponse<CheckQpayInvoiceResponse> | CheckQpayInvoiceResponse> {
-    const url = "/api/payment/qpay/invoice/check";
+    const url = "/api/qpay/check/invoice";
     this.log.debug("Checking QPay invoice:", url);
     return api.post(url, req);
   }

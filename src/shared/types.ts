@@ -229,11 +229,8 @@ export interface CategoryService {
 }
 
 export interface CreateQpayInvoiceRequest {
-  paymentMethod: "qpay" | "qrcode";
-  serviceId?: number;
-  registerNumber?: string;
-  amount?: number;
-  metadata?: Record<string, unknown>;
+  tax_id: number;
+  register: string;
 }
 
 export interface CreateQpayInvoiceResponse {
@@ -247,8 +244,7 @@ export interface CreateQpayInvoiceResponse {
 }
 
 export interface CheckQpayInvoiceRequest {
-  paymentMethod: "qpay" | "qrcode";
-  invoiceId: string;
+  invoice_id: string;
 }
 
 export interface CheckQpayInvoiceResponse {

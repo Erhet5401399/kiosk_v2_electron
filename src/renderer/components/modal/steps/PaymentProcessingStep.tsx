@@ -86,11 +86,8 @@ function QpayProcessing({
 
     try {
       const createdRaw = await window.electron.payment.createQpayInvoice({
-        paymentMethod: "qpay",
-        serviceId: context.service.id,
-        registerNumber: String(context.stepData.register_number || ""),
-        amount: toAmount(context.service.price),
-        metadata: { stepId: "payment-processing" },
+        register: String(context.stepData.register_number || ""),
+        tax_id: Number(context.stepData.tax_id || 0),
       });
 
       const created = normalizeInvoice(createdRaw);
@@ -132,8 +129,7 @@ function QpayProcessing({
 
     try {
       const result = await window.electron.payment.checkQpayInvoice({
-        paymentMethod: "qpay",
-        invoiceId: invoice.invoiceId,
+        invoice_id: invoice.invoiceId,
       });
       setCheckResult(result);
       actions.onUpdateStepData({
