@@ -23,18 +23,35 @@ export function PromoSection({
     const video = videoRef.current;
     if (!video) return;
 
-    if (paused) {
-      video.pause();
-      return;
-    }
+    const syncPlayback = () => {
+      if (paused || document.hidden) {
+        video.pause();
+        return;
+      }
 
-    void video.play().catch(() => {});
+      void video.play().catch(() => {});
+    };
+
+    syncPlayback();
+    document.addEventListener("visibilitychange", syncPlayback);
+
+    return () => {
+      document.removeEventListener("visibilitychange", syncPlayback);
+    };
   }, [paused]);
 
   return (
     <>
       <section className="promo-container">
-        <video ref={videoRef} className="promo-video" autoPlay muted loop playsInline>
+        <video
+          ref={videoRef}
+          className="promo-video"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+        >
           <source src={videoSrc} type="video/mp4" />
         </video>
       </section>

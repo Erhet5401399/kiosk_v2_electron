@@ -83,7 +83,7 @@ export function PromotionModal({
           autoPlay
           muted
           loop={playlist.length === 1}
-          preload="auto"
+          preload="metadata"
           playsInline
           onEnded={handleVideoEnded}
           onError={goToNext}
