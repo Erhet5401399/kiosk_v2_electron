@@ -51,6 +51,7 @@ export default function App() {
     reason: "not_authenticated",
   });
   const idleLogoutDoneRef = useRef(false);
+  const ignoreServiceTapUntilRef = useRef(0);
   const [connectedPrinterName, setConnectedPrinterName] = useState<string>("");
   const [isPrinterConnected, setIsPrinterConnected] = useState(false);
   const hasBlockingModal = Boolean(selectedService);
@@ -337,11 +338,16 @@ export default function App() {
   }, [hasBlockingModal, showPromotionModal]);
 
   const dismissPromotionModal = useCallback(() => {
+    // Guard against touch "tap-through" on kiosk devices after closing promotion overlay.
+    ignoreServiceTapUntilRef.current = Date.now() + 450;
     setLastInteractionAt(Date.now());
     setShowPromotionModal(false);
   }, []);
 
   const handleServiceSelect = async (service: Service) => {
+    if (Date.now() < ignoreServiceTapUntilRef.current) {
+      return;
+    }
     dismissPromotionModal();
     setSelectedService(service);
   };
