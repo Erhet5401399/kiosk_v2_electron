@@ -13,6 +13,7 @@ const log = logger.child("Main");
 let quitting = false;
 const PROMOTION_CACHE_DIR = "promotion-videos";
 const MEDIA_SCHEME = "kiosk-media";
+const AUTH_WEBVIEW_PRELOAD = path.join(__dirname, "webview/auth.preload.js");
 
 protocol.registerSchemesAsPrivileged([
   {
@@ -96,8 +97,7 @@ function setupSecurity() {
       webPreferences.nodeIntegration = false;
       webPreferences.contextIsolation = true;
       webPreferences.webSecurity = true;
-      delete (webPreferences as { preload?: string }).preload;
-      delete (webPreferences as { preloadURL?: string }).preloadURL;
+      (webPreferences as { preload?: string }).preload = AUTH_WEBVIEW_PRELOAD;
     });
     contents.setWindowOpenHandler(() => ({ action: "deny" }));
   });

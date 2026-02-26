@@ -21,13 +21,24 @@ interface UserAuthModalProps {
 
 type WebViewElement = HTMLElement & {
   reload: () => void;
+  send: (channel: string, ...args: unknown[]) => void;
   addEventListener: (
     type: string,
-    listener: (event: { url?: string; validatedURL?: string }) => void,
+    listener: (event: {
+      url?: string;
+      validatedURL?: string;
+      channel?: string;
+      args?: unknown[];
+    }) => void,
   ) => void;
   removeEventListener: (
     type: string,
-    listener: (event: { url?: string; validatedURL?: string }) => void,
+    listener: (event: {
+      url?: string;
+      validatedURL?: string;
+      channel?: string;
+      args?: unknown[];
+    }) => void,
   ) => void;
 };
 
@@ -42,6 +53,8 @@ export function UserAuthModal({
   const [error, setError] = useState<string | null>(null);
   const [authMethodId, setAuthMethodId] = useState<string | null>(null);
   const [loginDeadline, setLoginDeadline] = useState<number | null>(null);
+  const [showWebviewKeyboard, setShowWebviewKeyboard] = useState(false);
+  const [webviewKeyboardMode, setWebviewKeyboardMode] = useState<"alphanumeric" | "numeric">("alphanumeric");
 
   const smsKeyboard = useSmsAuthKeyboard();
   const { showError, showSuccess } = useSnackbar();
@@ -127,6 +140,8 @@ export function UserAuthModal({
     setAuthMethodId(nextMethod.id);
     setChallenge(null);
     setError(null);
+    setShowWebviewKeyboard(false);
+    setWebviewKeyboardMode("alphanumeric");
     smsKeyboard.setSmsCode("");
     smsKeyboard.closeKeyboard();
     setLoginDeadline(null);
@@ -274,6 +289,40 @@ export function UserAuthModal({
     };
   }, [challenge]);
 
+  useEffect(() => {
+    if (selectedMethod?.type === "webview_oauth") return;
+    setShowWebviewKeyboard(false);
+    setWebviewKeyboardMode("alphanumeric");
+  }, [selectedMethod?.type]);
+
+  useEffect(() => {
+    const webview = webviewRef.current;
+    if (!webview || selectedMethod?.type !== "webview_oauth") return;
+
+    const onIpcMessage = (event: { channel?: string; args?: unknown[] }) => {
+      const channel = String(event.channel || "");
+      if (channel === "vk-focus") {
+        const payload = (event.args?.[0] || {}) as { mode?: string };
+        setWebviewKeyboardMode(payload.mode === "numeric" ? "numeric" : "alphanumeric");
+        setShowWebviewKeyboard(true);
+        return;
+      }
+      if (channel === "vk-blur") {
+        setShowWebviewKeyboard(false);
+      }
+    };
+
+    webview.addEventListener("ipc-message", onIpcMessage);
+    return () => {
+      webview.removeEventListener("ipc-message", onIpcMessage);
+    };
+  }, [selectedMethod?.type, challenge?.webUrl]);
+
+  const sendWebviewKeyboardInput = (payload: { action: "append" | "backspace" | "done"; key?: string }) => {
+    if (selectedMethod?.type !== "webview_oauth") return;
+    webviewRef.current?.send("vk-input", payload);
+  };
+
   return (
     <ModalWrapper
       onClose={onCancel}
@@ -392,6 +441,17 @@ export function UserAuthModal({
               onKeyClick={smsKeyboard.appendKeyboardValue}
               onBackspace={smsKeyboard.backspaceKeyboardValue}
               onDone={smsKeyboard.closeKeyboard}
+            />
+          </div>
+        )}
+
+        {showWebviewKeyboard && selectedMethod?.type === "webview_oauth" && (
+          <div className="modal-keyboard-host">
+            <VirtualKeyboard
+              mode={webviewKeyboardMode}
+              onKeyClick={(key) => sendWebviewKeyboardInput({ action: "append", key })}
+              onBackspace={() => sendWebviewKeyboardInput({ action: "backspace" })}
+              onDone={() => sendWebviewKeyboardInput({ action: "done" })}
             />
           </div>
         )}
