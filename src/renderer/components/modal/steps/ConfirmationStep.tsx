@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
 
@@ -6,9 +5,7 @@ export function ConfirmationStep({ context, actions }: StepComponentProps) {
   const { service, stepData } = context;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
+    <div
       className="service-modal confirmation-step"
     >
       <div className="service-modal-body">
@@ -60,8 +57,12 @@ export function ConfirmationStep({ context, actions }: StepComponentProps) {
           <Button onClick={actions.onNext}>Баталгаажуулах</Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+
+
+
 
 

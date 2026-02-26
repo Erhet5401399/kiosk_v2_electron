@@ -1,5 +1,4 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
 import type {
   CategoryService,
   PrinterDevice,
@@ -218,7 +217,7 @@ export default function App() {
     } catch {
       // Keep fallback constants if remote catalog fails.
     }
-  }, [buildServiceFlowConfig]);
+  }, [buildServiceFlowConfig, selectedCategory]);
 
   const loadAuthStatus = useCallback(async () => {
     if (!window.electron?.auth) return;
@@ -430,29 +429,27 @@ export default function App() {
         />
       </div>
 
-      <AnimatePresence>
-        {showPromotionModal && !hasBlockingModal && (
-          <PromotionModal
-            videos={promotionVideos}
-            isLoading={isPromotionLoading}
-            statusText={promotionStatusText}
-            onGetStarted={dismissPromotionModal}
-          />
-        )}
+      {showPromotionModal && !hasBlockingModal && (
+        <PromotionModal
+          videos={promotionVideos}
+          isLoading={isPromotionLoading}
+          statusText={promotionStatusText}
+          onGetStarted={dismissPromotionModal}
+        />
+      )}
 
-        {selectedService && (
-          <ServiceModal
-            service={selectedService}
-            registerNumber={authStatus.session?.registerNumber || ""}
-            userClaims={authStatus.session?.claims}
-            sessionExpiresAt={authStatus.session?.expiresAt}
-            onSessionExpired={handleSessionExpired}
-            onAuthSuccess={handleAuthSuccess}
-            onPrint={handlePrintAndClose}
-            onClose={handleCloseModal}
-          />
-        )}
-      </AnimatePresence>
+      {selectedService && (
+        <ServiceModal
+          service={selectedService}
+          registerNumber={authStatus.session?.registerNumber || ""}
+          userClaims={authStatus.session?.claims}
+          sessionExpiresAt={authStatus.session?.expiresAt}
+          onSessionExpired={handleSessionExpired}
+          onAuthSuccess={handleAuthSuccess}
+          onPrint={handlePrintAndClose}
+          onClose={handleCloseModal}
+        />
+      )}
 
       <StatusBar
         deviceState={STATE_LABELS[snapshot.state]}

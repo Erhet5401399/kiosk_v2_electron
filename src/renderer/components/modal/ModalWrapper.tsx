@@ -1,5 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { motion } from "framer-motion";
+import React, { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { APP_NAME } from "../../constants";
 import { Logo } from "../common";
 
@@ -56,35 +55,15 @@ export function ModalWrapper({
   const warning = remainingMs !== null && remainingMs <= 30_000;
 
   return (
-    <motion.div
+    <div
       className="modal-overlay"
       style={{ willChange: "opacity" }}
-      initial={{ opacity: 0 }}
-      animate={{
-        opacity: 1,
-        transition: { duration: 0.14, ease: "easeOut" },
-      }}
-      exit={{
-        opacity: 0,
-        transition: { duration: 0.1, ease: "linear" },
-      }}
       onClick={onClose}
     >
-      <motion.div
+      <div
         className="modal-content full-height"
         style={{ willChange: "transform, opacity" }}
-        initial={{ y: 10, opacity: 0.995 }}
-        animate={{
-          y: 0,
-          opacity: 1,
-          transition: { duration: 0.16, ease: "easeOut" },
-        }}
-        exit={{
-          y: 8,
-          opacity: 0.995,
-          transition: { duration: 0.12, ease: "linear" },
-        }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
       >
         <div className="modal-header-fixed">
           <div className="modal-brand">
@@ -96,7 +75,12 @@ export function ModalWrapper({
           </span>
         </div>
         <div className="modal-scroll-body">{children}</div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 }
+
+
+
+
+

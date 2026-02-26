@@ -7,7 +7,6 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 
 type SnackbarTone = "info" | "success" | "error";
 
@@ -72,7 +71,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
   const current = queue[0];
   const iconByTone: Record<SnackbarTone, string> = {
     info: "i",
-    success: "✓",
+    success: "v",
     error: "!",
   };
 
@@ -80,25 +79,19 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
     <SnackbarContext.Provider value={value}>
       {children}
       <div className="snackbar-root">
-        <AnimatePresence mode="wait">
-          {current && (
-            <motion.div
-              key={current.id}
-              className={`snackbar snackbar-${current.tone}`}
-              initial={{ opacity: 0, y: -18, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -14, scale: 0.98 }}
-              transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              role="status"
-              aria-live="polite"
-            >
-              <span className="snackbar-icon" aria-hidden="true">
-                {iconByTone[current.tone]}
-              </span>
-              <span className="snackbar-text">{current.message}</span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {current && (
+          <div
+            key={current.id}
+            className={`snackbar snackbar-${current.tone}`}
+            role="status"
+            aria-live="polite"
+          >
+            <span className="snackbar-icon" aria-hidden="true">
+              {iconByTone[current.tone]}
+            </span>
+            <span className="snackbar-text">{current.message}</span>
+          </div>
+        )}
       </div>
     </SnackbarContext.Provider>
   );

@@ -8,7 +8,6 @@
   flex-direction: column;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
   position: relative;
 }
 
@@ -130,11 +129,6 @@
   right: 24px;
   bottom: 24px; */
   margin-left: 2px;
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  50% { opacity: 0; }
 }
 
 .virtual-keyboard {
@@ -292,3 +286,5 @@
     rgba(255, 255, 255, 0.95) 25%
   );
 }
+
+

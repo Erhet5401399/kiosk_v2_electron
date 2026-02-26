@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import type { UserAuthChallenge, UserAuthMethod, UserAuthStatus } from "../../../../shared/types";
 import type { StepComponentProps } from "../../../types/steps";
 import { Button, useSnackbar } from "../../common";
@@ -392,10 +391,7 @@ export function AuthStep({ actions }: StepComponentProps) {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
+    <div
       className="service-modal"
     >
       <div className="service-modal-body-login auth-step-fullscreen">
@@ -533,9 +529,13 @@ export function AuthStep({ actions }: StepComponentProps) {
           />
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
+
+
+
+
 
 
 

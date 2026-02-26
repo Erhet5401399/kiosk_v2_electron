@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { StepComponentProps } from "../../../types/steps";
@@ -198,10 +197,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
   }, [base64, previewKind]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }}
+    <div
       className="service-modal document-preview-step"
     >
       <div className="service-modal-body document-preview-body">
@@ -294,6 +290,10 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
           </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+
+
+

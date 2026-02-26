@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { StepComponentProps } from "../../../types/steps";
 import type {
@@ -45,13 +44,13 @@ function CardProcessing({ onNext }: { onNext: () => void }) {
   }, [onNext]);
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }} className="payment-processing">
+    <div className="payment-processing">
       <div className="step-header">
         <div className="processing-spinner" style={{ marginBottom: 20 }} />
         <h1>Та картаа уншуулна уу...</h1>
         <p>Please wait</p>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -147,7 +146,7 @@ function QpayProcessing({
   };
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }} className="service-modal payment-processing-step">
+    <div className="service-modal payment-processing-step">
       <div className="service-modal-body">
         <div className="step-header">
           <h1>Scan QPay QR to pay</h1>
@@ -208,7 +207,7 @@ function QpayProcessing({
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -226,7 +225,7 @@ export function PaymentProcessingStep({ context, actions }: StepComponentProps) 
   }
 
   return (
-    <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ type: "spring", bounce: 0, stiffness: 320, damping: 34 }} className="service-modal">
+    <div className="service-modal">
       <div className="service-modal-body">
         <div className="step-header">
           <h1>Payment method is required</h1>
@@ -240,6 +239,11 @@ export function PaymentProcessingStep({ context, actions }: StepComponentProps) 
           </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+
+
+
+

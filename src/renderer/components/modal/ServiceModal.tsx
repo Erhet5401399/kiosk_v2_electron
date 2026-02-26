@@ -1,5 +1,4 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import type {
   Service,
   PaymentMethod,
@@ -138,7 +137,6 @@ export function ServiceModal({
 
   const stepConfigs = engine.getStepConfigs();
   const currentConfig = engine.getCurrentStepConfig();
-  const isAuthStep = state.currentStepId === "auth-gate";
 
   const handlePrintAndClose = async () => {
     const currentRegister = (state.stepData.register_number as string) || registerNumber;
@@ -147,27 +145,25 @@ export function ServiceModal({
   };
 
   return (
-    <AnimatePresence>
-      <ModalWrapper
-        onClose={cancel}
-        countdownTo={sessionExpiresAt}
-        onCountdownEnd={onSessionExpired}
-      >
-        <div className="service-context-strip">
-          <div className="service-context-main">
-            <strong className="service-context-name">{service.name}</strong>
-            <span className="service-context-price">{service.price} MNT</span>
-          </div>
-          <span className="service-context-meta">Step {state.currentStepIndex + 1} / {state.steps.length}</span>
+    <ModalWrapper
+      onClose={cancel}
+      countdownTo={sessionExpiresAt}
+      onCountdownEnd={onSessionExpired}
+    >
+      <div className="service-context-strip">
+        <div className="service-context-main">
+          <strong className="service-context-name">{service.name}</strong>
+          <span className="service-context-price">{service.price} MNT</span>
         </div>
-        <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
-        <StepRenderer
-          context={context}
-          actions={actions}
-          config={currentConfig}
-          onPrint={handlePrintAndClose}
-        />
-      </ModalWrapper>
-    </AnimatePresence>
+        <span className="service-context-meta">Step {state.currentStepIndex + 1} / {state.steps.length}</span>
+      </div>
+      <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
+      <StepRenderer
+        context={context}
+        actions={actions}
+        config={currentConfig}
+        onPrint={handlePrintAndClose}
+      />
+    </ModalWrapper>
   );
 }

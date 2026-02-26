@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
@@ -29,9 +28,7 @@ export function BoundaryVerificationStep({ actions }: StepComponentProps) {
   }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 0 }}
-      animate={{ opacity: 1, x: 0 }}
+    <div
       className="service-modal"
     >
       <div className="service-modal-body">
@@ -78,6 +75,10 @@ export function BoundaryVerificationStep({ actions }: StepComponentProps) {
           </Button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
+
+
+
+

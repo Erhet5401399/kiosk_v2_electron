@@ -68,7 +68,6 @@
   font-size: var(--font-lg);
   letter-spacing: -0.3px;
   text-align: left;
-  transition: color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   cursor: pointer;
   width: 100%;
   outline: none;
@@ -96,7 +95,6 @@
   align-items: center;
   justify-content: center;
   background: var(--category-icon-bg);
-  transition: background-color 0.25s ease, transform 0.25s ease;
 }
 
 .category-glyph {
@@ -175,3 +173,4 @@
 .category-btn-sidebar.is-disabled:focus-visible {
   box-shadow: none !important;
 }
+

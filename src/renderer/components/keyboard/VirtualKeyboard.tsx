@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 const LETTERS = [
   ['Ф', 'Ц', 'У', 'Ж', 'Э', 'Н', 'Г', 'Ш', 'Ү', 'З', 'К', 'Ъ'],
   ['Й', 'Ы', 'Б', 'Ө', 'А', 'Х', 'Р', 'О', 'Л', 'Д', 'П'],
@@ -46,11 +44,7 @@ export function VirtualKeyboard({
   );
 
   return (
-    <motion.div
-      className="virtual-keyboard split-layout"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <div className="virtual-keyboard split-layout">
       <div className="keyboard-main">
         {showLetters && (
           <div className="keyboard-letters">
@@ -105,6 +99,6 @@ export function VirtualKeyboard({
           ))}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
