@@ -1,8 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
+import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { StepComponentProps } from "../../../types/steps";
 import { Button, StateCard } from "../../common";
 import { buildDataUriFromBase64, detectBase64ContentKind } from "../../../utils";
+
+GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 export function DocumentPreviewStep({ context, actions, config }: StepComponentProps) {
   const existingBase64 = String(context.stepData.documentBase64 || "").trim();
@@ -49,6 +53,10 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
   const [base64, setBase64] = useState(existingBase64);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pdfPageImages, setPdfPageImages] = useState<string[]>([]);
+  const [isRenderingPdf, setIsRenderingPdf] = useState(false);
+  const [pdfRenderError, setPdfRenderError] = useState<string | null>(null);
+  const pdfListRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -116,12 +124,78 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
 
   const dataUri = useMemo(() => buildDataUriFromBase64(base64), [base64]);
   const previewKind = useMemo(() => detectBase64ContentKind(base64), [base64]);
-  const previewSrc = useMemo(() => {
-    if (previewKind === "pdf") {
-      return `${dataUri}#toolbar=0&navpanes=0&scrollbar=0`;
+  const previewSrc = useMemo(() => dataUri, [dataUri]);
+
+  useEffect(() => {
+    setPdfPageImages([]);
+    setPdfRenderError(null);
+  }, [base64]);
+
+  useEffect(() => {
+    if (previewKind !== "pdf" || !base64) {
+      setIsRenderingPdf(false);
+      return;
     }
-    return dataUri;
-  }, [dataUri, previewKind]);
+
+    let active = true;
+    const bytes = Uint8Array.from(atob(base64), (char) => char.charCodeAt(0));
+
+    const render = async () => {
+      setIsRenderingPdf(true);
+      setPdfRenderError(null);
+
+      try {
+        const loadingTask = getDocument({ data: bytes });
+        const pdf = await loadingTask.promise;
+        if (!active) {
+          await loadingTask.destroy();
+          return;
+        }
+
+        const renderedPages: string[] = [];
+        const listWidth = pdfListRef.current?.clientWidth || 1000;
+        const targetWidth = Math.max(640, Math.min(1400, listWidth * window.devicePixelRatio));
+
+        for (let index = 1; index <= pdf.numPages; index += 1) {
+          if (!active) break;
+          const page = await pdf.getPage(index);
+          const unscaledViewport = page.getViewport({ scale: 1 });
+          const scale = targetWidth / unscaledViewport.width;
+          const viewport = page.getViewport({ scale });
+
+          const canvas = document.createElement("canvas");
+          const context2d = canvas.getContext("2d");
+          if (!context2d) {
+            throw new Error("PDF canvas context is unavailable.");
+          }
+
+          canvas.width = Math.floor(viewport.width);
+          canvas.height = Math.floor(viewport.height);
+          await page.render({ canvasContext: context2d, viewport }).promise;
+          renderedPages.push(canvas.toDataURL("image/png"));
+        }
+
+        if (!active) {
+          await pdf.destroy();
+          return;
+        }
+        setPdfPageImages(renderedPages);
+        await pdf.destroy();
+      } catch (err) {
+        if (!active) return;
+        setPdfRenderError((err as Error)?.message || "Failed to render PDF preview.");
+      } finally {
+        if (active) {
+          setIsRenderingPdf(false);
+        }
+      }
+    };
+
+    void render();
+    return () => {
+      active = false;
+    };
+  }, [base64, previewKind]);
 
   return (
     <motion.div
@@ -159,8 +233,41 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
             />
           </div>
         ) : (
-          <div className="result-details document-preview-fill">
-            {previewKind === "pdf" || previewKind === "html" ? (
+          <div className="document-preview-fill">
+            {previewKind === "pdf" ? (
+              <div className="document-preview-pdf">
+                <div ref={pdfListRef} className="document-preview-canvas-wrap">
+                  {isRenderingPdf && (
+                    <div className="document-preview-rendering">Түр хүлээнэ үү...</div>
+                  )}
+                  {pdfRenderError ? (
+                    <StateCard
+                      title="PDF preview failed"
+                      description="The PDF could not be rendered."
+                      detail={pdfRenderError}
+                      tone="warning"
+                    />
+                  ) : !isRenderingPdf && pdfPageImages.length === 0 ? (
+                    <StateCard
+                      title="PDF preview unavailable"
+                      description="No pages could be rendered from this PDF."
+                      tone="warning"
+                    />
+                  ) : (
+                    <div className="document-preview-pages">
+                      {pdfPageImages.map((imageSrc, index) => (
+                        <img
+                          key={`pdf-page-${index + 1}`}
+                          src={imageSrc}
+                          alt={`PDF page ${index + 1}`}
+                          className="document-preview-page-image"
+                        />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : previewKind === "html" ? (
               <iframe
                 title="Document Preview"
                 src={previewSrc}

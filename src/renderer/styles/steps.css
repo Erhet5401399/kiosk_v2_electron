@@ -281,6 +281,57 @@
   object-fit: contain;
 }
 
+.document-preview-pdf {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.document-preview-canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: #999999;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.document-preview-rendering {
+  color: var(--muted);
+  font-weight: 600;
+  align-self: center;
+}
+
+.document-preview-canvas {
+  width: min(100%, max-content);
+  height: auto;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+}
+
+.document-preview-pages {
+  width: 100%;
+  max-width: 980px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.document-preview-page-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 6px;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+}
+
 .result-row {
   display: flex;
   justify-content: space-between;
