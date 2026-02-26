@@ -409,7 +409,7 @@ export default function App() {
 
   return (
     <div className="screen">
-      <PromoSection />
+      <PromoSection paused={showPromotionModal || hasBlockingModal} />
 
       <div className="content sidebar-layout">
         <Sidebar
