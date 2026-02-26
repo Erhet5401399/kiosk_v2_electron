@@ -18,6 +18,7 @@ const CACHE_DIRNAME = "promotion-videos";
 const MANIFEST_FILENAME = "playlist.json";
 const MEDIA_SCHEME = "kiosk-media";
 const SYNC_INTERVAL_MS = Number(process.env.PROMOTION_SYNC_INTERVAL_MS || 5 * 60 * 1000);
+const TEST_PROMOTION_UPDATED_AT = "2026-01-01T00:00:00.000Z";
 
 class PromotionService extends EventEmitter {
   private static inst: PromotionService;
@@ -299,17 +300,20 @@ class PromotionService extends EventEmitter {
     this.emitState();
     try {
       // const payload = await api.post<PromotionApiResponse>(PROMOTION_ENDPOINT);
-      const payload: PromotionApiResponse = { videos: [
-        {
-          id: "example-video",
-          title: "Example Promotion",
-          src: "https://www.pexels.com/download/video/8879540/",
-          mimeType: "video/mp4",
-          active: true,
-          order: 1,
-          updatedAt: new Date().toISOString(),
-        }
-      ] };
+      const payload: PromotionApiResponse = {
+        videos: [
+          {
+            id: "example-video",
+            title: "Example Promotion",
+            src: "https://www.pexels.com/download/video/8879540/",
+            mimeType: "video/mp4",
+            active: true,
+            order: 1,
+            updatedAt: TEST_PROMOTION_UPDATED_AT,
+          },
+        ],
+        version: "test-stub-v1",
+      };
       const manifest = this.normalizeManifest(payload);
       const downloaded = (
         await Promise.all(manifest.videos.map((video) => this.materializeVideo(video)))

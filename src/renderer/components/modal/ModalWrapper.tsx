@@ -58,29 +58,31 @@ export function ModalWrapper({
   return (
     <motion.div
       className="modal-overlay"
+      style={{ willChange: "opacity" }}
       initial={{ opacity: 0 }}
       animate={{
         opacity: 1,
-        transition: { duration: 0.2, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.14, ease: "easeOut" },
       }}
       exit={{
         opacity: 0,
-        transition: { duration: 0, ease: [0.4, 0, 1, 1] },
+        transition: { duration: 0.1, ease: "linear" },
       }}
       onClick={onClose}
     >
       <motion.div
         className="modal-content full-height"
-        initial={{ y: 24, opacity: 0.98 }}
+        style={{ willChange: "transform, opacity" }}
+        initial={{ y: 10, opacity: 0.995 }}
         animate={{
           y: 0,
           opacity: 1,
-          transition: { duration: 0.26, ease: [0.22, 1, 0.36, 1] },
+          transition: { duration: 0.16, ease: "easeOut" },
         }}
         exit={{
-          y: 20,
-          opacity: 0.98,
-          transition: { duration: 0.2, ease: [0.4, 0, 1, 1] },
+          y: 8,
+          opacity: 0.995,
+          transition: { duration: 0.12, ease: "linear" },
         }}
         onClick={(e) => e.stopPropagation()}
       >
