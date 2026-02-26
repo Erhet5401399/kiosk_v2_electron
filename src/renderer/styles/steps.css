@@ -1,7 +1,7 @@
 .flow-progress-bar {
   position: relative;
   padding: 20px 0;
-  margin-bottom: 20px;
+  /* margin-bottom: 20px; */
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   background: white;
 }

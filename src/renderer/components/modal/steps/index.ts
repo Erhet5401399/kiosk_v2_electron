@@ -10,3 +10,4 @@ export { ConfirmationStep } from './ConfirmationStep';
 export { PrintOptionsStep } from './PrintOptionsStep';
 export { ServiceUnavailableStep } from './ServiceUnavailableStep';
 export { DocumentPreviewStep } from './DocumentPreviewStep';
+export { AuthStep } from './AuthStep';

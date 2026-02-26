@@ -110,10 +110,6 @@ export class FlowEngine {
       service: context.service!,
       paymentMethod: context.paymentMethod ?? null,
       stepData: this.state.stepData,
-      keyboard: context.keyboard ?? {
-        activeTarget: null,
-        mode: 'alphanumeric',
-      },
     };
 
     return stepConfig.validate(fullContext);

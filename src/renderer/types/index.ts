@@ -21,7 +21,5 @@ export interface Service {
 
 export type PaymentStep = "info" | "payment" | "success";
 export type PaymentMethod = "qrcode" | "pos" | null;
-export type KeyboardTarget = string;
-export type KeyboardInputMode = "alphanumeric" | "numeric";
 
 export * from './steps';

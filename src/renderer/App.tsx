@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence } from "framer-motion";
 import type {
   CategoryService,
@@ -23,7 +23,7 @@ import {
   StatusBar,
 } from "./components/layout";
 import { ServiceList } from "./components/service";
-import { PromotionModal, ServiceModal, UserAuthModal } from "./components/modal";
+import { PromotionModal, ServiceModal } from "./components/modal";
 import { hasStepDefinition } from "./flows";
 import { buildPrintableHtmlFromBase64, detectBase64ContentKind } from "./utils";
 import "./styles/index.css";
@@ -43,7 +43,6 @@ export default function App() {
   const [services, setServices] = useState<Service[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [pendingService, setPendingService] = useState<Service | null>(null);
   const [showPromotionModal, setShowPromotionModal] = useState(false);
   const [lastInteractionAt, setLastInteractionAt] = useState(() => Date.now());
   const [authStatus, setAuthStatus] = useState<UserAuthStatus>({
@@ -51,9 +50,10 @@ export default function App() {
     session: null,
     reason: "not_authenticated",
   });
+  const idleLogoutDoneRef = useRef(false);
   const [connectedPrinterName, setConnectedPrinterName] = useState<string>("");
   const [isPrinterConnected, setIsPrinterConnected] = useState(false);
-  const hasBlockingModal = Boolean(selectedService || pendingService);
+  const hasBlockingModal = Boolean(selectedService);
 
   const filteredServices = useMemo(() => {
     if (!selectedCategory) return services;
@@ -89,7 +89,7 @@ export default function App() {
       return toUnavailableFlow("No flow steps returned from backend.");
     }
 
-    const steps: ServiceFlowStep[] = [];
+    const steps: ServiceFlowStep[] = ["auth-gate"];
     for (const rawStep of rawSteps) {
       if (typeof rawStep === "string") {
         const id = rawStep.trim();
@@ -324,6 +324,18 @@ export default function App() {
     }
   }, [hasBlockingModal]);
 
+  useEffect(() => {
+    if (!showPromotionModal || hasBlockingModal) {
+      idleLogoutDoneRef.current = false;
+      return;
+    }
+    if (idleLogoutDoneRef.current) return;
+    idleLogoutDoneRef.current = true;
+
+    if (!window.electron?.auth) return;
+    void window.electron.auth.logout().then(setAuthStatus).catch(() => {});
+  }, [hasBlockingModal, showPromotionModal]);
+
   const dismissPromotionModal = useCallback(() => {
     setLastInteractionAt(Date.now());
     setShowPromotionModal(false);
@@ -331,22 +343,7 @@ export default function App() {
 
   const handleServiceSelect = async (service: Service) => {
     dismissPromotionModal();
-
-    if (!window.electron?.auth) {
-      setSelectedService(service);
-      return;
-    }
-
-    const status = await window.electron.auth.status();
-    setAuthStatus(status);
-
-    if (status.authenticated) {
-      void window.electron.auth.touch().then(setAuthStatus).catch(() => {});
-      setSelectedService(service);
-      return;
-    }
-
-    setPendingService(service);
+    setSelectedService(service);
   };
 
   const handleCloseModal = () => {
@@ -355,27 +352,17 @@ export default function App() {
     setShowPromotionModal(false);
   };
 
-  const handleAuthCancel = () => {
-    setPendingService(null);
-    setLastInteractionAt(Date.now());
-    setShowPromotionModal(false);
-  };
-
   const handleAuthSuccess = (session: UserAuthSession) => {
-    if (!pendingService) return;
     setAuthStatus({
       authenticated: true,
       session,
     });
-    setSelectedService(pendingService);
-    setPendingService(null);
     setLastInteractionAt(Date.now());
     setShowPromotionModal(false);
   };
 
   const handleSessionExpired = useCallback(() => {
     setSelectedService(null);
-    setPendingService(null);
     setAuthStatus({
       authenticated: false,
       session: null,
@@ -447,14 +434,6 @@ export default function App() {
           />
         )}
 
-        {pendingService && (
-          <UserAuthModal
-            serviceName={pendingService.name}
-            onCancel={handleAuthCancel}
-            onSuccess={handleAuthSuccess}
-          />
-        )}
-
         {selectedService && (
           <ServiceModal
             service={selectedService}
@@ -462,6 +441,7 @@ export default function App() {
             userClaims={authStatus.session?.claims}
             sessionExpiresAt={authStatus.session?.expiresAt}
             onSessionExpired={handleSessionExpired}
+            onAuthSuccess={handleAuthSuccess}
             onPrint={handlePrintAndClose}
             onClose={handleCloseModal}
           />

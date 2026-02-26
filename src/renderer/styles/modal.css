@@ -234,6 +234,11 @@
   flex-direction: column;
 }
 
+.auth-step-fullscreen {
+  min-height: 0;
+  padding: 0;
+}
+
 
 .service-header-modal {
   display: flex;
@@ -256,8 +261,6 @@
   width: 100%;
   height: 100%;
   /* min-height: 420px; */
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 12px;
   background: #fff;
 }
 
@@ -277,35 +280,6 @@
   flex: 1;
   min-height: 0;
   height: 100%;
-}
-
-.auth-method-selector {
-  display: flex;
-  gap: 10px;
-  margin: 8px 0 16px;
-}
-
-.auth-method-chip {
-  border: 1px solid rgba(0, 0, 0, 0.12);
-  border-radius: 999px;
-  background: #ffffff;
-  color: var(--text);
-  font-weight: 700;
-  font-size: var(--font-sm);
-  padding: 10px 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.auth-method-chip.active {
-  border-color: var(--accent);
-  background: rgba(0, 122, 255, 0.1);
-  color: var(--accent);
-}
-
-.auth-method-chip:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .auth-sms-card {
@@ -380,47 +354,4 @@
 .auth-sms-card .registration-input-field .placeholder {
   min-width: 100px;
   display: inline-block;
-}
-
-.auth-sms-card .input-cursor {
-  height: 2rem;
-}
-
-.auth-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: var(--font-sm);
-  font-weight: 700;
-  color: var(--text);
-}
-
-.auth-field input {
-  border: 1px solid rgba(15, 23, 42, 0.16);
-  border-radius: 12px;
-  font-size: var(--font-md);
-  padding: 12px 14px;
-  background: #ffffff;
-  color: var(--text);
-  outline: none;
-}
-
-.auth-field input:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.12);
-}
-
-.auth-sms-card p.auth-hint {
-  margin: 6px 0 0;
-  display: flex;
-  align-items: flex-start;
-  gap: 0;
-  color: #334155;
-  font-size: 0.8rem;
-  font-weight: 500;
-  line-height: 1.4;
-  background: rgba(14, 116, 144, 0.08);
-  border: 1px solid rgba(14, 116, 144, 0.22);
-  border-radius: 12px;
-  padding: 10px 12px 11px;
 }

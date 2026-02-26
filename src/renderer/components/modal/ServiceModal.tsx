@@ -3,15 +3,13 @@ import { AnimatePresence } from 'framer-motion';
 import type {
   Service,
   PaymentMethod,
-  KeyboardInputMode,
-  KeyboardTarget,
 } from '../../types';
 import type { StepContext, StepActions } from '../../types/steps';
-import { VirtualKeyboard } from '../keyboard';
 import { ModalWrapper } from './ModalWrapper';
 import { StepRenderer } from './StepRenderer';
 import { FlowProgressBar } from './FlowProgressBar';
 import { useFlowEngine } from '../../flows';
+import type { UserAuthSession } from "../../../shared/types";
 
 interface ServiceModalProps {
   service: Service;
@@ -19,6 +17,7 @@ interface ServiceModalProps {
   userClaims?: Record<string, unknown>;
   sessionExpiresAt?: number;
   onSessionExpired?: () => void;
+  onAuthSuccess?: (session: UserAuthSession) => void;
   onPrint: (
     registerNumber: string,
     documentBase64?: string,
@@ -32,18 +31,11 @@ export function ServiceModal({
   userClaims,
   sessionExpiresAt,
   onSessionExpired,
+  onAuthSuccess,
   onPrint,
   onClose,
 }: ServiceModalProps) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(null);
-  const [keyboardTarget, setKeyboardTarget] = useState<KeyboardTarget | null>(
-    null,
-  );
-  const [keyboardMode, setKeyboardMode] =
-    useState<KeyboardInputMode>('alphanumeric');
-  const [keyboardMaxLength, setKeyboardMaxLength] = useState<number | null>(
-    null,
-  );
 
   const {
     engine,
@@ -86,59 +78,7 @@ export function ServiceModal({
     service,
     paymentMethod,
     stepData: state.stepData,
-    keyboard: {
-      activeTarget: keyboardTarget,
-      mode: keyboardMode,
-    },
-  }), [
-    service,
-    paymentMethod,
-    state.stepData,
-    keyboardTarget,
-    keyboardMode,
-  ]);
-
-  const openKeyboard = useCallback(
-    (
-      target: KeyboardTarget,
-      options?: { mode?: KeyboardInputMode; maxLength?: number },
-    ) => {
-      setKeyboardTarget(target);
-      setKeyboardMode(options?.mode || 'alphanumeric');
-      setKeyboardMaxLength(
-        typeof options?.maxLength === 'number' ? options.maxLength : null,
-      );
-    },
-    [],
-  );
-
-  const closeKeyboard = useCallback(() => {
-    setKeyboardTarget(null);
-    setKeyboardMaxLength(null);
-  }, []);
-
-  const appendKeyboardValue = useCallback(
-    (key: string) => {
-      if (!keyboardTarget) return;
-
-      const currentValue = String(state.stepData[keyboardTarget] || '');
-      if (
-        typeof keyboardMaxLength === 'number' &&
-        currentValue.length >= keyboardMaxLength
-      ) {
-        return;
-      }
-
-      updateStepData({ [keyboardTarget]: currentValue + key });
-    },
-    [keyboardTarget, keyboardMaxLength, state.stepData, updateStepData],
-  );
-
-  const backspaceKeyboardValue = useCallback(() => {
-    if (!keyboardTarget) return;
-    const currentValue = String(state.stepData[keyboardTarget] || '');
-    updateStepData({ [keyboardTarget]: currentValue.slice(0, -1) });
-  }, [keyboardTarget, state.stepData, updateStepData]);
+  }), [service, paymentMethod, state.stepData]);
 
   const handleNext = useCallback(() => {
     const validation = engine.validateCurrentStep(context);
@@ -156,26 +96,31 @@ export function ServiceModal({
     const isFirstStep = !engine.canGoBack();
     const isSuccessStep = currentStepId === 'success';
     const isLastStep = engine.isOnFinalStep();
+    const previousStepId =
+      state.currentStepIndex > 0
+        ? state.steps[state.currentStepIndex - 1]
+        : null;
+    const shouldCloseInsteadOfReturningToAuth = previousStepId === "auth-gate";
 
-    if (isFirstStep || isSuccessStep || isLastStep) {
+    if (isFirstStep || isSuccessStep || isLastStep || shouldCloseInsteadOfReturningToAuth) {
       cancel();
       return;
     }
 
     goToBack();
-  }, [engine, state.currentStepId, cancel, goToBack]);
+  }, [engine, state.currentStepId, state.currentStepIndex, state.steps, cancel, goToBack]);
 
   const actions: StepActions = useMemo(() => ({
     onUpdateStepData: (data) => {
       if (data.paymentMethod) {
         setPaymentMethod(data.paymentMethod as PaymentMethod);
       }
+      const session = data.auth_session as UserAuthSession | undefined;
+      if (session) {
+        onAuthSuccess?.(session);
+      }
       updateStepData(data);
     },
-    onKeyboardOpen: openKeyboard,
-    onKeyboardClose: closeKeyboard,
-    onKeyboardAppend: appendKeyboardValue,
-    onKeyboardBackspace: backspaceKeyboardValue,
     onNext: handleNext,
     onBack: handleBackOrCancel,
     onGoToStep: goToStep,
@@ -183,10 +128,7 @@ export function ServiceModal({
     onCancel: cancel,
   }), [
     updateStepData,
-    openKeyboard,
-    closeKeyboard,
-    appendKeyboardValue,
-    backspaceKeyboardValue,
+    onAuthSuccess,
     handleNext,
     handleBackOrCancel,
     goToStep,
@@ -196,6 +138,7 @@ export function ServiceModal({
 
   const stepConfigs = engine.getStepConfigs();
   const currentConfig = engine.getCurrentStepConfig();
+  const isAuthStep = state.currentStepId === "auth-gate";
 
   const handlePrintAndClose = async () => {
     const currentRegister = (state.stepData.register_number as string) || registerNumber;
@@ -224,16 +167,6 @@ export function ServiceModal({
           config={currentConfig}
           onPrint={handlePrintAndClose}
         />
-        {keyboardTarget && (
-          <div className="modal-keyboard-host">
-            <VirtualKeyboard
-              mode={keyboardMode}
-              onKeyClick={appendKeyboardValue}
-              onBackspace={backspaceKeyboardValue}
-              onDone={closeKeyboard}
-            />
-          </div>
-        )}
       </ModalWrapper>
     </AnimatePresence>
   );

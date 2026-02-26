@@ -18,6 +18,7 @@ import {
   PrintOptionsStep,
   ServiceUnavailableStep,
   DocumentPreviewStep,
+  AuthStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -29,6 +30,17 @@ export type StepDefinition = StepConfig & {
 };
 
 export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
+  "auth-gate": {
+    id: "auth-gate",
+    title: "Нэвтрэх",
+    component: AuthStep,
+    validate: (context: StepContext): StepValidation => {
+      if (context.stepData.user_authenticated === true) {
+        return { isValid: true };
+      }
+      return { isValid: false, errorMessage: "Please complete authentication." };
+    },
+  },
   'land-parcel-select': {
     id: 'land-parcel-select',
     title: 'Газрын нэгж талбар сонгох',
