@@ -34,8 +34,8 @@
 }
 
 :root {
-  --bg: #f2f2f7;
-  --surface: rgba(255, 255, 255, 0.85);
+  --bg: #e9eef5;
+  --surface: rgba(255, 255, 255, 0.95);
   --text: #000000;
   --muted: #8e8e93;
   --accent: #1a42f7;

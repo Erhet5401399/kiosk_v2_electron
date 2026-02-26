@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import type { UserAuthChallenge, UserAuthMethod, UserAuthStatus } from "../../../../shared/types";
 import type { StepComponentProps } from "../../../types/steps";
-import { Button } from "../../common";
+import { Button, useSnackbar } from "../../common";
 import { VirtualKeyboard } from "../../keyboard";
 
 type WebViewElement = HTMLElement & {
@@ -33,6 +33,7 @@ function normalizeRegister(value: unknown): string {
 }
 
 export function AuthStep({ actions }: StepComponentProps) {
+  const { showError, showSuccess } = useSnackbar();
   const [methods, setMethods] = useState<UserAuthMethod[]>([]);
   const [authMethodId, setAuthMethodId] = useState<string | null>(null);
   const [challenge, setChallenge] = useState<UserAuthChallenge | null>(null);
@@ -144,7 +145,9 @@ export function AuthStep({ actions }: StepComponentProps) {
         }
       } catch (err) {
         if (!active) return;
-        setError((err as Error).message || "Failed to initialize authentication");
+        const message = (err as Error).message || "Failed to initialize authentication";
+        setError(message);
+        showError(message);
       } finally {
         if (active) {
           setInitializing(false);
@@ -180,11 +183,13 @@ export function AuthStep({ actions }: StepComponentProps) {
         throw new Error(`Method "${method.label}" is not configured for webview flow`);
       }
     } catch (err) {
-      setError((err as Error).message || "Failed to start authentication");
+      const message = (err as Error).message || "Failed to start authentication";
+      setError(message);
+      showError(message);
     } finally {
       setLoading(false);
     }
-  }, [authMethodId, loading, startAuth]);
+  }, [authMethodId, loading, showError, startAuth]);
 
   const verifyFromCallback = useCallback(async (callbackUrl: string) => {
     if (!challenge || authInFlightRef.current) return;
@@ -201,14 +206,17 @@ export function AuthStep({ actions }: StepComponentProps) {
       if (!status.authenticated || !status.session) {
         throw new Error("Authentication failed");
       }
+      showSuccess("Authenticated successfully");
       setAuthenticatedState(status);
     } catch (err) {
-      setError((err as Error).message || "Authentication failed");
+      const message = (err as Error).message || "Authentication failed";
+      setError(message);
+      showError(message);
       authInFlightRef.current = false;
     } finally {
       setLoading(false);
     }
-  }, [challenge, setAuthenticatedState]);
+  }, [challenge, setAuthenticatedState, showError, showSuccess]);
 
   useEffect(() => {
     const webview = webviewRef.current;
@@ -268,7 +276,9 @@ export function AuthStep({ actions }: StepComponentProps) {
     const normalizedReg = normalizeRegister(registerNumber);
     const normalizedPhone = String(phoneNumber || "").replace(/[^\d]/g, "");
     if (!normalizedReg || !normalizedPhone) {
-      setError("Register number and phone number are required");
+      const message = "Register number and phone number are required";
+      setError(message);
+      showError(message);
       return;
     }
 
@@ -280,20 +290,25 @@ export function AuthStep({ actions }: StepComponentProps) {
         registerNumber: normalizedReg,
         phoneNumber: normalizedPhone,
       });
+      showSuccess("SMS code sent");
       setSmsKeyboardTarget("code");
     } catch (err) {
       setChallenge(null);
-      setError((err as Error).message || "Failed to send SMS code");
+      const message = (err as Error).message || "Failed to send SMS code";
+      setError(message);
+      showError(message);
     } finally {
       setLoading(false);
     }
-  }, [phoneNumber, registerNumber, startAuth]);
+  }, [phoneNumber, registerNumber, showError, showSuccess, startAuth]);
 
   const verifySmsCode = useCallback(async () => {
     if (!challenge || challenge.methodId !== "sms") return;
     const normalizedCode = String(smsCode || "").replace(/[^\d]/g, "");
     if (!normalizedCode) {
-      setError("Enter SMS code");
+      const message = "Enter SMS code";
+      setError(message);
+      showError(message);
       return;
     }
 
@@ -308,13 +323,16 @@ export function AuthStep({ actions }: StepComponentProps) {
       if (!status.authenticated || !status.session) {
         throw new Error("Authentication failed");
       }
+      showSuccess("Authenticated successfully");
       setAuthenticatedState(status);
     } catch (err) {
-      setError((err as Error).message || "Authentication failed");
+      const message = (err as Error).message || "Authentication failed";
+      setError(message);
+      showError(message);
     } finally {
       setLoading(false);
     }
-  }, [challenge, setAuthenticatedState, smsCode]);
+  }, [challenge, setAuthenticatedState, showError, showSuccess, smsCode]);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -362,6 +380,17 @@ export function AuthStep({ actions }: StepComponentProps) {
     setSmsCode((prev) => prev.slice(0, -1));
   };
 
+  const renderFieldValue = (value: string, active: boolean, secure = false) => {
+    const displayValue = secure && value ? "•".repeat(value.length) : value;
+    return (
+      <div className="input-value">
+        {active && !displayValue && <div className="input-cursor" />}
+        {displayValue || <span className="placeholder" />}
+        {active && displayValue && <div className="input-cursor" />}
+      </div>
+    );
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -406,14 +435,14 @@ export function AuthStep({ actions }: StepComponentProps) {
                 onClick={() => setSmsKeyboardTarget("register")}
               >
                 <div className="input-label">Регистрийн дугаар</div>
-                <div className="input-value">{registerNumber || <span className="placeholder" />}</div>
+                {renderFieldValue(registerNumber, smsKeyboardTarget === "register")}
               </button>
               <button
                 className={`registration-input-field ${smsKeyboardTarget === "phone" ? "active" : ""}`}
                 onClick={() => setSmsKeyboardTarget("phone")}
               >
                 <div className="input-label">Утасны дугаар</div>
-                <div className="input-value">{phoneNumber || <span className="placeholder" />}</div>
+                {renderFieldValue(phoneNumber, smsKeyboardTarget === "phone")}
               </button>
               {smsCodeSent && (
                 <button
@@ -421,7 +450,7 @@ export function AuthStep({ actions }: StepComponentProps) {
                   onClick={() => setSmsKeyboardTarget("code")}
                 >
                   <div className="input-label">Нэг удаагийн код</div>
-                  <div className="input-value">{smsCode ? "•".repeat(smsCode.length) : <span className="placeholder" />}</div>
+                  {renderFieldValue(smsCode, smsKeyboardTarget === "code", true)}
                 </button>
               )}
             </div>
@@ -507,5 +536,6 @@ export function AuthStep({ actions }: StepComponentProps) {
     </motion.div>
   );
 }
+
 
 

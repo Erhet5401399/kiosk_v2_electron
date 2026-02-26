@@ -291,20 +291,27 @@
 .document-preview-canvas-wrap {
   flex: 1;
   min-height: 0;
+  position: relative;
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
   align-items: stretch;
   justify-content: center;
-  background: #999999;
+  background: #ffffff;
   border-radius: 12px;
   padding: 14px;
 }
 
 .document-preview-rendering {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: var(--muted);
   font-weight: 600;
-  align-self: center;
+  text-align: center;
+  pointer-events: none;
 }
 
 .document-preview-canvas {

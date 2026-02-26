@@ -17,15 +17,15 @@
   flex-direction: column;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(10px);
+  /* backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  transition: transform 0.2s ease;
-  height: 270px;
+  transition: transform 0.2s ease; */
+  /* height: 270px; */
   cursor: pointer;
 }
 
 .service-card:active {
-  transform: scale(0.97);
+  transform: scale(0.99);
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -105,8 +105,9 @@
 }
 
 .price {
-  font-weight: 700;
-  font-size: var(--font-lg);
+  font-weight: 600;
+  font-size: var(--font-md);
+  color: var(--muted);
 }
 
 .select-btn {

@@ -264,7 +264,6 @@ export interface PromotionVideo {
 
 export interface PromotionPlaylist {
   videos: PromotionVideo[];
-  version?: string;
   fetchedAt: number;
 }
 

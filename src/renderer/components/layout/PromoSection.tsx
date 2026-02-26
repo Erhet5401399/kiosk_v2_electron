@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { APP_NAME } from "../../constants";
 import { Logo } from "../common";
+import homePromoVideo from "../../assets/videos/home-promo.mp4";
 
 interface PromoSectionProps {
   logoSrc?: string;
@@ -13,7 +14,7 @@ interface PromoSectionProps {
 export function PromoSection({
   title = APP_NAME,
   subtitle = "Та үйлчилгээний төрлөө сонгоно уу.",
-  videoSrc = "https://www.pexels.com/download/video/3141208/",
+  videoSrc = homePromoVideo,
   paused = false,
 }: PromoSectionProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
