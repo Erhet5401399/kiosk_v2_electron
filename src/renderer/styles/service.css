@@ -37,30 +37,39 @@
 }
 
 .service-icon-box {
+  --service-icon-bg-start: #ecf3ff;
+  --service-icon-bg-end: #dbeafe;
+  --service-icon-fg: #0b56b8;
   width: 52px;
   height: 52px;
   border-radius: 12px;
-  /* background: #f2f2f7; */
+  background: linear-gradient(145deg, var(--service-icon-bg-start) 0%, var(--service-icon-bg-end) 100%);
+  color: var(--service-icon-fg);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 80px;
   flex-shrink: 0;
   line-height: 1;
-  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12); */
+  box-shadow: none;
 }
 
 .service-icon-box.small {
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   font-size: 60px;
-  border-radius: 20px;
+  border-radius: 18px;
 }
 
 .service-icon-box.large {
   width: 80px;
   height: 80px;
   border-radius: 20px;
+}
+
+.service-glyph {
+  width: 42px;
+  height: 42px;
 }
 
 .service-card h3 {

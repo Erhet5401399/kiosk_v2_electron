@@ -19,7 +19,7 @@
 
 .status-bar {
   padding: 10px 16px 12px;
-  background: linear-gradient(180deg, rgba(9, 14, 25, 0.96), rgba(13, 19, 32, 0.98));
+  background: #000000;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   flex-wrap: nowrap;
