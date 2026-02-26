@@ -20,7 +20,7 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   transition: transform 0.2s ease;
-  height: 340px;
+  height: 270px;
   cursor: pointer;
 }
 
