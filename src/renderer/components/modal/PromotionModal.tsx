@@ -15,7 +15,6 @@ export function PromotionModal({
   onGetStarted,
 }: PromotionModalProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const isSwitching = useRef(false);
   const playlist = useMemo(
     () => videos.filter((video) => Boolean(String(video.src || "").trim())),
     [videos],
@@ -42,53 +41,51 @@ export function PromotionModal({
   const currentVideo = playlist[currentIndex];
 
   const goToNext = useCallback(() => {
-    if (!playlist.length) return;
-    if (isSwitching.current) return;
-    isSwitching.current = true;
-    setCurrentIndex((prev) => (prev + 1) % playlist.length);
-    setTimeout(() => {
-    isSwitching.current = false;
-  }, 100);
+    setCurrentIndex((prev) => {
+      if (!playlist.length) return 0;
+      return (prev + 1) % playlist.length;
+    });
   }, [playlist.length]);
 
   const handleVideoEnded = useCallback(() => {
-    if (playlist.length > 1) {
-      goToNext();
-      return;
-    }
-
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Fallback for sources where native loop is unreliable in kiosk runtime.
-    video.currentTime = 0;
-    void video.play().catch(() => {});
+    if (!playlist.length) return;
+    goToNext();
   }, [goToNext, playlist.length]);
 
-  const handleVideoPause = useCallback(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (playlist.length !== 1) return;
-    if (!video.ended) return;
+  const handleDismissPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.setTimeout(() => {
+        onGetStarted();
+      }, 0);
+    },
+    [onGetStarted],
+  );
 
-    video.currentTime = 0;
-    void video.play().catch(() => {});
-  }, [playlist.length]);
+  const swallowClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+  }, []);
 
   return (
-    <section className="promotion-modal" onPointerDown={onGetStarted}>
+    <section
+      className="promotion-modal"
+      onPointerDown={handleDismissPointerDown}
+      onClick={swallowClick}
+    >
       {currentVideo ? (
         <video
+          key={currentVideo.id || currentVideo.src}
           ref={videoRef}
           className="promotion-video"
           src={currentVideo.src}
           autoPlay
           muted
-          loop={false}
+          loop={playlist.length === 1}
           preload="auto"
           playsInline
           onEnded={handleVideoEnded}
-          onPause={handleVideoPause}
           onError={goToNext}
         />
       ) : (
@@ -103,10 +100,8 @@ export function PromotionModal({
           <button
             type="button"
             className="promotion-start-btn"
-            onClick={(event) => {
-              event.stopPropagation();
-              onGetStarted();
-            }}
+            onPointerDown={handleDismissPointerDown}
+            onClick={swallowClick}
           >
             Үйлчилгээ авах
           </button>

@@ -23,8 +23,8 @@
   justify-content: center;
   background: linear-gradient(
     180deg,
-    rgba(2, 6, 23, 0.01) 0%,
-    rgba(2, 6, 23, 0.25) 60%,
+    rgba(2, 6, 23, 0) 0%,
+    rgba(2, 6, 23, 0.15) 60%,
     rgba(2, 6, 23, 0.85) 100%
   );
   padding: 56px 32px;

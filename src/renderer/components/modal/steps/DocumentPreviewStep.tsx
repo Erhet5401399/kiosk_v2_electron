@@ -133,7 +133,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
       <div className="service-modal-body document-preview-body">
         <div className="step-header">
           <h1>{config.title || ""}</h1>
-          <p>Please verify the document preview.</p>
+          <p>Та бичиг баримтыг шалгана уу.</p>
         </div>
 
         {isLoading ? (
@@ -180,10 +180,10 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
       <div className="service-modal-footer">
         <div className="modal-footer">
           <Button variant="secondary" onClick={actions.onBack}>
-            Back
+            Буцах
           </Button>
           <Button onClick={actions.onNext} disabled={!base64 || Boolean(error)}>
-            Continue
+            Үргэлжлүүлэх
           </Button>
         </div>
       </div>

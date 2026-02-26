@@ -74,10 +74,15 @@ class DanBackendProvider implements AuthProvider {
 
   async startChallenge(): Promise<UserAuthChallenge> {
     const challengeId = crypto.randomUUID();
-    const started = await api.post<DanStartResponse>(this.startEndpoint, {
-      challengeId,
-      methodId: this.method.id,
-    });
+    // const started = await api.post<DanStartResponse>(this.startEndpoint, {
+    //   challengeId,
+    //   methodId: this.method.id,
+    // });
+    const started: DanStartResponse = {
+      auth_url: "https://sso.gov.mn",
+      callback_url: this.defaultCallbackUrl,
+      expires_at: Date.now() + 5 * 60 * 1000,
+    };
 
     const callbackUrl = String(
       started.callback_url || this.defaultCallbackUrl,

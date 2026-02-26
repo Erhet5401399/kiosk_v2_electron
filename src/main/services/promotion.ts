@@ -298,7 +298,18 @@ class PromotionService extends EventEmitter {
     this.syncing = true;
     this.emitState();
     try {
-      const payload = await api.post<PromotionApiResponse>(PROMOTION_ENDPOINT);
+      // const payload = await api.post<PromotionApiResponse>(PROMOTION_ENDPOINT);
+      const payload: PromotionApiResponse = { videos: [
+        {
+          id: "example-video",
+          title: "Example Promotion",
+          src: "https://www.pexels.com/download/video/8879540/",
+          mimeType: "video/mp4",
+          active: true,
+          order: 1,
+          updatedAt: new Date().toISOString(),
+        }
+      ] };
       const manifest = this.normalizeManifest(payload);
       const downloaded = (
         await Promise.all(manifest.videos.map((video) => this.materializeVideo(video)))

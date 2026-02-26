@@ -22,7 +22,7 @@ const UPDATER_LABELS: Record<UpdateStatus['state'], string> = {
 
 export function StatusBar({
   deviceState,
-  deviceId,
+  // deviceId,
   printerLabel,
   printerConnected,
   updaterStatus,
@@ -45,14 +45,14 @@ export function StatusBar({
           <span className="status-label">State</span>
           <strong className="status-value">{deviceState || 'Unknown'}</strong>
         </span>
-        <span className="status-item">
+        {/* <span className="status-item">
           <span className="status-label">Kiosk ID</span>
           <strong className="status-value status-id">{deviceId || 'Unknown'}</strong>
-        </span>
+        </span> */}
         <span className="status-item">
           <span className="status-label">Printer</span>
           <strong className="status-value">
-            {printerConnected ? `Connected: ${printerLabel || "Unknown"}` : "Disconnected"}
+            {printerConnected ? `${printerLabel || "Unknown"}` : "Disconnected"}
           </strong>
         </span>
       </div>
