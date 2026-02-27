@@ -49,8 +49,32 @@ export function PromotionModal({
 
   const handleVideoEnded = useCallback(() => {
     if (!playlist.length) return;
+    if (playlist.length === 1) {
+      const video = videoRef.current;
+      if (!video) return;
+      video.currentTime = 0;
+      void video.play().catch(() => {});
+      return;
+    }
     goToNext();
   }, [goToNext, playlist.length]);
+
+  const handleVideoError = useCallback(() => {
+    const video = videoRef.current;
+    if (playlist.length === 1) {
+      if (!video) return;
+      video.load();
+      void video.play().catch(() => {});
+      return;
+    }
+    goToNext();
+  }, [goToNext, playlist.length]);
+
+  const handleVideoCanPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    void video.play().catch(() => {});
+  }, []);
 
   const handleDismissPointerDown = useCallback(
     (event: React.PointerEvent<HTMLElement>) => {
@@ -82,11 +106,12 @@ export function PromotionModal({
           src={currentVideo.src}
           autoPlay
           muted
-          loop={playlist.length === 1}
+          loop={false}
           preload="metadata"
           playsInline
           onEnded={handleVideoEnded}
-          onError={goToNext}
+          onCanPlay={handleVideoCanPlay}
+          onError={handleVideoError}
         />
       ) : (
         <div className="promotion-video promotion-fallback" />
