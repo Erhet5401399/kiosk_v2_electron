@@ -42,9 +42,9 @@ export const UPDATER = {
 
 export const PRINTER = {
   PATTERN: /\bLexmark\b/i,
-  TIMEOUT: 60000,
+  TIMEOUT: 30000,
   MAX_QUEUE: 100,
-  RETRY_ATTEMPTS: 3,
+  RETRY_ATTEMPTS: 1,
 } as const;
 
 export const IPC = {
@@ -55,6 +55,8 @@ export const IPC = {
 
   PRINT: "hardware:print",
   PRINTERS: "hardware:printers",
+  PRINT_JOB_STATUS: "hardware:print-job-status",
+  PRINT_EVENT: "hardware:print:event",
 
   CONFIG_GET: "config:get",
   CONFIG_REFRESH: "config:refresh",

@@ -6,6 +6,7 @@ import type {
   CreateQpayInvoiceResponse,
   Parcel,
   PrinterDevice,
+  PrintJobStatus,
   PromotionEvent,
   PromotionPlaylist,
   RuntimeSnapshot,
@@ -45,6 +46,8 @@ declare global {
           error?: string;
         }>;
         list: () => Promise<PrinterDevice[]>;
+        getJobStatus: (jobId: string) => Promise<PrintJobStatus | null>;
+        onJobStatus: (callback: (status: PrintJobStatus) => void) => () => void;
       };
       health: {
         getStatus: () => Promise<any>;

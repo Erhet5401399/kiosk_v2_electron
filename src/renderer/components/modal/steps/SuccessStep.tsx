@@ -23,7 +23,7 @@ export function SuccessStep({
     if (!onPrint || isPrinting) return;
 
     setPrintState('printing');
-    setPrintMessage('Хэвлэлийн хүсэлтийг илгээж байна...');
+    setPrintMessage('Баримт хэвлэх хүсэлтийг илгээж байна...');
 
     const result = await onPrint();
 
@@ -34,7 +34,7 @@ export function SuccessStep({
     }
 
     setPrintState('success');
-    setPrintMessage('Хэвлэх ажил илгээгдлээ. Түр хүлээнэ үү...');
+    setPrintMessage('Хэвлэх комманд илгээгдлээ. Түр хүлээнэ үү...');
     window.setTimeout(() => {
       actions.onComplete();
     }, 1200);

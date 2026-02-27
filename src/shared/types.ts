@@ -43,6 +43,15 @@ export interface PrintJob {
   error?: string;
 }
 
+export interface PrintJobStatus {
+  id: string;
+  status: PrintJob["status"];
+  error?: string;
+  createdAt: number;
+  updatedAt: number;
+  attempts: number;
+}
+
 export interface PrinterDevice {
   name: string;
   isDefault: boolean;

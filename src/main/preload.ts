@@ -25,6 +25,13 @@ const api = {
       priority?: string;
     }) => ipcRenderer.invoke("hardware:print", req),
     list: () => ipcRenderer.invoke("hardware:printers"),
+    getJobStatus: (jobId: string) =>
+      ipcRenderer.invoke("hardware:print-job-status", jobId),
+    onJobStatus: (cb: (status: unknown) => void) => {
+      const handler = (_: unknown, status: unknown) => cb(status);
+      ipcRenderer.on("hardware:print:event", handler);
+      return () => ipcRenderer.removeListener("hardware:print:event", handler);
+    },
   },
 
   health: {

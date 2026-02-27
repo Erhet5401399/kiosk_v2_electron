@@ -1,8 +1,9 @@
 import { EventEmitter } from "events";
 import fs from "fs";
 import path from "path";
+import { execFile } from "child_process";
 import { app, BrowserWindow } from "electron";
-import { PrintJob, PrinterDevice } from "../../shared/types";
+import { PrintJob, PrintJobStatus, PrinterDevice } from "../../shared/types";
 import { PRINTER, ERROR } from "../core/constants";
 import { PrinterError } from "../core/errors";
 import { generateId } from "../core/utils";
@@ -11,9 +12,78 @@ import { logger } from "./logger";
 class PrinterService extends EventEmitter {
   private static inst: PrinterService;
   private queue: PrintJob[] = [];
+  private jobStatuses = new Map<string, PrintJobStatus>();
   private processing = false;
   private stats = { completed: 0, failed: 0 };
   private log = logger.child("Printer");
+
+  private escapePowerShellSingleQuote(value: string): string {
+    return String(value || "").replace(/'/g, "''");
+  }
+
+  private runPowerShell(command: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      execFile(
+        "powershell.exe",
+        ["-NoProfile", "-NonInteractive", "-Command", command],
+        { windowsHide: true, timeout: 15000 },
+        (error, stdout) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve(String(stdout || ""));
+        },
+      );
+    });
+  }
+
+  private async getPrinterJobIds(printerName: string): Promise<Set<number>> {
+    if (process.platform !== "win32") return new Set<number>();
+
+    const escapedName = this.escapePowerShellSingleQuote(printerName);
+    const script = `Get-PrintJob -PrinterName '${escapedName}' | Select-Object -ExpandProperty ID`;
+    const output = await this.runPowerShell(script);
+    const ids = output
+      .split(/\r?\n/)
+      .map((line) => Number(line.trim()))
+      .filter((value) => Number.isFinite(value));
+
+    return new Set(ids);
+  }
+
+  private async waitForQueueCompletion(printerName: string, beforeIds: Set<number>): Promise<void> {
+    if (process.platform !== "win32") return;
+
+    const timeoutAt = Date.now() + PRINTER.TIMEOUT;
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    let trackedIds: Set<number> = new Set<number>();
+    while (Date.now() < timeoutAt && trackedIds.size === 0) {
+      const current = await this.getPrinterJobIds(printerName);
+      const created = [...current].filter((id) => !beforeIds.has(id));
+      if (created.length > 0) {
+        trackedIds = new Set(created);
+        break;
+      }
+      await sleep(400);
+    }
+
+    if (trackedIds.size === 0) {
+      return;
+    }
+
+    while (Date.now() < timeoutAt) {
+      const current = await this.getPrinterJobIds(printerName);
+      const pendingTracked = [...trackedIds].some((id) => current.has(id));
+      if (!pendingTracked) {
+        return;
+      }
+      await sleep(600);
+    }
+
+    throw new PrinterError(ERROR.PRINT_FAILED, "Printer queue confirmation timed out");
+  }
 
   static get(): PrinterService {
     return this.inst || (this.inst = new PrinterService());
@@ -68,6 +138,7 @@ class PrinterService extends EventEmitter {
         this.priorityWeight(j.priority) < this.priorityWeight(job.priority),
     );
     idx === -1 ? this.queue.push(job) : this.queue.splice(idx, 0, job);
+    this.updateJobStatus(job);
 
     this.log.info("Job queued", { id: job.id, type, priority: job.priority });
     this.emit("queued", job);
@@ -95,6 +166,7 @@ class PrinterService extends EventEmitter {
   private async processJob(job: PrintJob) {
     job.status = "printing";
     job.attempts++;
+    this.updateJobStatus(job);
 
     try {
       const printer = await this.findConfigured();
@@ -105,6 +177,7 @@ class PrinterService extends EventEmitter {
 
       job.status = "completed";
       this.stats.completed++;
+      this.updateJobStatus(job);
       this.removeJob(job.id);
       this.emit("completed", job);
       this.log.info("Job completed", { id: job.id });
@@ -113,11 +186,13 @@ class PrinterService extends EventEmitter {
 
       if (job.attempts < PRINTER.RETRY_ATTEMPTS) {
         job.status = "queued";
+        this.updateJobStatus(job);
         this.log.warn("Job will retry", { id: job.id, attempt: job.attempts });
         await new Promise((r) => setTimeout(r, 2000));
       } else {
         job.status = "failed";
         this.stats.failed++;
+        this.updateJobStatus(job);
         this.removeJob(job.id);
         this.emit("failed", job);
         this.log.error("Job failed", e as Error, { id: job.id });
@@ -143,7 +218,9 @@ class PrinterService extends EventEmitter {
       }
 
       for (let i = 0; i < job.copies; i++) {
+        const beforeIds = await this.getPrinterJobIds(printerName);
         await print(pdfPath, { printer: printerName });
+        await this.waitForQueueCompletion(printerName, beforeIds);
       }
     } finally {
       if (pdfPath && pdfPath !== job.content && fs.existsSync(pdfPath)) {
@@ -185,15 +262,51 @@ class PrinterService extends EventEmitter {
     if (idx > -1) this.queue.splice(idx, 1);
   }
 
+  private updateJobStatus(job: PrintJob) {
+    const now = Date.now();
+    const previous = this.jobStatuses.get(job.id);
+    const payload: PrintJobStatus = {
+      id: job.id,
+      status: job.status,
+      ...(job.error ? { error: job.error } : {}),
+      createdAt: job.createdAt,
+      updatedAt: now,
+      attempts: job.attempts,
+    };
+
+    this.jobStatuses.set(job.id, payload);
+    this.emit("job-status", payload);
+
+    if (this.jobStatuses.size > 400) {
+      const oldestId = this.jobStatuses.keys().next().value as string | undefined;
+      if (oldestId) this.jobStatuses.delete(oldestId);
+    }
+
+    if (
+      previous &&
+      (previous.status === "completed" || previous.status === "failed" || previous.status === "cancelled")
+    ) {
+      this.jobStatuses.delete(job.id);
+      this.jobStatuses.set(job.id, payload);
+    }
+  }
+
   cancel(id: string) {
     const job = this.queue.find((j) => j.id === id);
     if (job && job.status !== "printing") {
       job.status = "cancelled";
+      this.updateJobStatus(job);
       this.removeJob(id);
       this.emit("cancelled", job);
       return true;
     }
     return false;
+  }
+
+  getJobStatus(id: string): PrintJobStatus | null {
+    const normalized = String(id || "").trim();
+    if (!normalized) return null;
+    return this.jobStatuses.get(normalized) || null;
   }
 
   getStats() {

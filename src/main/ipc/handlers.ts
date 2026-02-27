@@ -8,7 +8,7 @@ import { cleanupParcelHandlers, setupParcelHandlers } from './parcel.handlers';
 import { cleanupPaymentHandlers, setupPaymentHandlers } from './payment.handlers';
 import { cleanupPromotionHandlers, setupPromotionHandlers } from './promotion.handlers';
 import { cleanupServiceHandlers, setupServiceHandlers } from './service.handlers';
-import type { PromotionEvent, UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
+import type { PrintJobStatus, PromotionEvent, UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
 const updaterStatusHandler = (status: unknown) => {
@@ -16,6 +16,9 @@ const updaterStatusHandler = (status: unknown) => {
 };
 const promotionStateHandler = (event: PromotionEvent) => {
   windows.broadcast(IPC.PROMOTION_EVENT, event);
+};
+const printerStatusHandler = (event: PrintJobStatus) => {
+  windows.broadcast(IPC.PRINT_EVENT, event);
 };
 
 export function setupIPC() {
@@ -33,6 +36,7 @@ export function setupIPC() {
   });
 
   ipcMain.handle(IPC.PRINTERS, () => printer.list());
+  ipcMain.handle(IPC.PRINT_JOB_STATUS, (_, jobId: string) => printer.getJobStatus(jobId));
   ipcMain.handle(IPC.CONFIG_GET, () => config.get());
   ipcMain.handle(IPC.CONFIG_REFRESH, () => config.fetch());
   ipcMain.handle(IPC.UPDATE_STATUS, () => updater.getStatus());
@@ -68,6 +72,7 @@ export function setupIPC() {
   });
   updater.on('status', updaterStatusHandler);
   promotion.on('state', promotionStateHandler);
+  printer.on('job-status', printerStatusHandler);
 
   log.info('IPC handlers registered');
 }
@@ -83,6 +88,7 @@ export function cleanupIPC() {
   ipcMain.removeHandler(IPC.RUNTIME_RESET);
   ipcMain.removeHandler(IPC.PRINT);
   ipcMain.removeHandler(IPC.PRINTERS);
+  ipcMain.removeHandler(IPC.PRINT_JOB_STATUS);
   ipcMain.removeHandler(IPC.CONFIG_GET);
   ipcMain.removeHandler(IPC.CONFIG_REFRESH);
   ipcMain.removeHandler(IPC.UPDATE_STATUS);
@@ -97,4 +103,5 @@ export function cleanupIPC() {
   ipcMain.removeHandler(IPC.HEALTH);
   updater.removeListener('status', updaterStatusHandler);
   promotion.removeListener('state', promotionStateHandler);
+  printer.removeListener('job-status', printerStatusHandler);
 }
