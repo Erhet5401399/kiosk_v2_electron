@@ -22,7 +22,7 @@ export function PaymentMethodStep({ actions }: StepComponentProps) {
             <div className="payment-icon">📱</div>
             <div className="payment-info">
               <h3>QPAY</h3>
-              <span>SocialPay, QPay, Банкны апп</span>
+              <span>Банкны апп-р QR код уншуулах</span>
             </div>
           </button>
 

@@ -4,17 +4,26 @@ import type {
   CheckQpayInvoiceResponse,
   CreateQpayInvoiceResponse,
 } from "../../../../shared/types";
-import { Button } from "../../common";
-
-const toAmount = (value: string | number): number => {
-  if (typeof value === "number") return value;
-  const numeric = Number(String(value || "").replace(/[^\d.]/g, ""));
-  return Number.isFinite(numeric) ? numeric : 0;
-};
+import { Button, useSnackbar } from "../../common";
 
 const normalizeInvoice = (raw: unknown): CreateQpayInvoiceResponse | null => {
   if (!raw || typeof raw !== "object") return null;
-  const payload = raw as Record<string, unknown>;
+  const root = raw as Record<string, unknown>;
+  const payload =
+    root.data && typeof root.data === "object"
+      ? (root.data as Record<string, unknown>)
+      : root;
+
+  const rawQrBase64 = String(
+    payload.qrImageBase64 ||
+      payload.qr_image_base64 ||
+      payload.qr_image ||
+      "",
+  ).trim();
+  const normalizedQrBase64 = rawQrBase64
+    .replace(/^data:image\/[a-z0-9.+-]+;base64,/i, "")
+    .replace(/\s+/g, "");
+
   const invoiceId = String(
     payload.invoiceId || payload.invoice_id || payload.id || payload.invoice || "",
   ).trim();
@@ -23,11 +32,14 @@ const normalizeInvoice = (raw: unknown): CreateQpayInvoiceResponse | null => {
   return {
     invoiceId,
     qrImageUrl: String(payload.qrImageUrl || payload.qr_image_url || "").trim() || undefined,
-    qrImageBase64:
-      String(payload.qrImageBase64 || payload.qr_image_base64 || "").trim() || undefined,
-    qrText: String(payload.qrText || payload.qr_text || payload.qr || "").trim() || undefined,
-    status: String(payload.status || "").trim() || undefined,
-    deeplink: String(payload.deeplink || payload.deep_link || "").trim() || undefined,
+    qrImageBase64: normalizedQrBase64 || undefined,
+    qrText:
+      String(payload.qrText || payload.qr_text || payload.qr || payload.short_url || "")
+        .trim() || undefined,
+    status: String(payload.status || root.status || "").trim() || undefined,
+    deeplink:
+      String(payload.deeplink || payload.deep_link || payload.short_url || "")
+        .trim() || undefined,
     amount:
       typeof payload.amount === "number"
         ? payload.amount
@@ -48,7 +60,7 @@ function CardProcessing({ onNext }: { onNext: () => void }) {
       <div className="step-header">
         <div className="processing-spinner" style={{ marginBottom: 20 }} />
         <h1>Та картаа уншуулна уу...</h1>
-        <p>Please wait</p>
+        <p>Та ПОС төхөөрөмжид банкны картаа уншуулна уу.</p>
       </div>
     </div>
   );
@@ -61,6 +73,7 @@ function QpayProcessing({
   context: StepComponentProps["context"];
   actions: StepComponentProps["actions"];
 }) {
+  const { showSuccess, showError, showInfo } = useSnackbar();
   const storedInvoice = useMemo(() => {
     const raw = context.stepData.qpayInvoice as CreateQpayInvoiceResponse | undefined;
     return raw?.invoiceId ? raw : null;
@@ -72,6 +85,15 @@ function QpayProcessing({
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const createStartedRef = useRef(false);
+  const currentInvoiceId = useMemo(
+    () =>
+      String(
+        invoice?.invoiceId ||
+        context.stepData.qpayInvoiceId ||
+        "",
+      ).trim(),
+    [context.stepData.qpayInvoiceId, invoice?.invoiceId],
+  );
 
   const createInvoice = async () => {
     if (!window.electron?.payment?.createQpayInvoice) {
@@ -86,12 +108,12 @@ function QpayProcessing({
     try {
       const createdRaw = await window.electron.payment.createQpayInvoice({
         register: String(context.stepData.register_number || ""),
-        tax_id: Number(context.stepData.tax_id || 0),
+        tax_id: Number(context.stepData.service_id || context.stepData.tax_id || context.service.id || 0),
       });
 
       const created = normalizeInvoice(createdRaw);
       if (!created) {
-        setError("Failed to create invoice.");
+        setError("Нэхэмжлэх үүсгэхэд алдаа гарлаа.");
         setIsCreating(false);
         return;
       }
@@ -103,8 +125,8 @@ function QpayProcessing({
         qpayInvoiceId: created.invoiceId,
         qpayStatus: created.status ?? "CREATED",
       });
-    } catch {
-      setError("Unable to create invoice. Please retry.");
+    } catch (e) {
+      setError("Нэхэмжлэх үүсгэхэд алдаа гарлаа. Дахин оролдоно уу.");
       setIsCreating(false);
     }
   };
@@ -122,24 +144,34 @@ function QpayProcessing({
   };
 
   const handleCheck = async () => {
-    if (!invoice?.invoiceId || !window.electron?.payment?.checkQpayInvoice) return;
+    if (!currentInvoiceId || !window.electron?.payment?.checkQpayInvoice) return;
     setIsChecking(true);
     setError(null);
 
     try {
       const result = await window.electron.payment.checkQpayInvoice({
-        invoice_id: invoice.invoiceId,
+        invoice_id: currentInvoiceId,
       });
+
+      const paymentState = String(result?.data || "UNKNOWN").trim().toUpperCase();
       setCheckResult(result);
-      actions.onUpdateStepData({
-        qpayCheck: result,
-        qpayStatus: result?.status ?? "UNKNOWN",
-      });
-      if (result?.paid) {
+      // actions.onUpdateStepData({
+      //   qpayCheck: result,
+      //   qpayStatus: paymentState || "UNKNOWN",
+      // });
+      if (!result?.status) {
+        showError("Төлбөр төлөгдөөгүй байна.");
+        return;
+      }
+      if (paymentState === "PAID") {
+        showSuccess("Төлбөр амжилттай төлөгдлөө.");
         actions.onNext();
+      } else {
+        showInfo(`Төлбөр төлөгдөөгүй байна.`);
       }
     } catch {
-      setError("Unable to check payment.");
+      setError("Төлбөр шалгахад алдаа гарлаа.");
+      showError("Төлбөр шалгахад алдаа гарлаа.");
     } finally {
       setIsChecking(false);
     }
@@ -149,14 +181,14 @@ function QpayProcessing({
     <div className="service-modal payment-processing-step">
       <div className="service-modal-body">
         <div className="step-header">
-          <h1>Scan QPay QR to pay</h1>
-          <p>After payment, click "Check payment".</p>
+          <h1>QPAY төлбөр төлөх</h1>
+          <p>Доорх QR кодыг банкны апп ашиглан төлбөр төлнө үү.</p>
         </div>
 
         {isCreating ? (
           <div className="loading-container">
             <div className="processing-spinner" />
-            <p>Creating invoice...</p>
+            <p>Түр хүлээнэ үү...</p>
           </div>
         ) : (
           <div className="qpay-payment-content">
@@ -170,19 +202,19 @@ function QpayProcessing({
               />
             ) : (
               <div className="qpay-qr-fallback">
-                <strong>QR payload</strong>
-                <span>{invoice?.qrText || "No QR data"}</span>
+                <strong>QPAY</strong>
+                <span>{invoice?.qrText || "Дахин оролдон уу"}</span>
               </div>
             )}
 
             <div className="qpay-meta">
               <div className="result-row">
-                <span>Invoice</span>
+                <span>Нэхэмжлэхийн дугаар</span>
                 <strong>{invoice?.invoiceId || "-"}</strong>
               </div>
               <div className="result-row">
-                <span>Status</span>
-                <strong>{checkResult?.status || invoice?.status || "CREATED"}</strong>
+                <span>Төлбөрийн төлөв</span>
+                <strong>{checkResult?.data || invoice?.status || "CREATED"}</strong>
               </div>
             </div>
 
@@ -194,15 +226,15 @@ function QpayProcessing({
       <div className="service-modal-footer">
         <div className="modal-footer">
           <Button variant="secondary" onClick={actions.onBack} disabled={isCreating || isChecking}>
-            Back
+            Буцах
           </Button>
-          {!invoice?.invoiceId ? (
+          {!currentInvoiceId ? (
             <Button onClick={handleRetry} disabled={isCreating}>
-              {isCreating ? "Creating..." : "Retry invoice"}
+              {isCreating ? "Нэхэмлэх үүсгэж байна..." : "Нэхэмжлэх үүсгэх"}
             </Button>
           ) : (
             <Button onClick={handleCheck} disabled={isCreating || isChecking}>
-              {isChecking ? "Checking..." : "Check payment"}
+              {isChecking ? "Төлбөр шалгаж байна..." : "Төлбөр шалгах"}
             </Button>
           )}
         </div>
@@ -228,8 +260,8 @@ export function PaymentProcessingStep({ context, actions }: StepComponentProps) 
     <div className="service-modal">
       <div className="service-modal-body">
         <div className="step-header">
-          <h1>Payment method is required</h1>
-          <p>Please go back and select a method.</p>
+          <h1>Төлбөрийн нөхцөл олдсонгүй</h1>
+          <p>Та дахин оролдоно уу.</p>
         </div>
       </div>
       <div className="service-modal-footer">
@@ -242,8 +274,5 @@ export function PaymentProcessingStep({ context, actions }: StepComponentProps) 
     </div>
   );
 }
-
-
-
 
 

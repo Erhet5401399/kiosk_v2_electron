@@ -68,10 +68,11 @@ export function ServiceModal({
     };
 
     updateStepData({
+      service_id: Number(service.id || 0),
       register_number: resolvedRegister,
       citizen,
     });
-  }, [registerNumber, userClaims, updateStepData]);
+  }, [registerNumber, service.id, userClaims, updateStepData]);
 
   const context: StepContext = useMemo(() => ({
     service,
@@ -155,7 +156,7 @@ export function ServiceModal({
           <strong className="service-context-name">{service.name}</strong>
           <span className="service-context-price">{service.price} MNT</span>
         </div>
-        <span className="service-context-meta">Step {state.currentStepIndex + 1} / {state.steps.length}</span>
+        {/* <span className="service-context-meta">{state.currentStepIndex + 1} / {state.steps.length}</span> */}
       </div>
       <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
       <StepRenderer

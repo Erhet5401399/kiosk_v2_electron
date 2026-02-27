@@ -27,7 +27,7 @@ class PaymentService {
   async checkQpayInvoice(
     req: CheckQpayInvoiceRequest,
   ): Promise<ApiResponse<CheckQpayInvoiceResponse> | CheckQpayInvoiceResponse> {
-    const url = "/api/qpay/check/invoice";
+    const url = "/api/qpay/check/inoivce";
     this.log.debug("Checking QPay invoice:", url);
     return api.post(url, req);
   }

@@ -50,7 +50,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
   }, [resolvedRequest.request]);
 
   const [base64, setBase64] = useState(existingBase64);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [hasResolvedDocument, setHasResolvedDocument] = useState(Boolean(existingBase64));
   const [error, setError] = useState<string | null>(null);
   const [pdfPageImages, setPdfPageImages] = useState<string[]>([]);
@@ -75,6 +75,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         setBase64("");
         setError(`Missing required fields: ${resolvedRequest.missing.join(", ")}`);
         setHasResolvedDocument(true);
+        setIsLoading(false);
         return;
       }
 
@@ -82,6 +83,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         setBase64("");
         setError("Unable to build document request.");
         setHasResolvedDocument(true);
+        setIsLoading(false);
         return;
       }
 
@@ -89,6 +91,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         setBase64(existingBase64);
         setError(null);
         setHasResolvedDocument(true);
+        setIsLoading(false);
         return;
       }
 
@@ -219,7 +222,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         {isLoading ? (
           <div className="loading-container document-preview-fill">
             <div className="processing-spinner" />
-            <p>Loading...</p>
+            <p>Түр хүлээнэ үү...</p>
           </div>
         ) : error ? (
           <div className="document-preview-fill">
@@ -242,7 +245,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
           ) : (
             <div className="loading-container document-preview-fill">
               <div className="processing-spinner" />
-              <p>Loading...</p>
+              <p>Түр хүлээнэ үү...</p>
             </div>
           )
         ) : (

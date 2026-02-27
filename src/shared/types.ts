@@ -250,9 +250,8 @@ export interface CheckQpayInvoiceRequest {
 }
 
 export interface CheckQpayInvoiceResponse {
-  paid: boolean;
-  status?: string;
-  paidAt?: string;
+  data: "PAID" | "UNPAID" | "EXPIRED" | "CANCELLED" | string;
+  status: boolean;
 }
 
 export interface PromotionVideo {

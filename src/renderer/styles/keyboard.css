@@ -254,7 +254,8 @@
 }
 
 .key.keyboard-done {
-  /* color: white; */
+  background: #a3e635;
+  color: #0f172a;
   padding: 12px 30px;
   border-radius: 12px;
   border: none;
@@ -262,6 +263,12 @@
   font-size: 1.1rem;
   cursor: pointer;
   flex: 0.2;
+}
+
+.key.keyboard-done:active {
+  background: #a3e635;
+  opacity: 0.7;
+  transform: scale(0.98);
 }
 
 /* Keep numeric-only last row keys perfectly equal width: backspace | 0 | done */
@@ -286,5 +293,3 @@
     rgba(255, 255, 255, 0.95) 25%
   );
 }
-
-

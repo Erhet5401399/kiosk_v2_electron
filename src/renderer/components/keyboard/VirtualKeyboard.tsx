@@ -63,7 +63,7 @@ export function VirtualKeyboard({
                 {backspaceIcon}
               </button>
               <button className="key keyboard-done" onClick={onDone}>
-                Done
+                Хаах
               </button>
             </div>
           </div>
@@ -81,7 +81,7 @@ export function VirtualKeyboard({
                     0
                   </button>
                   <button className="key keyboard-done" onClick={onDone}>
-                    Done
+                    Хаах
                   </button>
                 </>
               ) : (
