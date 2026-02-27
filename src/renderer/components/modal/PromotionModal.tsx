@@ -105,7 +105,6 @@ export function PromotionModal({
           className="promotion-video"
           src={currentVideo.src}
           autoPlay
-          muted
           loop={false}
           preload="metadata"
           playsInline
