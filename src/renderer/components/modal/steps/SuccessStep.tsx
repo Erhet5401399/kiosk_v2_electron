@@ -34,10 +34,10 @@ export function SuccessStep({
     }
 
     setPrintState('success');
-    setPrintMessage('Хэвлэх комманд илгээгдлээ. Түр хүлээнэ үү...');
-    window.setTimeout(() => {
-      actions.onComplete();
-    }, 1200);
+    setPrintMessage('Амжилттай хэвлэгдлээ.');
+    // window.setTimeout(() => {
+    //   actions.onComplete();
+    // }, 1200);
   };
 
   return (
