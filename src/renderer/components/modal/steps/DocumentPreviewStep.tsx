@@ -280,7 +280,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
                   )}
                 </div>
               </div>
-            ) : previewKind === "html" ? (
+            ) : previewKind === "html" || previewKind === "text" ? (
               <iframe
                 title="Document Preview"
                 src={previewSrc}
@@ -310,5 +310,4 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
     </div>
   );
 }
-
 

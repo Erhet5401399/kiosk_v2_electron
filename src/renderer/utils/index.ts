@@ -22,7 +22,7 @@ const JPEG_PREFIX_BASE64 = '/9j/';
 const PNG_PREFIX_BASE64 = 'iVBORw0KGgo';
 const GIF_PREFIX_BASE64 = 'R0lGOD';
 
-export type Base64ContentKind = 'image' | 'pdf' | 'html' | 'unknown';
+export type Base64ContentKind = 'image' | 'pdf' | 'html' | 'text' | 'unknown';
 
 export function normalizeBase64Payload(input: string): string {
   const trimmed = String(input || '').trim().replace(/^["'`]+|["'`]+$/g, '');
@@ -58,6 +58,14 @@ export function detectBase64ContentKind(base64: string): Base64ContentKind {
     if (/^<!doctype\s+html\b/i.test(decoded) || /^<html\b/i.test(decoded)) {
       return 'html';
     }
+
+    const compact = decoded.trim();
+    if (compact) {
+      const hasBinaryControls = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/.test(compact);
+      if (!hasBinaryControls) {
+        return 'text';
+      }
+    }
   } catch {
     // Ignore decode failures and fall back to unknown.
   }
@@ -82,6 +90,9 @@ export function buildDataUriFromBase64(base64: string): string {
   if (kind === 'html') {
     return `data:text/html;base64,${normalized}`;
   }
+  if (kind === 'text') {
+    return `data:text/plain;charset=utf-8;base64,${normalized}`;
+  }
   if (normalized.startsWith(JPEG_PREFIX_BASE64)) {
     return `data:image/jpeg;base64,${normalized}`;
   }
@@ -104,6 +115,29 @@ export function buildPrintableHtmlFromBase64(base64: string): string {
     const htmlContent = decodeBase64Utf8(normalized);
     if (!htmlContent.trim()) return '';
     return htmlContent;
+  }
+
+  if (kind === 'text') {
+    const textContent = decodeBase64Utf8(normalized);
+    if (!textContent.trim()) return '';
+    const escaped = textContent
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    return `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <style>
+            html, body { margin: 0; padding: 24px; background: #fff; color: #111; font-family: "Segoe UI", Arial, sans-serif; }
+            pre { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 16px; line-height: 1.5; }
+          </style>
+        </head>
+        <body><pre>${escaped}</pre></body>
+      </html>
+    `;
   }
 
   return `

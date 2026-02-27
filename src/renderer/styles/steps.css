@@ -112,7 +112,6 @@
   padding: 32px 24px;
   border-radius: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   text-align: left;
 }
