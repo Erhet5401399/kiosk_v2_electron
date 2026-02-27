@@ -3,12 +3,12 @@ import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
 import pdfWorkerSrc from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { StepComponentProps } from "../../../types/steps";
 import { Button, StateCard } from "../../common";
-import { buildDataUriFromBase64, detectBase64ContentKind } from "../../../utils";
+import { buildDataUriFromBase64, detectBase64ContentKind, normalizeBase64Payload } from "../../../utils";
 
 GlobalWorkerOptions.workerSrc = pdfWorkerSrc;
 
 export function DocumentPreviewStep({ context, actions, config }: StepComponentProps) {
-  const existingBase64 = String(context.stepData.documentBase64 || "").trim();
+  const existingBase64 = normalizeBase64Payload(String(context.stepData.documentBase64 || ""));
   const existingRequestKey = String(context.stepData.documentRequestKey || "").trim();
   const documentConfig = config.document;
 
@@ -51,6 +51,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
 
   const [base64, setBase64] = useState(existingBase64);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasResolvedDocument, setHasResolvedDocument] = useState(Boolean(existingBase64));
   const [error, setError] = useState<string | null>(null);
   const [pdfPageImages, setPdfPageImages] = useState<string[]>([]);
   const [isRenderingPdf, setIsRenderingPdf] = useState(false);
@@ -61,27 +62,33 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
     let active = true;
 
     const run = async () => {
+      setHasResolvedDocument(false);
+
       if (!documentConfig?.endpoint) {
         setBase64("");
         setError("Document endpoint is not configured.");
+        setHasResolvedDocument(true);
         return;
       }
 
       if (resolvedRequest.missing.length > 0) {
         setBase64("");
         setError(`Missing required fields: ${resolvedRequest.missing.join(", ")}`);
+        setHasResolvedDocument(true);
         return;
       }
 
       if (!resolvedRequest.request) {
         setBase64("");
         setError("Unable to build document request.");
+        setHasResolvedDocument(true);
         return;
       }
 
       if (existingBase64 && existingRequestKey && existingRequestKey === requestKey) {
         setBase64(existingBase64);
         setError(null);
+        setHasResolvedDocument(true);
         return;
       }
 
@@ -92,10 +99,11 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         const response = await window.electron.service.getDocument(resolvedRequest.request);
         if (!active) return;
 
-        const normalized = String(response || "").trim();
+        const normalized = normalizeBase64Payload(String(response || ""));
         if (!normalized) {
           setError("Document not found.");
           setBase64("");
+          setHasResolvedDocument(true);
           return;
         }
 
@@ -104,10 +112,12 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
           documentBase64: normalized,
           documentRequestKey: requestKey,
         });
+        setHasResolvedDocument(true);
       } catch (err) {
         if (!active) return;
         setBase64("");
         setError((err as Error)?.message || "Failed to load document.");
+        setHasResolvedDocument(true);
       } finally {
         if (active) {
           setIsLoading(false);
@@ -221,6 +231,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
             />
           </div>
         ) : !base64 ? (
+          hasResolvedDocument ? (
           <div className="document-preview-fill">
             <StateCard
               title="No document found"
@@ -228,6 +239,12 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
               tone="warning"
             />
           </div>
+          ) : (
+            <div className="loading-container document-preview-fill">
+              <div className="processing-spinner" />
+              <p>Loading...</p>
+            </div>
+          )
         ) : (
           <div className="document-preview-fill">
             {previewKind === "pdf" ? (
@@ -293,7 +310,5 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
     </div>
   );
 }
-
-
 
 

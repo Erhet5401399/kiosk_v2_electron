@@ -12,7 +12,6 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
   const { parcels, isLoading } = useParcels({ register: registerNumber });
 
   const handleSelectParcel = (parcel: Parcel) => {
-    console.log(parcel)
     actions.onUpdateStepData({
       parcel_id: parcel.parcel,
       contract_id: parcel.contract_id,
