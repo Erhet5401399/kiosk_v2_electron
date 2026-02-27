@@ -2,6 +2,7 @@ import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
 import { CheckIcon } from '../../common/CheckIcon';
 import { useParcels } from '../../../hooks';
+import type { Parcel } from '../../../../shared/types';
 
 export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
@@ -10,8 +11,14 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
 
   const { parcels, isLoading } = useParcels({ register: registerNumber });
 
-  const handleSelectParcel = (parcelId: string) => {
-    actions.onUpdateStepData({ parcel_id: parcelId });
+  const handleSelectParcel = (parcel: Parcel) => {
+    console.log(parcel)
+    actions.onUpdateStepData({
+      parcel_id: parcel.parcel,
+      contract_id: parcel.contract_id,
+      contract_no: parcel.contract_no,
+      person_id: parcel.person_id,
+    });
   };
 
   return (
@@ -35,7 +42,7 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
               <button
                 key={parcel.parcel}
                 className={`parcel-option land-parcel-option ${selectedParcel === parcel.parcel ? 'selected' : ''}`}
-                onClick={() => handleSelectParcel(parcel.parcel)}
+                onClick={() => handleSelectParcel(parcel)}
               >
                 <div className="parcel-icon">🗺️</div>
                 <div className="parcel-info land-parcel-info">

@@ -174,6 +174,9 @@ export interface Parcel {
   valid_from: string;
   valid_till: string;
   person_register: string;
+  contract_no?: string;
+  contract_id?: string;
+  person_id: string;
 }
 
 export interface ServiceCategory {
