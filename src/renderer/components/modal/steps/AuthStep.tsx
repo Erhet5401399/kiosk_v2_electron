@@ -275,7 +275,7 @@ export function AuthStep({ actions }: StepComponentProps) {
     const normalizedReg = normalizeRegister(registerNumber);
     const normalizedPhone = String(phoneNumber || "").replace(/[^\d]/g, "");
     if (!normalizedReg || !normalizedPhone) {
-      const message = "Register number and phone number are required";
+      const message = "Регистр болон утасны дугаараа зөв оруулна уу";
       setError(message);
       showError(message);
       return;
@@ -289,11 +289,11 @@ export function AuthStep({ actions }: StepComponentProps) {
         registerNumber: normalizedReg,
         phoneNumber: normalizedPhone,
       });
-      showSuccess("SMS code sent");
+      showSuccess("Нэг удаагийн код амжилттай илгээгдлээ");
       setSmsKeyboardTarget("code");
     } catch (err) {
       setChallenge(null);
-      const message = (err as Error).message || "Failed to send SMS code";
+      const message = (err as Error).message || "Нэг удаагийн код илгээхэд алдаа гарлаа";
       setError(message);
       showError(message);
     } finally {
@@ -305,7 +305,7 @@ export function AuthStep({ actions }: StepComponentProps) {
     if (!challenge || challenge.methodId !== "sms") return;
     const normalizedCode = String(smsCode || "").replace(/[^\d]/g, "");
     if (!normalizedCode) {
-      const message = "Enter SMS code";
+      const message = "Нэг удаагийн кодыг оруулна уу";
       setError(message);
       showError(message);
       return;
@@ -395,7 +395,7 @@ export function AuthStep({ actions }: StepComponentProps) {
       className="service-modal"
     >
       <div className="service-modal-body-login auth-step-fullscreen">
-        {error && <p style={{ color: "#c62828", fontWeight: 700, margin: "16px 24px 0" }}>{error}</p>}
+        {/* {error && <p style={{ color: "#c62828", fontWeight: 700, margin: "16px 24px 0" }}>{error}</p>} */}
 
         {initializing ? (
           <div className="loading-container">
