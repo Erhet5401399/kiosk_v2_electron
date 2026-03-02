@@ -203,12 +203,12 @@ export function AuthStep({ actions }: StepComponentProps) {
         payload: { callbackUrl },
       });
       if (!status.authenticated || !status.session) {
-        throw new Error("Authentication failed");
+        throw new Error("Нэвтрэх хүсэлт амжилтүй");
       }
-      showSuccess("Authenticated successfully");
+      showSuccess("Амжилттай нэвтэрлээ");
       setAuthenticatedState(status);
     } catch (err) {
-      const message = (err as Error).message || "Authentication failed";
+      const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтүй";
       setError(message);
       showError(message);
       authInFlightRef.current = false;
@@ -320,12 +320,12 @@ export function AuthStep({ actions }: StepComponentProps) {
         payload: { sendCode: normalizedCode },
       });
       if (!status.authenticated || !status.session) {
-        throw new Error("Authentication failed");
+        throw new Error("Нэвтрэх хүсэлт амжилтүй");
       }
       showSuccess("Authenticated successfully");
       setAuthenticatedState(status);
     } catch (err) {
-      const message = (err as Error).message || "Authentication failed";
+      const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтүй";
       setError(message);
       showError(message);
     } finally {

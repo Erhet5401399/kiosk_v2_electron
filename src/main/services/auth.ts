@@ -215,10 +215,10 @@ class SmsBackendProvider implements AuthProvider {
     process.env.SMS_CHALLENGE_TTL_MS || 5 * 60 * 1000,
   );
   private readonly passwordLoginPhoneNumber = String(
-    process.env.SMS_AUTH_PASSWORD_PHONE || "12345678",
+    process.env.SMS_AUTH_PASSWORD_PHONE || "",
   ).replace(/[^\d]/g, "");
   private readonly passwordLoginCode = String(
-    process.env.SMS_AUTH_PASSWORD_CODE || "123456",
+    process.env.SMS_AUTH_PASSWORD_CODE || "",
   ).trim();
 
   private pending = new Map<
@@ -243,7 +243,6 @@ class SmsBackendProvider implements AuthProvider {
     }
 
     const passwordLogin = phoneNumber === this.passwordLoginPhoneNumber;
-
     if (!passwordLogin) {
       await this.callSmsApi(this.checkEndpoint, { registerNumber, phoneNumber });
       await this.callSmsApi(this.sendEndpoint, { registerNumber, phoneNumber });
@@ -287,12 +286,12 @@ class SmsBackendProvider implements AuthProvider {
 
     const sendCode = String(req.payload.sendCode || "").trim();
     if (!/^\d{4,6}$/.test(sendCode)) {
-      throw new Error("Invalid SMS code");
+      throw new Error("Баталгаажуулах код буруу");
     }
 
     const verified = pending.passwordLogin
       ? this.verifyPasswordLogin(sendCode, pending.registerNumber)
-      : await this.callSmsApi<Record<string, unknown>>(
+      : await this.callSmsVerifyApi(
         this.verifyEndpoint,
         {
           registerNumber: pending.registerNumber,
@@ -309,7 +308,7 @@ class SmsBackendProvider implements AuthProvider {
       .replace(/\s+/g, "");
 
     if (!registerNumber) {
-      throw new Error("Missing register number from SMS login");
+      throw new Error("Регистрийн дугаар олдсонгүй");
     }
 
     this.pending.delete(challenge.challengeId);
@@ -334,6 +333,38 @@ class SmsBackendProvider implements AuthProvider {
       throw new Error(message);
     }
     return (response.data || {}) as T;
+  }
+
+  private async callSmsVerifyApi(
+    endpoint: string,
+    data: { registerNumber: string; phoneNumber: string; sendCode: string },
+  ): Promise<Record<string, unknown>> {
+    const response = await api.post<Record<string, unknown> | ApiEnvelope<Record<string, unknown>>>(
+      this.withParams(endpoint, data),
+    );
+
+    if (this.isApiEnvelope(response)) {
+      if (response.status !== true) {
+        throw new Error(String(response.msg || "Нэвтрэх хүсэлт амжилтгүй"));
+      }
+      return (response.data || {}) as Record<string, unknown>;
+    }
+
+    if (!response || typeof response !== "object") {
+      throw new Error("Нэвтрэх хүсэлт амжилтгүй");
+    }
+
+    const error = String((response as { error?: unknown }).error || "").trim();
+    if (error) {
+      throw new Error(error);
+    }
+
+    const message = String((response as { message?: unknown }).message || "").trim();
+    if (!message) {
+      throw new Error("Нэвтрэх хүсэлт амжилтгүй");
+    }
+
+    return response as Record<string, unknown>;
   }
 
   private withParams(
@@ -374,9 +405,17 @@ class SmsBackendProvider implements AuthProvider {
     });
   }
 
+  private isApiEnvelope<T = Record<string, unknown>>(value: unknown): value is ApiEnvelope<T> {
+    return Boolean(
+      value &&
+      typeof value === "object" &&
+      typeof (value as { status?: unknown }).status === "boolean",
+    );
+  }
+
   private verifyPasswordLogin(sendCode: string, registerNumber: string): Record<string, unknown> {
     if (sendCode !== this.passwordLoginCode) {
-      throw new Error("Invalid SMS code");
+      throw new Error("Баталгаажуулах код буруу байна");
     }
 
     return {
