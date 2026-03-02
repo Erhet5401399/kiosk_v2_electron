@@ -25,23 +25,6 @@ export function VirtualKeyboard({
   onDone,
 }: VirtualKeyboardProps) {
   const showLetters = mode !== 'numeric';
-  const backspaceIcon = (
-    <svg
-      className="key-backspace-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
-      <path
-        d="M20 12H7M7 12L12 7M7 12L12 17"
-        stroke="currentColor"
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
 
   return (
     <div className="virtual-keyboard split-layout">
@@ -60,7 +43,7 @@ export function VirtualKeyboard({
             <div className="keyboard-row">
               <button className="key ghost" />
               <button className="key backspace" onClick={onBackspace} aria-label="Backspace">
-                {backspaceIcon}
+                Арилгах
               </button>
               <button className="key keyboard-done" onClick={onDone}>
                 Хаах
@@ -75,7 +58,7 @@ export function VirtualKeyboard({
               {!showLetters && i === NUMBERS.length - 1 ? (
                 <>
                   <button className="key backspace" onClick={onBackspace} aria-label="Backspace">
-                    {backspaceIcon}
+                    Арилгах
                   </button>
                   <button className="key number-key" onClick={() => onKeyClick("0")}>
                     0

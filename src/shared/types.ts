@@ -189,6 +189,7 @@ export interface Parcel {
 }
 
 export interface ParcelRequest {
+  application_request_id: string;
   app_id: string;
   app_no: string;
   created_at: string;

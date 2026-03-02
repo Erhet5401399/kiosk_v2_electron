@@ -70,31 +70,31 @@ export function RequestCheckStep({ context, actions }: StepComponentProps) {
               >
                 <div className="parcel-icon">🗺️</div>
                 <div className="parcel-info land-parcel-info">
-                  <h3>Хүсэлтийн дугаар: {request.app_no}</h3>
+                  <h3>Хүсэлтийн дугаар: {request.application_request_id || "-"}</h3>
 
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Хүсэлтийн төрөл</span>
-                    <strong className="land-parcel-value">{request.app_type_desc}</strong>
+                    <strong className="land-parcel-value">{request.app_type_desc || "-"}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Хүсэлтийн тайлбар</span>
-                    <strong className="land-parcel-value">{request.req_description}</strong>
+                    <strong className="land-parcel-value">{request.req_description || "-"}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Нэгж талбарын дугаар</span>
-                    <strong className="land-parcel-value">{request.parcel_id}</strong>
-                  </div>
-                  <div className="land-parcel-meta-row">
-                    <span className="land-parcel-label">Талбайн хэмжээ (м²)</span>
-                    <strong className="land-parcel-value">{request.area_m2 || ""}</strong>
+                    <strong className="land-parcel-value">{request.parcel_id || "-"}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Аймаг /Нийслэл/</span>
-                    <strong className="land-parcel-value">{request.au1_name}</strong>
+                    <strong className="land-parcel-value">{request.au1_name || "-"}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Сум /Дүүрэг/</span>
-                    <strong className="land-parcel-value">{request.au2_name}</strong>
+                    <strong className="land-parcel-value">{request.au2_name || "-"}</strong>
+                  </div>
+                  <div className="land-parcel-meta-row">
+                    <span className="land-parcel-label">Хүсэлт гаргасан огноо</span>
+                    <strong className="land-parcel-value">{request.created_at || "-"}</strong>
                   </div>
                 </div>
               </button>
@@ -111,12 +111,12 @@ export function RequestCheckStep({ context, actions }: StepComponentProps) {
 
       <div className="service-modal-footer">
         <div className="modal-footer">
-          <Button variant="secondary" onClick={actions.onBack}>
-            Буцах
+          <Button onClick={actions.onComplete}>
+            Дуусгах
           </Button>
-          <Button onClick={actions.onNext}>
+          {/* <Button onClick={actions.onNext}>
             Үргэлжлүүлэх
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>
