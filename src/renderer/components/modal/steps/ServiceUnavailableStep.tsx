@@ -10,16 +10,16 @@ export function ServiceUnavailableStep({ context, actions }: StepComponentProps)
     >
       <div className="service-modal-body">
         <StateCard
-          title="Service Unavailable"
-          description="This service cannot be used right now."
-          detail={reason || 'The service flow is not configured correctly by backend.'}
+          title="Үйлчилгээ идэвхгүй байна"
+          description="Энэ үйлчилгээг одоогоор ашиглах боломжгүй байна."
+          detail={reason}
           tone="warning"
         />
       </div>
 
       <div className="service-modal-footer">
         <div className="modal-footer">
-          <Button onClick={actions.onCancel}>Close</Button>
+          <Button onClick={actions.onCancel}>Буцах</Button>
         </div>
       </div>
     </div>

@@ -1,3 +1,4 @@
+import { ApiResponse, Parcel, ParcelRequest, ServiceCategory } from "../../shared/types";
 import { api } from "./api";
 import { logger } from "./logger";
 
@@ -124,6 +125,42 @@ class ServiceApiService {
       this.log.error("Failed to fetch document", error as Error);
       return "";
     }
+  }
+
+  async getParcels(register: string): Promise<ApiResponse<Parcel[]> | Parcel[]> {
+    const reg = String(register || "").trim().toUpperCase();
+    if (!reg) {
+      this.log.warn("Skipping parcel fetch: empty register number");
+      return [];
+    }
+
+    const query = new URLSearchParams();
+    query.set('register_number', reg);
+
+    const url = `/api/kiosk/service/active/all/parcel?${query.toString()}`;
+    this.log.debug('Fetching parcels:', url);
+    return api.post(url);
+  }
+
+  async getParcelRequests(register: string): Promise<ApiResponse<ParcelRequest[]> | ParcelRequest[]> {
+    const reg = String(register || "").trim().toUpperCase();
+    if (!reg) {
+      this.log.warn("Skipping parcel request fetch: empty register number");
+      return [];
+    }
+
+    const query = new URLSearchParams();
+    query.set('register_number', reg);
+
+    const url = `/api/kiosk/service/request/check?${query.toString()}`;
+    this.log.debug('Fetching parcels:', url);
+    return api.post(url);
+  }
+
+  async getCategories(): Promise<ApiResponse<ServiceCategory[]> | ServiceCategory[]> {
+    const url = '/api/kiosk/service/category/tree';
+    this.log.debug('Fetching categories:', url);
+    return api.post(url);
   }
 
 }

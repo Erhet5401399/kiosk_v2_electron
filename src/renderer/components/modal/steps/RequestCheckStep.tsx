@@ -1,30 +1,19 @@
+import { useCallback, useEffect, useState } from 'react';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
-import { CheckIcon } from '../../common/CheckIcon';
-import type { Parcel } from '../../../../shared/types';
-import { useCallback, useEffect, useState } from 'react';
+import type { ParcelRequest } from '../../../../shared/types';
 
-export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
+export function RequestCheckStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
   const registerNumber = (stepData.register_number as string) ?? '';
-  const selectedParcel = stepData.parcel_id as string | undefined;
-  const [parcels, setParcels] = useState<Parcel[]>([]);
+  const [requests, setRequests] = useState<ParcelRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [_, setError] = useState<string | null>(null);
-
-  const handleSelectParcel = (parcel: Parcel) => {
-    actions.onUpdateStepData({
-      parcel_id: parcel.parcel,
-      contract_id: parcel.contract_id,
-      contract_no: parcel.contract_no,
-      person_id: parcel.person_id,
-    });
-  };
 
   const fetch = useCallback(async () => {
     const normalizedRegister = String(registerNumber || "").trim();
     if (!normalizedRegister) {
-      setParcels([]);
+      setRequests([]);
       setError(null);
       setIsLoading(false);
       return;
@@ -38,10 +27,10 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
         throw new Error('Electron IPC not available');
       }
 
-      const response = await window.electron.parcel.list(normalizedRegister);
+      const response = await window.electron.parcel.requestList(normalizedRegister);
 
       if (response) {
-        setParcels(response);
+        setRequests(response);
       } else {
         setError('Unknown error');
       }
@@ -62,8 +51,8 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
     >
       <div className="service-modal-body">
         <div className="step-header">
-          <h1>Газрын нэгж талбар сонгох</h1>
-          <p>Таны регистрийн дугаартай холбоотой газрын нэгжүүд</p>
+          <h1>Хүсэлт шалгах</h1>
+          <p>Таны регистрийн дугаар дээрх хүсэлтүүд</p>
         </div>
 
         {isLoading ? (
@@ -71,51 +60,50 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
             <div className="processing-spinner" />
             <p>Түр хүлээнэ үү...</p>
           </div>
-        ) : parcels.length ? (
+        ) : requests.length ? (
           <div className="parcel-list land-parcel-list">
-            {parcels.map((parcel) => (
+            {requests.map((request) => (
               <button
-                key={parcel.parcel}
-                className={`parcel-option land-parcel-option ${selectedParcel === parcel.parcel ? 'selected' : ''}`}
-                onClick={() => handleSelectParcel(parcel)}
+                key={request.app_id}
+                className={`parcel-option land-parcel-option`}
+                onClick={() => () => {}}
               >
                 <div className="parcel-icon">🗺️</div>
                 <div className="parcel-info land-parcel-info">
-                  <h3>Нэгж талбарын дугаар: {parcel.parcel}</h3>
+                  <h3>Хүсэлтийн дугаар: {request.app_no}</h3>
 
                   <div className="land-parcel-meta-row">
-                    <span className="land-parcel-label">Төлөв</span>
-                    <strong className="land-parcel-value">{parcel.status_desc}</strong>
+                    <span className="land-parcel-label">Хүсэлтийн төрөл</span>
+                    <strong className="land-parcel-value">{request.app_type_desc}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
-                    <span className="land-parcel-label">Өргөдөл</span>
-                    <strong className="land-parcel-value">{parcel.app_type_name}</strong>
+                    <span className="land-parcel-label">Хүсэлтийн тайлбар</span>
+                    <strong className="land-parcel-value">{request.req_description}</strong>
+                  </div>
+                  <div className="land-parcel-meta-row">
+                    <span className="land-parcel-label">Нэгж талбарын дугаар</span>
+                    <strong className="land-parcel-value">{request.parcel_id}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Талбайн хэмжээ (м²)</span>
-                    <strong className="land-parcel-value">{parcel.area_m2}</strong>
+                    <strong className="land-parcel-value">{request.area_m2 || ""}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Аймаг /Нийслэл/</span>
-                    <strong className="land-parcel-value">{parcel.au1_name}</strong>
+                    <strong className="land-parcel-value">{request.au1_name}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
                     <span className="land-parcel-label">Сум /Дүүрэг/</span>
-                    <strong className="land-parcel-value">{parcel.au2_name}</strong>
+                    <strong className="land-parcel-value">{request.au2_name}</strong>
                   </div>
                 </div>
-                {selectedParcel === parcel.parcel && (
-                  <div className="check-icon">
-                    <CheckIcon />
-                  </div>
-                )}
               </button>
             ))}
           </div>
         ) : (
           <div className="step-no-data">
             <p>
-              <strong>{registerNumber}</strong> регистрийн дугаар дээр өмчилсөн газар олдсонгүй!
+              <strong>{registerNumber}</strong> регистрийн дугаар дээр хүсэлт байхгүй байна!
             </p>
           </div>
         )}
@@ -126,7 +114,7 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
           <Button variant="secondary" onClick={actions.onBack}>
             Буцах
           </Button>
-          <Button onClick={actions.onNext} disabled={!selectedParcel}>
+          <Button onClick={actions.onNext}>
             Үргэлжлүүлэх
           </Button>
         </div>

@@ -10,16 +10,13 @@ import {
   PaymentProcessingStep,
   SuccessStep,
   LandParcelSelectStep,
-  DocumentTypeSelectStep,
   OwnershipCheckStep,
-  BoundaryVerificationStep,
   PaymentInfoStep,
-  ConfirmationStep,
-  PrintOptionsStep,
   ServiceUnavailableStep,
   DocumentPreviewStep,
   AuthStep,
 } from '../components/modal/steps';
+import { RequestCheckStep } from '../components/modal/steps/RequestCheckStep';
 
 export type StepComponent = ComponentType<
   StepComponentProps & { onPrint?: () => Promise<{ success: boolean; error?: string }> }
@@ -43,7 +40,7 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
   },
   'land-parcel-select': {
     id: 'land-parcel-select',
-    title: 'Газрын нэгж талбар сонгох',
+    title: 'Нэгж талбар сонгох',
     component: LandParcelSelectStep,
     validate: (context: StepContext): StepValidation => {
       const { stepData } = context;
@@ -53,33 +50,14 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       return { isValid: true };
     },
   },
-  'free-land-owner-reference': {
-    id: 'free-land-owner-reference',
-    title: '',
-    component: DocumentPreviewStep,
-    validate: (context: StepContext): StepValidation => {
-      const base64 = String(context.stepData.documentBase64 || "").trim();
-      if (!base64) {
-        return { isValid: false, errorMessage: 'Something wrong.' };
-      }
-      return { isValid: true };
-    },
-  },
-  'cadastral-map': {
-    id: 'cadastral-map',
-    title: '',
-    component: DocumentPreviewStep,
-    validate: (context: StepContext): StepValidation => {
-      const base64 = String(context.stepData.documentBase64 || "").trim();
-      if (!base64) {
-        return { isValid: false, errorMessage: 'Something wrong.' };
-      }
-      return { isValid: true };
-    },
+  'request-check': {
+    id: 'request-check',
+    title: 'Хүсэлт шалгах',
+    component: RequestCheckStep,
   },
   'document-preview': {
     id: 'document-preview',
-    title: '',
+    title: 'Баримт харах',
     component: DocumentPreviewStep,
     validate: (context: StepContext): StepValidation => {
       const base64 = String(context.stepData.documentBase64 || "").trim();
@@ -88,23 +66,6 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       }
       return { isValid: true };
     },
-  },
-  'document-type-select': {
-    id: 'document-type-select',
-    title: 'Бичиг баримтын төрөл',
-    component: DocumentTypeSelectStep,
-    validate: (context: StepContext): StepValidation => {
-      const { stepData } = context;
-      if (!stepData.documentType) {
-        return { isValid: false, errorMessage: 'Бичиг баримтын төрөл сонгоно уу.' };
-      }
-      return { isValid: true };
-    },
-  },
-  'boundary-verification': {
-    id: 'boundary-verification',
-    title: 'Хил хязгаар баталгаажуулах',
-    component: BoundaryVerificationStep,
   },
   'ownership-check': {
     id: 'ownership-check',
@@ -126,24 +87,14 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
     title: 'Төлбөр боловсруулж байна',
     component: PaymentProcessingStep,
   },
-  success: {
+  'success': {
     id: 'success',
     title: 'Амжилттай',
     component: SuccessStep,
   },
-  'print-options': {
-    id: 'print-options',
-    title: 'Хэвлэх сонголт',
-    component: PrintOptionsStep,
-  },
-  confirmation: {
-    id: 'confirmation',
-    title: 'Баталгаажуулалт',
-    component: ConfirmationStep,
-  },
   'service-unavailable': {
     id: 'service-unavailable',
-    title: 'Service Unavailable',
+    title: 'Идэвхгүй үйлчилгээ',
     component: ServiceUnavailableStep,
   },
 };

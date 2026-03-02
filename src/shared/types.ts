@@ -188,6 +188,23 @@ export interface Parcel {
   person_id: string;
 }
 
+export interface ParcelRequest {
+  app_id: string;
+  app_no: string;
+  created_at: string;
+  updated_at: string;
+  person_id: string;
+  parcel_id: string;
+  au_name: string;
+  au1_name: string;
+  au2_name: string;
+  area_m2: string;
+  request_message: string;
+  req_description: string;
+  app_type_desc: string;
+  right_type_desc: string;
+}
+
 export interface ServiceCategory {
   id: number;
   name?: string;

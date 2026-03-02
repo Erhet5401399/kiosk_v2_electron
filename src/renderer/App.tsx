@@ -86,7 +86,7 @@ export default function App() {
     });
 
     if (!Array.isArray(rawSteps) || !rawSteps.length) {
-      return toUnavailableFlow("No flow steps returned from backend.");
+      return toUnavailableFlow("Сервисийн тохиргоо буруу байна.");
     }
 
     const steps: ServiceFlowStep[] = ["auth-gate"];

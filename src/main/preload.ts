@@ -51,6 +51,7 @@ const api = {
 
   parcel: {
     list: (register: string) => ipcRenderer.invoke("parcel:list", register),
+    requestList: (register: string) => ipcRenderer.invoke("parcel:request:list", register),
     categories: () => ipcRenderer.invoke("category:list"),
   },
 

@@ -5,6 +5,7 @@ import type {
   CreateQpayInvoiceRequest,
   CreateQpayInvoiceResponse,
   Parcel,
+  ParcelRequest,
   PrinterDevice,
   PrintJobStatus,
   PromotionEvent,
@@ -60,6 +61,7 @@ declare global {
       };
       parcel: {
         list: (register: string) => Promise<Parcel[]>;
+        requestList: (register: string) => Promise<ParcelRequest[]>; 
         categories: () => Promise<ServiceCategory[]>;
       };
       service: {

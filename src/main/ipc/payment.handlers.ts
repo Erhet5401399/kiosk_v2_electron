@@ -7,21 +7,9 @@ import type {
   CreateQpayInvoiceRequest,
   CreateQpayInvoiceResponse,
 } from "../../shared/types";
+import { unwrapData } from "../core";
 
 const log = logger.child("IPC:Payment");
-
-const unwrapData = <T>(payload: unknown): T | null => {
-  if (!payload) return null;
-  if (
-    typeof payload === "object" &&
-    payload !== null &&
-    "data" in payload &&
-    (payload as { data?: unknown }).data
-  ) {
-    return (payload as { data: T }).data;
-  }
-  return payload as T;
-};
 
 const normalizeCheckResponse = (payload: unknown): CheckQpayInvoiceResponse => {
   const asPaymentState = (value: unknown): string => {

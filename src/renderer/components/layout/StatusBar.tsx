@@ -42,7 +42,7 @@ export function StatusBar({
     <footer className="status-bar">
       <div className="status-meta">
         <span className="status-item">
-          <span className="status-label">State</span>
+          <span className="status-label">Төлөв</span>
           <strong className="status-value">{deviceState || 'Unknown'}</strong>
         </span>
         {/* <span className="status-item">
@@ -50,7 +50,7 @@ export function StatusBar({
           <strong className="status-value status-id">{deviceId || 'Unknown'}</strong>
         </span> */}
         <span className="status-item">
-          <span className="status-label">Printer</span>
+          <span className="status-label">Хэвлэгч</span>
           <strong className="status-value">
             {printerConnected ? `${printerLabel || "Unknown"}` : "Disconnected"}
           </strong>
@@ -79,7 +79,7 @@ export function StatusBar({
             disabled={isBusy}
             onClick={() => void onUpdateCheck()}
           >
-            Check
+            Шалгах
           </button>
         </div>
       </div>

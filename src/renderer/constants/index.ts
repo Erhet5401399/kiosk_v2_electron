@@ -1,4 +1,4 @@
-export const APP_NAME = "Эрхэт киоск";
+export const APP_NAME = "Эрхэт Киоск";
 
 export { MONGOLIAN_KEYBOARD } from "./keyboard";
 
