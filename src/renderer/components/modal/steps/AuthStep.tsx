@@ -400,7 +400,7 @@ export function AuthStep({ actions }: StepComponentProps) {
         {initializing ? (
           <div className="loading-container">
             <div className="processing-spinner" />
-            <p>Preparing authentication...</p>
+            <p>Түр хүлээнэ үү...</p>
           </div>
         ) : isWebviewMethod ? (
           <div className="auth-webview-card auth-webview-card-full">
@@ -415,7 +415,7 @@ export function AuthStep({ actions }: StepComponentProps) {
               />
             ) : (
               <div className="auth-webview-placeholder auth-webview-placeholder-full">
-                Web authentication is unavailable.
+                ДАН нэвтрэлт одоогоор ашиглах боломжгүй байна.
               </div>
             )}
           </div>

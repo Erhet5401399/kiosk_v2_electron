@@ -214,15 +214,21 @@ class SmsBackendProvider implements AuthProvider {
   private readonly challengeTtlMs = Number(
     process.env.SMS_CHALLENGE_TTL_MS || 5 * 60 * 1000,
   );
-  private readonly bypassEnabled = String(process.env.SMS_AUTH_BYPASS || "false")
-    .trim()
-    .toLowerCase() === "true";
-  private readonly bypassCode = String(process.env.SMS_AUTH_BYPASS_CODE || "123456")
-    .trim();
+  private readonly passwordLoginPhoneNumber = String(
+    process.env.SMS_AUTH_PASSWORD_PHONE || "12345678",
+  ).replace(/[^\d]/g, "");
+  private readonly passwordLoginCode = String(
+    process.env.SMS_AUTH_PASSWORD_CODE || "123456",
+  ).trim();
 
   private pending = new Map<
     string,
-    { registerNumber: string; phoneNumber: string; expiresAt: number }
+    {
+      registerNumber: string;
+      phoneNumber: string;
+      expiresAt: number;
+      passwordLogin: boolean;
+    }
   >();
 
   getMethod(): UserAuthMethod {
@@ -236,7 +242,9 @@ class SmsBackendProvider implements AuthProvider {
       throw new Error("Register number and phone number are required");
     }
 
-    if (!this.bypassEnabled) {
+    const passwordLogin = phoneNumber === this.passwordLoginPhoneNumber;
+
+    if (!passwordLogin) {
       await this.callSmsApi(this.checkEndpoint, { registerNumber, phoneNumber });
       await this.callSmsApi(this.sendEndpoint, { registerNumber, phoneNumber });
     }
@@ -244,7 +252,12 @@ class SmsBackendProvider implements AuthProvider {
     const challengeId = crypto.randomUUID();
     const expiresAt = Date.now() + this.challengeTtlMs;
 
-    this.pending.set(challengeId, { registerNumber, phoneNumber, expiresAt });
+    this.pending.set(challengeId, {
+      registerNumber,
+      phoneNumber,
+      expiresAt,
+      passwordLogin,
+    });
     this.prunePending();
 
     return {
@@ -277,8 +290,8 @@ class SmsBackendProvider implements AuthProvider {
       throw new Error("Invalid SMS code");
     }
 
-    const verified = this.bypassEnabled
-      ? this.verifyBypassCode(sendCode, pending.registerNumber)
+    const verified = pending.passwordLogin
+      ? this.verifyPasswordLogin(sendCode, pending.registerNumber)
       : await this.callSmsApi<Record<string, unknown>>(
         this.verifyEndpoint,
         {
@@ -361,8 +374,8 @@ class SmsBackendProvider implements AuthProvider {
     });
   }
 
-  private verifyBypassCode(sendCode: string, registerNumber: string): Record<string, unknown> {
-    if (sendCode !== this.bypassCode) {
+  private verifyPasswordLogin(sendCode: string, registerNumber: string): Record<string, unknown> {
+    if (sendCode !== this.passwordLoginCode) {
       throw new Error("Invalid SMS code");
     }
 
@@ -370,7 +383,7 @@ class SmsBackendProvider implements AuthProvider {
       register_number: registerNumber,
       claims: {
         provider: "SMS",
-        bypass: true,
+        passwordLogin: true,
       },
     };
   }

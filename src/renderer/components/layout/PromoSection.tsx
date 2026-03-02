@@ -1,7 +1,7 @@
-import { useEffect, useRef } from "react";
+// import { useEffect, useRef } from "react";
 import { APP_NAME } from "../../constants";
 import { Logo } from "../common";
-import homePromoVideo from "../../assets/videos/home-promo.mp4";
+// import homePromoVideo from "../../assets/videos/home-promo.mp4";
 
 interface PromoSectionProps {
   logoSrc?: string;
@@ -14,31 +14,31 @@ interface PromoSectionProps {
 export function PromoSection({
   title = APP_NAME,
   subtitle = "Та үйлчилгээний төрлөө сонгоно уу.",
-  videoSrc = homePromoVideo,
-  paused = false,
+  // videoSrc = homePromoVideo,
+  // paused = false,
 }: PromoSectionProps) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  // const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+  // useEffect(() => {
+  //   const video = videoRef.current;
+  //   if (!video) return;
 
-    const syncPlayback = () => {
-      if (paused || document.hidden) {
-        video.pause();
-        return;
-      }
+  //   const syncPlayback = () => {
+  //     if (paused || document.hidden) {
+  //       video.pause();
+  //       return;
+  //     }
 
-      void video.play().catch(() => {});
-    };
+  //     void video.play().catch(() => {});
+  //   };
 
-    syncPlayback();
-    document.addEventListener("visibilitychange", syncPlayback);
+  //   syncPlayback();
+  //   document.addEventListener("visibilitychange", syncPlayback);
 
-    return () => {
-      document.removeEventListener("visibilitychange", syncPlayback);
-    };
-  }, [paused]);
+  //   return () => {
+  //     document.removeEventListener("visibilitychange", syncPlayback);
+  //   };
+  // }, [paused]);
 
   return (
     <>
