@@ -39,6 +39,16 @@ export function setupServiceHandlers() {
         return [];
       }
     });
+  
+  ipcMain.handle(IPC.PARCEL_APPLICATION_LIST, async (_, register: string) => {
+      try {
+        const data = await serviceApi.getParcelApplications(register);
+        return asList(data);
+      } catch (e) {
+        log.error('Get parcel applications failed:', e as Error);
+        return [];
+      }
+    });
 
   log.info("Service IPC handlers registered");
 }

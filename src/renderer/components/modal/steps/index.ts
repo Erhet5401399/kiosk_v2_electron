@@ -7,3 +7,5 @@ export { PaymentInfoStep } from './PaymentInfoStep';
 export { ServiceUnavailableStep } from './ServiceUnavailableStep';
 export { DocumentPreviewStep } from './DocumentPreviewStep';
 export { AuthStep } from './AuthStep';
+export { RequestCheckStep } from './RequestCheckStep';
+export { ApplicationCheckStep } from './ApplicationCheckStep';

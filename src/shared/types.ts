@@ -206,6 +206,27 @@ export interface ParcelRequest {
   right_type_desc: string;
 }
 
+export interface ParcelApplication {
+  application_request_id: string;
+  app_id: string;
+  app_no: string;
+  app_timestamp: string;
+  person_register: string;
+  has_contract: boolean;
+  active_contract: boolean;
+  contract_no: string | null;
+  has_certificate_egazar: boolean;
+  egazar_confirm: boolean;
+  confirm_cert_request: boolean;
+  parcel: string;
+  au1_name: string;
+  au2_name: string;
+  area_m2: string;
+  app_type_name: string;
+  right_type_desc: string;
+  status_desc: string;
+}
+
 export interface ServiceCategory {
   id: number;
   name?: string;

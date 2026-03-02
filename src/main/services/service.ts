@@ -1,4 +1,4 @@
-import { ApiResponse, Parcel, ParcelRequest, ServiceCategory } from "../../shared/types";
+import { ApiResponse, Parcel, ParcelApplication, ParcelRequest, ServiceCategory } from "../../shared/types";
 import { api } from "./api";
 import { logger } from "./logger";
 
@@ -154,6 +154,21 @@ class ServiceApiService {
 
     const url = `/api/kiosk/service/request/check?${query.toString()}`;
     this.log.debug('Fetching parcels:', url);
+    return api.post(url);
+  }
+
+  async getParcelApplications(register: string): Promise<ApiResponse<ParcelApplication[]> | ParcelApplication[]> {
+    const reg = String(register || "").trim().toUpperCase();
+    if (!reg) {
+      this.log.warn("Skipping parcel application fetch: empty register number");
+      return [];
+    }
+
+    const query = new URLSearchParams();
+    query.set('register_number', reg);
+
+    const url = `/api/kiosk/service/application/check?${query.toString()}`;
+    this.log.debug('Fetching applications:', url);
     return api.post(url);
   }
 

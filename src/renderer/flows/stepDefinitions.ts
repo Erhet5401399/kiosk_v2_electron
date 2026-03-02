@@ -15,8 +15,9 @@ import {
   ServiceUnavailableStep,
   DocumentPreviewStep,
   AuthStep,
+  RequestCheckStep,
+  ApplicationCheckStep,
 } from '../components/modal/steps';
-import { RequestCheckStep } from '../components/modal/steps/RequestCheckStep';
 
 export type StepComponent = ComponentType<
   StepComponentProps & { onPrint?: () => Promise<{ success: boolean; error?: string }> }
@@ -54,6 +55,11 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
     id: 'request-check',
     title: 'Хүсэлт шалгах',
     component: RequestCheckStep,
+  },
+  'application-check': {
+    id: 'application-check',
+    title: 'Өргөдөл шалгах',
+    component: ApplicationCheckStep,
   },
   'document-preview': {
     id: 'document-preview',
