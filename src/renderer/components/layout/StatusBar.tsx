@@ -10,14 +10,14 @@ interface StatusBarProps {
 }
 
 const UPDATER_LABELS: Record<UpdateStatus['state'], string> = {
-  idle: 'Idle',
-  checking: 'Checking',
-  available: 'Available',
-  downloading: 'Downloading',
-  downloaded: 'Downloaded',
-  installing: 'Installing',
-  up_to_date: 'Up to date',
-  error: 'Error',
+  idle: '-',
+  checking: 'Шалгаж байна',
+  available: 'Шинэчлэлт байна',
+  downloading: 'Татаж байна',
+  downloaded: 'Татагдсан',
+  installing: 'Суулгаж байна',
+  up_to_date: 'Шинэчлэгдсэн',
+  error: 'Алдаа гарлаа',
 };
 
 export function StatusBar({

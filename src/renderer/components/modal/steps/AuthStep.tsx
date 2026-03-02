@@ -463,7 +463,6 @@ export function AuthStep({ actions }: StepComponentProps) {
             <>
               {smsMethod && (
                 <Button
-                  variant="secondary"
                   onClick={() => void changeMethod(smsMethod)}
                   disabled={loading}
                 >
@@ -475,7 +474,6 @@ export function AuthStep({ actions }: StepComponentProps) {
             <>
               {danMethod && (
                 <Button
-                  variant="secondary"
                   onClick={() => void changeMethod(danMethod)}
                   disabled={loading}
                 >
@@ -490,7 +488,6 @@ export function AuthStep({ actions }: StepComponentProps) {
             <>
               {danMethod && (
                 <Button
-                  variant="secondary"
                   onClick={() => void changeMethod(danMethod)}
                   disabled={loading}
                 >

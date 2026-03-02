@@ -9,6 +9,7 @@ import { StepRenderer } from './StepRenderer';
 import { FlowProgressBar } from './FlowProgressBar';
 import { useFlowEngine } from '../../flows';
 import type { UserAuthSession } from "../../../shared/types";
+import { formatServicePrice } from '../../utils';
 
 interface ServiceModalProps {
   service: Service;
@@ -154,7 +155,7 @@ export function ServiceModal({
       <div className="service-context-strip">
         <div className="service-context-main">
           <strong className="service-context-name">{service.name}</strong>
-          <span className="service-context-price">{service.price} MNT</span>
+          <span className="service-context-price">{formatServicePrice(service.price)}</span>
         </div>
         {/* <span className="service-context-meta">{state.currentStepIndex + 1} / {state.steps.length}</span> */}
       </div>

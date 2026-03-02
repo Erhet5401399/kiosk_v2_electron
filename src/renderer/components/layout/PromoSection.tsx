@@ -43,7 +43,7 @@ export function PromoSection({
   return (
     <>
       <section className="promo-container">
-        <video
+        {/* <video
           ref={videoRef}
           className="promo-video"
           autoPlay
@@ -53,7 +53,7 @@ export function PromoSection({
           preload="metadata"
         >
           <source src={videoSrc} type="video/mp4" />
-        </video>
+        </video> */}
       </section>
 
       <header className="main-header">

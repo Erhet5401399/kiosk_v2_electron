@@ -142,6 +142,7 @@
 
 .service-modal-footer .modal-footer .btn {
   min-height: 72px;
+  max-width: 400px;
   border-radius: 16px;
   font-size: 1.12rem;
   font-weight: 700;
