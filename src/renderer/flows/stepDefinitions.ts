@@ -17,6 +17,7 @@ import {
   AuthStep,
   RequestCheckStep,
   ApplicationCheckStep,
+  ParcelReasonSelectStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -47,6 +48,18 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       const { stepData } = context;
       if (!stepData.parcel_id) {
         return { isValid: false, errorMessage: 'Газрын нэгж талбар сонгоно уу.' };
+      }
+      return { isValid: true };
+    },
+  },
+  'parcel-reason-select': {
+    id: 'parcel-reason-select',
+    title: 'Нэгж талбарын зориулалт сонгох',
+    component: ParcelReasonSelectStep,
+    validate: (context: StepContext): StepValidation => {
+      const { stepData } = context;
+      if (!stepData.reason) {
+        return { isValid: false, errorMessage: 'Газрын нэгж талбарын зориулалт сонгоно уу.' };
       }
       return { isValid: true };
     },
