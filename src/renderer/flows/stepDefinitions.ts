@@ -18,6 +18,7 @@ import {
   RequestCheckStep,
   ApplicationCheckStep,
   ParcelReasonSelectStep,
+  LandParcelFeesStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -51,6 +52,11 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       }
       return { isValid: true };
     },
+  },
+  'land-parcel-fee': {
+    id: 'land-parcel-fee',
+    title: 'Газрын төлбөрүүд',
+    component: LandParcelFeesStep,
   },
   'parcel-reason-select': {
     id: 'parcel-reason-select',

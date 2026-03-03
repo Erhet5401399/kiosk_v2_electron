@@ -227,6 +227,37 @@ export interface ParcelApplication {
   status_desc: string;
 }
 
+export interface ParcelFee {
+  id: string;
+  parcel_id: string;
+  imposition_year: number;
+  remainning_amount: string;
+  year_amount: string;
+  quarter_one: string;
+  quarter_two: string;
+  quarter_three: string;
+  quarter_four: string;
+  discount_amount: string;
+  compensation_amount: string | null;
+  earning_amount: string | null;
+  total_amount: string;
+  invoices: ParcelFeeInvoice[];
+}
+
+export interface ParcelFeeInvoice {
+  id: string;
+  qpay_qrimage: string;
+  quarter_number: string;
+  amount: string;
+  description: string;
+  paid_date: string;
+  balance: string;
+  payable_amount: string;
+  paid_amount: string;
+  status_id: number;
+  status_name: string;
+}
+
 export interface ServiceCategory {
   id: number;
   name?: string;

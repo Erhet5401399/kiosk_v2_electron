@@ -50,6 +50,16 @@ export function setupServiceHandlers() {
       }
     });
 
+  ipcMain.handle(IPC.PARCEL_FEE_LIST, async (_, register: string) => {
+      try {
+        const data = await serviceApi.getParcelFees(register);
+        return asList(data);
+      } catch (e) {
+        log.error('Get parcel fees failed:', e as Error);
+        return [];
+      }
+    });
+
   log.info("Service IPC handlers registered");
 }
 

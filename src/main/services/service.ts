@@ -1,4 +1,4 @@
-import { ApiResponse, Parcel, ParcelApplication, ParcelRequest, ServiceCategory } from "../../shared/types";
+import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelRequest, ServiceCategory } from "../../shared/types";
 import { api } from "./api";
 import { logger } from "./logger";
 
@@ -169,6 +169,20 @@ class ServiceApiService {
 
     const url = `/api/kiosk/service/application/check?${query.toString()}`;
     this.log.debug('Fetching applications:', url);
+    return api.post(url);
+  }
+
+  async getParcelFees(parcelId: string): Promise<ApiResponse<ParcelFee[]> | ParcelFee[]> {
+    if (!parcelId) {
+      this.log.warn("Skipping parcel fees fetch: empty parcel id");
+      return [];
+    }
+
+    const query = new URLSearchParams();
+    query.set('parcel_id', parcelId);
+
+    const url = `/api/kiosk/service/pay/land/fees?${query.toString()}`;
+    this.log.debug('Fetching parcel fees:', url);
     return api.post(url);
   }
 

@@ -15,6 +15,23 @@ export function formatServicePrice(value: number | string | null | undefined): s
   return `${numericValue.toLocaleString('mn-MN')}₮`;
 }
 
+export function formatPrice(value: number | string | null | undefined): string {
+  if (value === null || value === undefined) {
+    return '0₮';
+  }
+
+  const numericValue =
+    typeof value === 'number'
+      ? value
+      : Number(String(value).replace(/[^\d.-]/g, '').trim());
+
+  if (!Number.isFinite(numericValue) || numericValue <= 0) {
+    return '0₮';
+  }
+
+  return `${numericValue.toLocaleString('mn-MN')}₮`;
+}
+
 const HTML_PREFIX_BASE64 = 'PCFET0NUWVBFIGh0bWw';
 const HTML_TAG_PREFIX_BASE64 = 'PGh0bWw';
 const PDF_PREFIX_BASE64 = 'JVBER';

@@ -6,6 +6,7 @@ import type {
   CreateQpayInvoiceResponse,
   Parcel,
   ParcelApplication,
+  ParcelFee,
   ParcelRequest,
   PrinterDevice,
   PrintJobStatus,
@@ -62,8 +63,9 @@ declare global {
       };
       parcel: {
         list: (register: string) => Promise<Parcel[]>;
-        requestList: (register: string) => Promise<ParcelRequest[]>; 
-        applicationList: (register: string) => Promise<ParcelApplication[]>; 
+        requestList: (register: string) => Promise<ParcelRequest[]>;
+        applicationList: (register: string) => Promise<ParcelApplication[]>;
+        feeList: (parcelId: string) => Promise<ParcelFee[]>;
         categories: () => Promise<ServiceCategory[]>;
       };
       service: {

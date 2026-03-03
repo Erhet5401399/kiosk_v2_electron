@@ -10,3 +10,4 @@ export { AuthStep } from './AuthStep';
 export { RequestCheckStep } from './RequestCheckStep';
 export { ApplicationCheckStep } from './ApplicationCheckStep';
 export { ParcelReasonSelectStep } from './ParcelReasonSelectStep';
+export { LandParcelFeesStep } from './LandParcelFeesStep';

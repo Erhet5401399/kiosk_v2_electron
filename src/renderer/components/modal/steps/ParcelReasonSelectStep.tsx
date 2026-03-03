@@ -3,7 +3,12 @@ import { Button } from '../../common';
 import { CheckIcon } from '../../common/CheckIcon';
 
 const reasonList = [
-  { id: '3', label: "Гэр, орон сууцны хашааны газар" },
+  { id: '1', label: "Эрх сунгах" },
+  { id: '2', label: "Эрхийн хугацаа сунгах" },
+  { id: '3', label: "Бусад" },
+  { id: '4', label: "Эрх шилжүүлэх" },
+  { id: '5', label: "Хянан баталгааны хугацаа дууссан" },
+  { id: '6', label: "Эзэмшил газраа өмчлөх" },
 ]
 
 export function ParcelReasonSelectStep({ context, actions }: StepComponentProps) {
