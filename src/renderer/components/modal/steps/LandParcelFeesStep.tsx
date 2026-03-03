@@ -1,25 +1,40 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { StepComponentProps } from '../../../types/steps';
 import { Button } from '../../common';
-import { CheckIcon } from '../../common/CheckIcon';
-import type { ParcelFee } from '../../../../shared/types';
+import type { ParcelFee, ParcelFeeInvoice } from '../../../../shared/types';
 import { formatPrice } from '../../../utils';
 
 export function LandParcelFeesStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
   const selectedParcel = stepData.parcel_id as string | undefined;
   const [fees, setFees] = useState<ParcelFee[]>([]);
-  const [selectedFee, setSelectedFee] = useState<ParcelFee | null>(null);
+  const [qrInvoice, setQrInvoice] = useState<ParcelFeeInvoice | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [_, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSelectFee = (fee: ParcelFee) => {
-    setSelectedFee(fee)
+  const handleSelectInvoice = (fee: ParcelFee, invoice: ParcelFeeInvoice) => {
+    setQrInvoice(invoice);
+    actions.onUpdateStepData({
+      selectedFee: fee,
+      selectedFeeId: fee.id,
+      selectedInvoice: invoice,
+      selectedInvoiceId: invoice.id,
+      qpayQrImage: invoice.qpay_qrimage || null,
+    });
   };
 
-  const fetch = useCallback(async () => {
+  const invoiceQrSrc = useMemo(() => {
+    const raw = String(qrInvoice?.qpay_qrimage || '').trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw) || /^data:image\//i.test(raw)) return raw;
+    const normalized = raw.replace(/\s+/g, '');
+    return normalized ? `data:image/png;base64,${normalized}` : '';
+  }, [qrInvoice?.qpay_qrimage]);
+
+  const fetchFees = useCallback(async () => {
     if (!selectedParcel) {
       setFees([]);
+      setQrInvoice(null);
       setError(null);
       setIsLoading(false);
       return;
@@ -29,7 +44,7 @@ export function LandParcelFeesStep({ context, actions }: StepComponentProps) {
     setError(null);
 
     try {
-      if (!window.electron?.parcel?.list) {
+      if (!window.electron?.parcel?.feeList) {
         throw new Error('Electron IPC not available');
       }
 
@@ -37,28 +52,27 @@ export function LandParcelFeesStep({ context, actions }: StepComponentProps) {
 
       if (response) {
         setFees(response);
+        setQrInvoice(null);
       } else {
         setError('Unknown error');
       }
     } catch (err: any) {
-      setError(err?.message || 'Failed to fetch parcels');
+      setError(err?.message || 'Failed to fetch fees');
     } finally {
       setIsLoading(false);
     }
   }, [selectedParcel]);
 
   useEffect(() => {
-    fetch();
-  }, [fetch]);
+    fetchFees();
+  }, [fetchFees]);
 
   return (
-    <div
-      className="service-modal"
-    >
+    <div className="service-modal">
       <div className="service-modal-body">
         <div className="step-header">
           <h1>Газрын төлбөр төлөх</h1>
-          <p>Таны сонгосон газрын төлбөрүүд</p>
+          <p>Таны сонгосон газар дээрх төлбөрүүд.</p>
         </div>
 
         {isLoading ? (
@@ -69,12 +83,8 @@ export function LandParcelFeesStep({ context, actions }: StepComponentProps) {
         ) : fees.length ? (
           <div className="parcel-list land-parcel-list">
             {fees.map((fee) => (
-              <button
-                key={fee.id}
-                className={`parcel-option land-parcel-option ${selectedFee?.id === fee.id ? 'selected' : ''}`}
-                onClick={() => handleSelectFee(fee)}
-              >
-                <div className="parcel-icon">🗺️</div>
+              <div key={fee.id} className="parcel-option land-parcel-option fee-with-invoices">
+                <div className="parcel-icon" />
                 <div className="parcel-info land-parcel-info">
                   <h3>{fee.imposition_year}</h3>
 
@@ -87,41 +97,93 @@ export function LandParcelFeesStep({ context, actions }: StepComponentProps) {
                     <strong className="land-parcel-value">{formatPrice(fee.remainning_amount)}</strong>
                   </div>
                   <div className="land-parcel-meta-row">
-                    <span className="land-parcel-label">Year amount</span>
+                    <span className="land-parcel-label">Жилийн төлбөр</span>
                     <strong className="land-parcel-value">{formatPrice(fee.year_amount)}</strong>
                   </div>
-                </div>
-                {selectedFee?.id === fee.id && (
-                  <div className="check-icon">
-                    <CheckIcon />
+
+                  <div className="fee-card-invoices">
+                    <h4 className="fee-card-invoices-title">Нэхэмжлэхүүд</h4>
+                    {fee.invoices?.length ? (
+                      fee.invoices.map((invoice) => (
+                        <div key={invoice.id} className="fee-invoice-item">
+                          <div className="fee-invoice-row">
+                            <span className="fee-invoice-label">Төлөх дүн</span>
+                            <strong className="fee-invoice-value">{formatPrice(invoice.payable_amount)}</strong>
+                          </div>
+                          <div className="fee-invoice-row">
+                            <span className="fee-invoice-label">Төлөв</span>
+                            <strong className="fee-invoice-value">{invoice.status_name || '-'}</strong>
+                          </div>
+                          <div className="fee-invoice-row">
+                            <span className="fee-invoice-label">Тайлбар</span>
+                            <strong className="fee-invoice-value">{invoice.description || '-'}</strong>
+                          </div>
+                          <div className="fee-invoice-actions">
+                            <Button className="invoice-pay-btn" onClick={() => handleSelectInvoice(fee, invoice)}>
+                              Нэхэмжлэхийн төлбөр төлөх
+                            </Button>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="qpay-pending-text">Нэхэмжлэх байхгүй байна.</p>
+                    )}
                   </div>
-                )}
-              </button>
+                </div>
+              </div>
             ))}
           </div>
         ) : (
           <div className="step-no-data">
             <p>
-              <strong>{selectedParcel}</strong> дугаартай газар дээр төлбөр олдсонгүй!
+              <strong>{selectedParcel}</strong> дугаартай газар дээр төлбөр үүсээгүй байна.
             </p>
           </div>
         )}
+
+        {error ? <p className="qpay-error-text">{error}</p> : null}
+
+        {qrInvoice ? (
+          <div className="fee-qr-popup-backdrop">
+            <div className="fee-qr-popup" onClick={(e) => e.stopPropagation()}>
+              <h3 className="fee-invoices-title">Төлбөр төлөх</h3>
+              {invoiceQrSrc ? (
+                <img className="qpay-qr-image" src={invoiceQrSrc} alt="Invoice QPay QR" />
+              ) : (
+                <p className="qpay-pending-text">Энэ нэхэмжлэлд QPay QR код алга.</p>
+              )}
+              <div className="qpay-meta">
+                <div className="result-row">
+                  <span>Нэхэмжлэхийн дугаар</span>
+                  <strong>{qrInvoice.invoice_no || '-'}</strong>
+                </div>
+                <div className="result-row">
+                  <span>Төлөв</span>
+                  <strong>{qrInvoice.status_name || '-'}</strong>
+                </div>
+                <div className="result-row">
+                  <span>Улирал</span>
+                  <strong>{qrInvoice.description || '-'}</strong>
+                </div>
+              </div>
+              <div className="fee-qr-popup-actions">
+                <Button variant="secondary" onClick={() => setQrInvoice(null)}>
+                  Хаах
+                </Button>
+                {/* <Button onClick={() => {}} disabled>
+                  Төлбөр шалгах
+                </Button> */}
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="service-modal-footer">
         <div className="modal-footer">
-          <Button onClick={actions.onComplete}>
-            Дуусгах
-          </Button>
-          {/* <Button onClick={actions.onNext} disabled={!selectedFee}>
-            Үргэлжлүүлэх
-          </Button> */}
+          <Button onClick={actions.onComplete} variant='secondary'>Дуусгах</Button>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-

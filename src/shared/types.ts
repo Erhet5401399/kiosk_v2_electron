@@ -246,6 +246,7 @@ export interface ParcelFee {
 
 export interface ParcelFeeInvoice {
   id: string;
+  invoice_no: string;
   qpay_qrimage: string;
   quarter_number: string;
   amount: string;

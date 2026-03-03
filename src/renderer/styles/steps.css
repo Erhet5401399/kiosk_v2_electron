@@ -484,6 +484,100 @@
   gap: 16px;
 }
 
+.fee-with-invoices {
+  align-items: flex-start;
+}
+
+.fee-card-invoices {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fee-card-invoices-title,
+.fee-invoices-title {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--text);
+}
+
+.fee-invoice-item {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  background: #fafbff;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.fee-invoice-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.fee-invoice-item .fee-invoice-row:last-child {
+  border-bottom: none;
+}
+
+.fee-invoice-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.invoice-pay-btn {
+  width: auto;
+  min-width: 90px;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.1;
+}
+
+.fee-invoice-label {
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.fee-invoice-value {
+  color: var(--text);
+  font-size: 0.98rem;
+}
+
+.fee-qr-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.fee-qr-popup {
+  width: min(520px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fee-qr-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 .qpay-qr-image {
   width: min(320px, 100%);
   aspect-ratio: 1 / 1;
