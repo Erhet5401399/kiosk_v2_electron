@@ -338,10 +338,19 @@
 .auth-sms-layout {
   flex: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   width: 100%;
-  padding: 24px 0;
+  min-height: 0;
+  padding: 24px 0 32px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+.auth-sms-layout::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .auth-sms-head h3 {

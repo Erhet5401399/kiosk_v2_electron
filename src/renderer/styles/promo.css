@@ -29,20 +29,24 @@
 
 .header-logo {
   display: block;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
 }
 
 .header-logo--small {
-  width: 32px;
+  width: 44px;
   height: auto;
 }
 
 .header-logo--medium {
-  width: 42px;
+  width: 58px;
   height: auto;
 }
 
 .header-logo--large {
-  width: 96px;
+  width: 128px;
   height: auto;
 }
 
