@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
 import type { Category } from "../../types";
+import emongoliaIcon from "../../assets/images/emongolia.webp";
 
 interface SidebarProps {
   categories: Category[];
@@ -25,29 +25,42 @@ export function Sidebar({
         <span className="sidebar-title">Үйлчилгээнүүд</span>
       </div>
       <div className="sidebar-pill-container">
-        <motion.div
+        <div
           className="sidebar-active-pill"
-          animate={{ y: safeSelectedIndex * 72 }}
-          transition={{ type: "spring", stiffness: 350, damping: 35 }}
+          style={{ top: safeSelectedIndex * 72 }}
         />
         <nav className="categories-list">
           {categories.map((cat) => {
             const serviceCount = Number(categoryServiceCount[cat.name] || 0);
             const disabled = serviceCount <= 0;
 
+            let iconImageSrc = undefined;
+
+            if (cat.id == 1) {
+              iconImageSrc = emongoliaIcon;
+            };
+
             return (
               <button
                 key={cat.name}
-                className={`category-btn-sidebar ${selectedCategory === cat.name ? "active" : ""} ${disabled ? "is-disabled" : ""}`}
+                className={`category-btn-sidebar ${selectedCategory === cat.name ? "active" : ""}`}
                 onClick={() => onSelectCategory(cat.name)}
                 disabled={disabled}
               >
+                <span className="category-icon-wrap" aria-hidden="true">
+                  {iconImageSrc &&
+                    <img className="category-icon-image" src={iconImageSrc} alt="" />
+                  }
+                </span>
                 <span className="category-name">{cat.name}</span>
                 <span className="category-item-count">{serviceCount}</span>
               </button>
             );
           })}
         </nav>
+      </div>
+      <div className="sidebar-copyright">
+        © {new Date().getFullYear()} Erkhet Innovation LLC
       </div>
     </aside>
   );

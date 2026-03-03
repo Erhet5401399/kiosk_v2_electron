@@ -1,7 +1,7 @@
 import type { ServiceFlowConfig } from './steps';
 
 export interface Category {
-  id?: number;
+  id: number;
   name: string;
   icon: string;
   desc?: string;

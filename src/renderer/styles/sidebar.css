@@ -5,7 +5,7 @@
 }
 
 .sidebar {
-  width: 320px;
+  width: 380px;
   background: transparent;
   border-right: none;
   display: flex;
@@ -32,6 +32,16 @@
 .sidebar-pill-container {
   position: relative;
   width: 100%;
+  flex: 1;
+}
+
+.sidebar-copyright {
+  margin-top: auto;
+  padding: 10px 16px 6px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: rgba(15, 23, 42, 0.6);
+  font-weight: 600;
 }
 
 .sidebar-active-pill {
@@ -62,7 +72,7 @@
   padding: 0 16px;
   border-radius: 0 16px 16px 0;
   border: none;
-  background: transparent;
+  background: #fff;
   color: var(--text);
   font-weight: 700;
   font-size: var(--font-lg);
@@ -95,11 +105,19 @@
   align-items: center;
   justify-content: center;
   background: var(--category-icon-bg);
+  overflow: hidden;
 }
 
 .category-glyph {
   width: 22px;
   height: 22px;
+}
+
+.category-icon-image {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  display: block;
 }
 
 .category-btn-sidebar .category-name {
@@ -173,4 +191,3 @@
 .category-btn-sidebar.is-disabled:focus-visible {
   box-shadow: none !important;
 }
-
