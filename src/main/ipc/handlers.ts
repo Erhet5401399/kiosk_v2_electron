@@ -6,6 +6,7 @@ import { windows } from '../windows/manager';
 import { cleanupPaymentHandlers, setupPaymentHandlers } from './payment.handlers';
 import { cleanupPromotionHandlers, setupPromotionHandlers } from './promotion.handlers';
 import { cleanupServiceHandlers, setupServiceHandlers } from './service.handlers';
+import { ipcWrap } from './result';
 import type { PrintJobStatus, PromotionEvent, UserAuthStartRequest, UserAuthVerifyRequest } from '../../shared/types';
 
 const log = logger.child('IPC');
@@ -20,36 +21,34 @@ const printerStatusHandler = (event: PrintJobStatus) => {
 };
 
 export function setupIPC() {
-  ipcMain.handle(IPC.RUNTIME_SNAPSHOT, () => runtime.getSnapshot());
-  ipcMain.handle(IPC.RUNTIME_RETRY, () => runtime.retry());
-  ipcMain.handle(IPC.RUNTIME_RESET, () => runtime.reset());
+  ipcMain.handle(IPC.RUNTIME_SNAPSHOT, () => ipcWrap(() => runtime.getSnapshot()));
+  ipcMain.handle(IPC.RUNTIME_RETRY, () => ipcWrap(() => runtime.retry()));
+  ipcMain.handle(IPC.RUNTIME_RESET, () => ipcWrap(() => runtime.reset()));
 
   ipcMain.handle(IPC.PRINT, async (_, req: { content: string; type?: 'html' | 'text' | 'pdf' | 'pdf_base64'; copies?: number; priority?: 'low' | 'normal' | 'high' }) => {
-    try {
+    return ipcWrap(async () => {
       const jobId = await printer.print(req.content, req.type, { copies: req.copies, priority: req.priority });
       return { success: true, jobId };
-    } catch (e) {
-      return { success: false, error: (e as Error).message };
-    }
+    }, "Print failed");
   });
 
-  ipcMain.handle(IPC.PRINTERS, () => printer.list());
-  ipcMain.handle(IPC.PRINT_JOB_STATUS, (_, jobId: string) => printer.getJobStatus(jobId));
-  ipcMain.handle(IPC.CONFIG_GET, () => config.get());
-  ipcMain.handle(IPC.CONFIG_REFRESH, () => config.fetch());
-  ipcMain.handle(IPC.UPDATE_STATUS, () => updater.getStatus());
-  ipcMain.handle(IPC.UPDATE_CHECK, () => updater.checkForUpdates());
-  ipcMain.handle(IPC.UPDATE_INSTALL, () => updater.installNow());
-  ipcMain.handle(IPC.USER_AUTH_METHODS, () => userAuth.listMethods());
-  ipcMain.handle(IPC.USER_AUTH_START, (_, req: UserAuthStartRequest | string) => userAuth.start(req));
+  ipcMain.handle(IPC.PRINTERS, () => ipcWrap(() => printer.list()));
+  ipcMain.handle(IPC.PRINT_JOB_STATUS, (_, jobId: string) => ipcWrap(() => printer.getJobStatus(jobId)));
+  ipcMain.handle(IPC.CONFIG_GET, () => ipcWrap(() => config.get()));
+  ipcMain.handle(IPC.CONFIG_REFRESH, () => ipcWrap(() => config.fetch()));
+  ipcMain.handle(IPC.UPDATE_STATUS, () => ipcWrap(() => updater.getStatus()));
+  ipcMain.handle(IPC.UPDATE_CHECK, () => ipcWrap(() => updater.checkForUpdates()));
+  ipcMain.handle(IPC.UPDATE_INSTALL, () => ipcWrap(() => updater.installNow()));
+  ipcMain.handle(IPC.USER_AUTH_METHODS, () => ipcWrap(() => userAuth.listMethods()));
+  ipcMain.handle(IPC.USER_AUTH_START, (_, req: UserAuthStartRequest | string) => ipcWrap(() => userAuth.start(req)));
   ipcMain.handle(IPC.USER_AUTH_VERIFY, (_, req: UserAuthVerifyRequest) =>
-    userAuth.verify(req),
+    ipcWrap(() => userAuth.verify(req)),
   );
-  ipcMain.handle(IPC.USER_AUTH_STATUS, () => userAuth.getStatus());
-  ipcMain.handle(IPC.USER_AUTH_TOUCH, () => userAuth.touch());
-  ipcMain.handle(IPC.USER_AUTH_LOGOUT, () => userAuth.logout());
+  ipcMain.handle(IPC.USER_AUTH_STATUS, () => ipcWrap(() => userAuth.getStatus()));
+  ipcMain.handle(IPC.USER_AUTH_TOUCH, () => ipcWrap(() => userAuth.touch()));
+  ipcMain.handle(IPC.USER_AUTH_LOGOUT, () => ipcWrap(() => userAuth.logout()));
 
-  ipcMain.handle(IPC.HEALTH, () => ({
+  ipcMain.handle(IPC.HEALTH, () => ipcWrap(() => ({
     online: runtime.isReady(),
     lastCheck: Date.now(),
     services: { api: runtime.isReady(), printer: printer.isReady(), storage: true },
@@ -57,7 +56,7 @@ export function setupIPC() {
       uptime: runtime.getSnapshot().uptime,
       memoryUsage: process.memoryUsage().heapUsed,
     },
-  }));
+  })));
 
   setupServiceHandlers();
   setupPaymentHandlers();

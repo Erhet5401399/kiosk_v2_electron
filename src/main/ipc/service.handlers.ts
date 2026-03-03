@@ -2,62 +2,48 @@ import { ipcMain } from "electron";
 import { IPC, asList } from "../core";
 import { logger, serviceApi } from "../services";
 import type { GetDocumentRequest } from "../services/service";
+import { ipcWrap } from "./result";
 
 const log = logger.child("IPC:Service");
 
 export function setupServiceHandlers() {
   ipcMain.handle(IPC.SERVICE_GET_DOCUMENT, async (_, request: GetDocumentRequest) => {
-    return serviceApi.getDocument(request);
+    return ipcWrap(() => serviceApi.getDocument(request), "Document fetch failed");
   });
 
   ipcMain.handle(IPC.CATEGORY_LIST, async () => {
-      try {
+      return ipcWrap(async () => {
         const data = await serviceApi.getCategories();
         return asList(data);
-      } catch (error) {
-        log.error("Get categories failed", error as Error);
-        return [];
-      }
+      }, "Get categories failed");
     });
 
   ipcMain.handle(IPC.PARCEL_LIST, async (_, register: string) => {
-      try {
+      return ipcWrap(async () => {
         const data = await serviceApi.getParcels(register);
         return asList(data);
-      } catch (e) {
-        log.error('Get parcels failed:', e as Error);
-        return [];
-      }
+      }, "Get parcels failed");
     });
 
   ipcMain.handle(IPC.PARCEL_REQUEST_LIST, async (_, register: string) => {
-      try {
+      return ipcWrap(async () => {
         const data = await serviceApi.getParcelRequests(register);
         return asList(data);
-      } catch (e) {
-        log.error('Get parcel requests failed:', e as Error);
-        return [];
-      }
+      }, "Get parcel requests failed");
     });
   
   ipcMain.handle(IPC.PARCEL_APPLICATION_LIST, async (_, register: string) => {
-      try {
+      return ipcWrap(async () => {
         const data = await serviceApi.getParcelApplications(register);
         return asList(data);
-      } catch (e) {
-        log.error('Get parcel applications failed:', e as Error);
-        return [];
-      }
+      }, "Get parcel applications failed");
     });
 
   ipcMain.handle(IPC.PARCEL_FEE_LIST, async (_, register: string) => {
-      try {
+      return ipcWrap(async () => {
         const data = await serviceApi.getParcelFees(register);
         return asList(data);
-      } catch (e) {
-        log.error('Get parcel fees failed:', e as Error);
-        return [];
-      }
+      }, "Get parcel fees failed");
     });
 
   log.info("Service IPC handlers registered");

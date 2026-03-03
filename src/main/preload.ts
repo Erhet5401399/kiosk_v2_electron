@@ -1,20 +1,45 @@
 ﻿import { contextBridge, ipcRenderer } from "electron";
 
+type IpcResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string };
+
+function isIpcResult(value: unknown): value is IpcResult<unknown> {
+  return Boolean(
+    value &&
+      typeof value === "object" &&
+      typeof (value as { ok?: unknown }).ok === "boolean",
+  );
+}
+
+async function invokeIpc<T>(channel: string, ...args: unknown[]): Promise<T> {
+  const payload = await ipcRenderer.invoke(channel, ...args);
+  if (!isIpcResult(payload)) {
+    return payload as T;
+  }
+
+  if (payload.ok) {
+    return payload.data as T;
+  }
+
+  throw new Error(String(payload.error || "Request failed"));
+}
+
 const api = {
   runtime: {
-    getSnapshot: () => ipcRenderer.invoke("runtime:snapshot"),
+    getSnapshot: () => invokeIpc("runtime:snapshot"),
     onUpdate: (cb: (snap: unknown) => void) => {
       const handler = (_: unknown, snap: unknown) => cb(snap);
       ipcRenderer.on("runtime:update", handler);
       return () => ipcRenderer.removeListener("runtime:update", handler);
     },
-    retry: () => ipcRenderer.invoke("runtime:retry"),
-    reset: () => ipcRenderer.invoke("runtime:reset"),
+    retry: () => invokeIpc("runtime:retry"),
+    reset: () => invokeIpc("runtime:reset"),
   },
 
   config: {
-    get: () => ipcRenderer.invoke("config:get"),
-    refresh: () => ipcRenderer.invoke("config:refresh"),
+    get: () => invokeIpc("config:get"),
+    refresh: () => invokeIpc("config:refresh"),
   },
 
   printer: {
@@ -23,10 +48,10 @@ const api = {
       type?: string;
       copies?: number;
       priority?: string;
-    }) => ipcRenderer.invoke("hardware:print", req),
-    list: () => ipcRenderer.invoke("hardware:printers"),
+    }) => invokeIpc("hardware:print", req),
+    list: () => invokeIpc("hardware:printers"),
     getJobStatus: (jobId: string) =>
-      ipcRenderer.invoke("hardware:print-job-status", jobId),
+      invokeIpc("hardware:print-job-status", jobId),
     onJobStatus: (cb: (status: unknown) => void) => {
       const handler = (_: unknown, status: unknown) => cb(status);
       ipcRenderer.on("hardware:print:event", handler);
@@ -35,13 +60,13 @@ const api = {
   },
 
   health: {
-    getStatus: () => ipcRenderer.invoke("health:status"),
+    getStatus: () => invokeIpc("health:status"),
   },
 
   updater: {
-    getStatus: () => ipcRenderer.invoke("update:status"),
-    check: () => ipcRenderer.invoke("update:check"),
-    install: () => ipcRenderer.invoke("update:install"),
+    getStatus: () => invokeIpc("update:status"),
+    check: () => invokeIpc("update:check"),
+    install: () => invokeIpc("update:install"),
     onStatus: (cb: (status: unknown) => void) => {
       const handler = (_: unknown, status: unknown) => cb(status);
       ipcRenderer.on("update:event", handler);
@@ -50,11 +75,11 @@ const api = {
   },
 
   parcel: {
-    list: (register: string) => ipcRenderer.invoke("parcel:list", register),
-    requestList: (register: string) => ipcRenderer.invoke("parcel:request:list", register),
-    applicationList: (register: string) => ipcRenderer.invoke("parcel:application:list", register),
-    feeList: (parcelId: string) => ipcRenderer.invoke("parcel:fee:list", parcelId),
-    categories: () => ipcRenderer.invoke("category:list"),
+    list: (register: string) => invokeIpc("parcel:list", register),
+    requestList: (register: string) => invokeIpc("parcel:request:list", register),
+    applicationList: (register: string) => invokeIpc("parcel:application:list", register),
+    feeList: (parcelId: string) => invokeIpc("parcel:fee:list", parcelId),
+    categories: () => invokeIpc("category:list"),
   },
 
   service: {
@@ -62,12 +87,12 @@ const api = {
       endpoint: string;
       method?: "GET" | "POST";
       params?: Record<string, unknown>;
-    }) => ipcRenderer.invoke("service:get-document", request),
+    }) => invokeIpc("service:get-document", request),
   },
 
   promotion: {
-    list: () => ipcRenderer.invoke("promotion:list"),
-    refresh: () => ipcRenderer.invoke("promotion:refresh"),
+    list: () => invokeIpc("promotion:list"),
+    refresh: () => invokeIpc("promotion:refresh"),
     onStatus: (cb: (status: unknown) => void) => {
       const handler = (_: unknown, status: unknown) => cb(status);
       ipcRenderer.on("promotion:event", handler);
@@ -76,17 +101,17 @@ const api = {
   },
 
   auth: {
-    listMethods: () => ipcRenderer.invoke("user-auth:methods"),
+    listMethods: () => invokeIpc("user-auth:methods"),
     start: (req: { methodId: string; payload?: Record<string, unknown> }) =>
-      ipcRenderer.invoke("user-auth:start", req),
+      invokeIpc("user-auth:start", req),
     verify: (req: {
       methodId: string;
       challengeId: string;
       payload: Record<string, unknown>;
-    }) => ipcRenderer.invoke("user-auth:verify", req),
-    status: () => ipcRenderer.invoke("user-auth:status"),
-    touch: () => ipcRenderer.invoke("user-auth:touch"),
-    logout: () => ipcRenderer.invoke("user-auth:logout"),
+    }) => invokeIpc("user-auth:verify", req),
+    status: () => invokeIpc("user-auth:status"),
+    touch: () => invokeIpc("user-auth:touch"),
+    logout: () => invokeIpc("user-auth:logout"),
   },
 
   payment: {
@@ -96,11 +121,11 @@ const api = {
       registerNumber?: string;
       amount?: number;
       metadata?: Record<string, unknown>;
-    }) => ipcRenderer.invoke("payment:qpay:create", req),
+    }) => invokeIpc("payment:qpay:create", req),
     checkQpayInvoice: (req: {
       paymentMethod: "qpay" | "qrcode";
       invoiceId: string;
-    }) => ipcRenderer.invoke("payment:qpay:check", req),
+    }) => invokeIpc("payment:qpay:check", req),
   },
 
   platform: {

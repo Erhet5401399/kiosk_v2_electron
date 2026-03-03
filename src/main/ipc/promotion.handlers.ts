@@ -1,16 +1,17 @@
 import { ipcMain } from "electron";
 import { IPC } from "../core/constants";
 import { logger, promotion } from "../services";
+import { ipcWrap } from "./result";
 
 const log = logger.child("IPC:Promotion");
 
 export function setupPromotionHandlers() {
   ipcMain.handle(IPC.PROMOTION_LIST, async () => {
-    return promotion.list();
+    return ipcWrap(() => promotion.list(), "Get promotion list failed");
   });
 
   ipcMain.handle(IPC.PROMOTION_REFRESH, async () => {
-    return promotion.refresh();
+    return ipcWrap(() => promotion.refresh(), "Refresh promotion failed");
   });
 
   log.info("Promotion IPC handlers registered");

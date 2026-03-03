@@ -111,7 +111,7 @@ export function RequestCheckStep({ context, actions }: StepComponentProps) {
 
       <div className="service-modal-footer">
         <div className="modal-footer">
-          <Button onClick={actions.onComplete}>
+          <Button onClick={actions.onComplete} variant='secondary'>
             Дуусгах
           </Button>
           {/* <Button onClick={actions.onNext}>

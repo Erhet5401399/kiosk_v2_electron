@@ -62,8 +62,8 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
     >
       <div className="service-modal-body">
         <div className="step-header">
-          <h1>Газрын нэгж талбар сонгох</h1>
-          <p>Таны регистрийн дугаартай холбоотой газрын нэгжүүд</p>
+          <h1>Нэгж талбар сонгох</h1>
+          <p>Таны регистрийн дугаартай холбоотой нэгж талбарууд</p>
         </div>
 
         {isLoading ? (
@@ -115,7 +115,7 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
         ) : (
           <div className="step-no-data">
             <p>
-              <strong>{registerNumber}</strong> регистрийн дугаар дээр өмчилсөн газар олдсонгүй!
+              <strong>{registerNumber}</strong> регистрийн дугаар дээр газар олдсонгүй!
             </p>
           </div>
         )}

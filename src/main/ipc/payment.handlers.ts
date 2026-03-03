@@ -8,6 +8,7 @@ import type {
   CreateQpayInvoiceResponse,
 } from "../../shared/types";
 import { unwrapData } from "../core";
+import { ipcFail, ipcOk } from "./result";
 
 const log = logger.child("IPC:Payment");
 
@@ -69,23 +70,23 @@ export function setupPaymentHandlers() {
   ipcMain.handle(IPC.PAYMENT_QPAY_CREATE, async (_, req: CreateQpayInvoiceRequest) => {
     try {
       const data = await payment.createQpayInvoice(req);
-      return unwrapData<CreateQpayInvoiceResponse>(data);
+      return ipcOk(unwrapData<CreateQpayInvoiceResponse>(data));
     } catch (e) {
       log.error("Create QPay invoice failed:", e as Error);
-      return null;
+      return ipcFail(e, "Create QPay invoice failed");
     }
   });
 
   ipcMain.handle(IPC.PAYMENT_QPAY_CHECK, async (_, req: CheckQpayInvoiceRequest) => {
     try {
       const data = await payment.checkQpayInvoice(req);
-      return normalizeCheckResponse(data);
+      return ipcOk(normalizeCheckResponse(data));
     } catch (e) {
       log.error("Check QPay invoice failed:", e as Error);
-      return {
+      return ipcOk({
         data: "ERROR",
         status: false,
-      } satisfies CheckQpayInvoiceResponse;
+      } satisfies CheckQpayInvoiceResponse);
     }
   });
 
