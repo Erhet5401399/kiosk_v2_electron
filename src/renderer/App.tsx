@@ -290,6 +290,31 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!selectedService || !window.electron?.auth?.status) return;
+
+    let active = true;
+    const refresh = async () => {
+      try {
+        const status = await window.electron.auth.status();
+        if (!active) return;
+        setAuthStatus(status);
+      } catch {
+        // Ignore transient status refresh failures.
+      }
+    };
+
+    void refresh();
+    const timer = window.setInterval(() => {
+      void refresh();
+    }, 5000);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [selectedService]);
+
+  useEffect(() => {
     const registerActivity = () => {
       setLastInteractionAt(Date.now());
       setShowPromotionModal(false);

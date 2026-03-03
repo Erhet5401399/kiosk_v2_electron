@@ -139,6 +139,11 @@ export function ServiceModal({
 
   const stepConfigs = engine.getStepConfigs();
   const currentConfig = engine.getCurrentStepConfig();
+  const stepSessionExpiresAt = Number(state.stepData.session_expires_at || 0);
+  const countdownTo =
+    Number(sessionExpiresAt || 0) ||
+    stepSessionExpiresAt ||
+    undefined;
 
   const handlePrintAndClose = async () => {
     const currentRegister = (state.stepData.register_number as string) || registerNumber;
@@ -149,7 +154,7 @@ export function ServiceModal({
   return (
     <ModalWrapper
       onClose={cancel}
-      countdownTo={sessionExpiresAt}
+      countdownTo={countdownTo}
       onCountdownEnd={onSessionExpired}
     >
       <div className="service-modal-layout">

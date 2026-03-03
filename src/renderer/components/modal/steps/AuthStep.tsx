@@ -4,6 +4,8 @@ import type { StepComponentProps } from "../../../types/steps";
 import { Button, useSnackbar } from "../../common";
 import { VirtualKeyboard } from "../../keyboard";
 
+const AUTH_STEP_IDLE_MS = Number(import.meta.env.VITE_USER_SESSION_IDLE_MS || 90_000);
+
 type WebViewElement = HTMLElement & {
   reload: () => void;
   send: (channel: string, ...args: unknown[]) => void;
@@ -42,7 +44,6 @@ export function AuthStep({ actions }: StepComponentProps) {
   const [registerNumber, setRegisterNumber] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [smsCode, setSmsCode] = useState("");
-  const [loginDeadline, setLoginDeadline] = useState<number | null>(null);
 
   const [smsKeyboardTarget, setSmsKeyboardTarget] = useState<"register" | "phone" | "code" | null>(null);
   const [showWebviewKeyboard, setShowWebviewKeyboard] = useState(false);
@@ -50,6 +51,11 @@ export function AuthStep({ actions }: StepComponentProps) {
 
   const webviewRef = useRef<WebViewElement | null>(null);
   const authInFlightRef = useRef(false);
+  const updateStepDataRef = useRef(actions.onUpdateStepData);
+
+  useEffect(() => {
+    updateStepDataRef.current = actions.onUpdateStepData;
+  }, [actions.onUpdateStepData]);
 
   const selectedMethod = useMemo(
     () => methods.find((method) => method.id === authMethodId) || null,
@@ -66,6 +72,12 @@ export function AuthStep({ actions }: StepComponentProps) {
 
   const isWebviewMethod = selectedMethod?.type === "webview_oauth";
   const smsCodeSent = selectedMethod?.id === "sms" && challenge?.methodId === "sms";
+
+  const bumpAuthStepTimeout = useCallback((ms = AUTH_STEP_IDLE_MS) => {
+    updateStepDataRef.current({
+      session_expires_at: Date.now() + ms,
+    });
+  }, []);
 
   const setAuthenticatedState = useCallback((status: UserAuthStatus) => {
     const session = status.session;
@@ -102,9 +114,18 @@ export function AuthStep({ actions }: StepComponentProps) {
     payload?: Record<string, unknown>,
   ) => {
     const started = await window.electron.auth.start({ methodId, payload });
+    const deadline = Number(started.expiresAt || Date.now() + 60_000);
     setChallenge(started);
-    setLoginDeadline(started.expiresAt || Date.now() + 60_000);
+    actions.onUpdateStepData({
+      session_expires_at: deadline,
+    });
     return started;
+  }, [actions]);
+
+  useEffect(() => {
+    bumpAuthStepTimeout();
+    // Run once when auth step mounts.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -171,7 +192,6 @@ export function AuthStep({ actions }: StepComponentProps) {
     setSmsKeyboardTarget(null);
     setShowWebviewKeyboard(false);
     setWebviewKeyboardMode("alphanumeric");
-    setLoginDeadline(null);
 
     if (method.type !== "webview_oauth") return;
 
@@ -271,6 +291,22 @@ export function AuthStep({ actions }: StepComponentProps) {
     };
   }, [isWebviewMethod, challenge?.webUrl]);
 
+  useEffect(() => {
+    const onActivity = () => {
+      bumpAuthStepTimeout();
+    };
+
+    window.addEventListener("pointerdown", onActivity);
+    window.addEventListener("keydown", onActivity);
+    window.addEventListener("touchstart", onActivity);
+
+    return () => {
+      window.removeEventListener("pointerdown", onActivity);
+      window.removeEventListener("keydown", onActivity);
+      window.removeEventListener("touchstart", onActivity);
+    };
+  }, [bumpAuthStepTimeout]);
+
   const sendSmsCode = useCallback(async () => {
     const normalizedReg = normalizeRegister(registerNumber);
     const normalizedPhone = String(phoneNumber || "").replace(/[^\d]/g, "");
@@ -332,18 +368,6 @@ export function AuthStep({ actions }: StepComponentProps) {
       setLoading(false);
     }
   }, [challenge, setAuthenticatedState, showError, showSuccess, smsCode]);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      if (!loginDeadline) return;
-      if (Date.now() < loginDeadline) return;
-      window.clearInterval(timer);
-      actions.onCancel();
-    }, 500);
-    return () => {
-      window.clearInterval(timer);
-    };
-  }, [actions, loginDeadline]);
 
   const sendWebviewKeyboardInput = (payload: { action: "append" | "backspace" | "done"; key?: string }) => {
     webviewRef.current?.send("vk-input", payload);
@@ -529,10 +553,5 @@ export function AuthStep({ actions }: StepComponentProps) {
     </div>
   );
 }
-
-
-
-
-
 
 

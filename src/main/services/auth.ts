@@ -62,6 +62,7 @@ class DanBackendProvider implements AuthProvider {
   private readonly defaultCallbackUrl = String(
     process.env.DAN_CALLBACK_URL || "https://kiosk.local/auth/dan/callback",
   ).trim();
+  private readonly challengeTtlMs = AUTH.USER_SESSION_IDLE_MS;
 
   private pending = new Map<
     string,
@@ -81,14 +82,14 @@ class DanBackendProvider implements AuthProvider {
     const started: DanStartResponse = {
       auth_url: "https://sso.gov.mn",
       callback_url: this.defaultCallbackUrl,
-      expires_at: Date.now() + 5 * 60 * 1000,
+      expires_at: Date.now() + this.challengeTtlMs,
     };
 
     const callbackUrl = String(
       started.callback_url || this.defaultCallbackUrl,
     ).trim();
     const expiresAt = Number(
-      started.expires_at || Date.now() + 5 * 60 * 1000,
+      started.expires_at || Date.now() + this.challengeTtlMs,
     );
     const webUrl = String(started.auth_url || "").trim();
 
@@ -211,9 +212,7 @@ class SmsBackendProvider implements AuthProvider {
     process.env.SMS_VERIFY_ENDPOINT || "/api/kiosk/service/auth/login/check",
   ).trim();
 
-  private readonly challengeTtlMs = Number(
-    process.env.SMS_CHALLENGE_TTL_MS || 5 * 60 * 1000,
-  );
+  private readonly challengeTtlMs = AUTH.USER_SESSION_IDLE_MS;
   private readonly passwordLoginPhoneNumber = String(
     process.env.SMS_AUTH_PASSWORD_PHONE || "",
   ).replace(/[^\d]/g, "");
