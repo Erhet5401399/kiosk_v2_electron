@@ -152,20 +152,26 @@ export function ServiceModal({
       countdownTo={sessionExpiresAt}
       onCountdownEnd={onSessionExpired}
     >
-      <div className="service-context-strip">
-        <div className="service-context-main">
-          <strong className="service-context-name">{service.name}</strong>
-          <span className="service-context-price">{formatServicePrice(service.price)}</span>
+      <div className="service-modal-layout">
+        <div className="service-modal-fixed-top">
+          <div className="service-context-strip">
+            <div className="service-context-main">
+              <strong className="service-context-name">{service.name}</strong>
+              <span className="service-context-price">{formatServicePrice(service.price)}</span>
+            </div>
+            {/* <span className="service-context-meta">{state.currentStepIndex + 1} / {state.steps.length}</span> */}
+          </div>
+          <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
         </div>
-        {/* <span className="service-context-meta">{state.currentStepIndex + 1} / {state.steps.length}</span> */}
+        <div className="service-modal-step-scroll">
+          <StepRenderer
+            context={context}
+            actions={actions}
+            config={currentConfig}
+            onPrint={handlePrintAndClose}
+          />
+        </div>
       </div>
-      <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />
-      <StepRenderer
-        context={context}
-        actions={actions}
-        config={currentConfig}
-        onPrint={handlePrintAndClose}
-      />
     </ModalWrapper>
   );
 }

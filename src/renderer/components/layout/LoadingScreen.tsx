@@ -13,7 +13,7 @@ export function LoadingScreen({ state, deviceId }: LoadingScreenProps) {
         <Logo />
         <h1 style={{ marginTop: 16, color: '#aaa' }}>{APP_NAME}</h1>
       </div>
-      <div className="spinner" />
+      {/* <div className="spinner" /> */}
       <h2 style={{ marginTop: 40, marginBottom: 10, fontWeight: 600, color: "white", textTransform: "uppercase" }}>
         {STATE_LABELS[state] || state}
       </h2>
