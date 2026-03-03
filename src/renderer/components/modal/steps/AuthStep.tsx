@@ -358,7 +358,7 @@ export function AuthStep({ actions }: StepComponentProps) {
       if (!status.authenticated || !status.session) {
         throw new Error("Нэвтрэх хүсэлт амжилтүй");
       }
-      showSuccess("Authenticated successfully");
+      showSuccess("Амжилттай нэвтэрлээ");
       setAuthenticatedState(status);
     } catch (err) {
       const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтүй";

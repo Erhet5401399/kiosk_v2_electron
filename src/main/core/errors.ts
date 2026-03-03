@@ -33,7 +33,7 @@ export class AppError extends Error {
 }
 
 export class AuthError extends AppError {
-  constructor(code: ErrorCode = ERROR.AUTH_FAILED, message = 'Authentication failed') {
+  constructor(code: ErrorCode = ERROR.AUTH_FAILED, message = 'Нэвтрэх хүсэлт амжилтгүй') {
     super(code, message, code === ERROR.AUTH_EXPIRED);
     this.name = 'AuthError';
   }
