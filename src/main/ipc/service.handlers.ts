@@ -53,6 +53,13 @@ export function setupServiceHandlers() {
     }, "Get parcel apps failed");
   });
 
+  ipcMain.handle(IPC.PARCEL_ONLINE_REQUEST_FORM, async (_, register: string, parcel: string, appType: string) => {
+    return ipcWrap(async () => {
+      const data = await serviceApi.getParcelOnlineRequestForm(register, parcel, appType);
+      return asList(data);
+    }, "Get parcel apps failed");
+  });
+
   log.info("Service IPC handlers registered");
 }
 

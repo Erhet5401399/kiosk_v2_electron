@@ -1,4 +1,4 @@
-import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelOnlineRequest, ParcelRequest, ServiceCategory } from "../../shared/types";
+import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelOnlineRequest, ParcelOnlineRequestFormField, ParcelRequest, ServiceCategory } from "../../shared/types";
 import { api } from "./api";
 import { logger } from "./logger";
 
@@ -198,6 +198,23 @@ class ServiceApiService {
 
     const url = `/api/kiosk/service/choose/request/app/type?${query.toString()}`;
     this.log.debug('Fetching parcel online request:', url);
+    return api.post(url);
+  }
+
+  async getParcelOnlineRequestForm(registerNumber: string, parcelId: string, appType: string): Promise<ApiResponse<ParcelOnlineRequestFormField[]> | ParcelOnlineRequestFormField[]> {
+    if (!registerNumber || !parcelId || !appType) {
+      this.log.warn("Skipping parcel online request forms fetch: missing parameters");
+      return [];
+    }
+
+    const query = new URLSearchParams();
+    query.set('register_number', registerNumber);
+    query.set('parcel_id', parcelId);
+    query.set('app_type', appType);
+    query.set('needed', "0");
+
+    const url = `/api/kiosk/service/application/request/parameter/file/upload?${query.toString()}`;
+    this.log.debug('Fetching parcel online request forms:', url);
     return api.post(url);
   }
 

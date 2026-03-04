@@ -257,7 +257,19 @@ export interface ParcelOnlineRequest {
     is_online_request: boolean;
     online_request_description: string;
     is_meeting: boolean;
+    required_input: {
+      field: string;
+      title: string;
+    }[];
   }[];
+}
+
+export interface ParcelOnlineRequestFormField {
+  field: string;
+  type: 'input' | 'select';
+  initialInputValue: string | null;
+  options: { id: string, label: string }[] | null;
+  qr_code: string | null;
 }
 
 export interface ParcelFeeInvoice {

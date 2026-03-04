@@ -68,6 +68,7 @@ export const IPC = {
   PARCEL_APPLICATION_LIST: "parcel:application:list",
   PARCEL_FEE_LIST: "parcel:fee:list",
   PARCEL_ONLINE_REQUEST_LIST: "parcel:online-request:list",
+  PARCEL_ONLINE_REQUEST_FORM: "parcel:online-request:form",
   CATEGORY_LIST: "category:list",
   SERVICE_GET_DOCUMENT: "service:get-document",
   

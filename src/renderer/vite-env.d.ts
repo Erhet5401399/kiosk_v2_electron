@@ -8,6 +8,7 @@ import type {
   ParcelApplication,
   ParcelFee,
   ParcelOnlineRequest,
+  ParcelOnlineRequestFormField,
   ParcelRequest,
   PrinterDevice,
   PrintJobStatus,
@@ -68,6 +69,7 @@ declare global {
         applicationList: (register: string) => Promise<ParcelApplication[]>;
         feeList: (parcelId: string) => Promise<ParcelFee[]>;
         onlineRequestList: (register: string, parcelId: string) => Promise<ParcelOnlineRequest | null>;
+        onlineRequestForm: (register: string, parcelId: string, appType: string) => Promise<ParcelOnlineRequestFormField[]>;
         categories: () => Promise<ServiceCategory[]>;
       };
       service: {

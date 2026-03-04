@@ -20,6 +20,7 @@ import {
   ParcelReasonSelectStep,
   LandParcelFeesStep,
   LandParcelOnlineRequestSelectStep,
+  LandParcelOnlineRequestFormStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -82,6 +83,11 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       }
       return { isValid: true };
     },
+  },
+  'parcel-online-request-form': {
+    id: 'parcel-online-request-form',
+    title: 'Хүсэлтийн форм бөглөх',
+    component: LandParcelOnlineRequestFormStep,
   },
   'request-check': {
     id: 'request-check',
