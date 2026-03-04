@@ -134,7 +134,3 @@ export function LandParcelSelectStep({ context, actions }: StepComponentProps) {
     </div>
   );
 }
-
-
-
-

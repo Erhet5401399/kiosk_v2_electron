@@ -67,11 +67,14 @@ export const IPC = {
   PARCEL_REQUEST_LIST: "parcel:request:list",
   PARCEL_APPLICATION_LIST: "parcel:application:list",
   PARCEL_FEE_LIST: "parcel:fee:list",
+  PARCEL_ONLINE_REQUEST_LIST: "parcel:online-request:list",
   CATEGORY_LIST: "category:list",
   SERVICE_GET_DOCUMENT: "service:get-document",
+  
   PROMOTION_LIST: "promotion:list",
   PROMOTION_REFRESH: "promotion:refresh",
   PROMOTION_EVENT: "promotion:event",
+  
   PAYMENT_QPAY_CREATE: "payment:qpay:create",
   PAYMENT_QPAY_CHECK: "payment:qpay:check",
 

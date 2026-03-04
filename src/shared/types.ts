@@ -244,6 +244,22 @@ export interface ParcelFee {
   invoices: ParcelFeeInvoice[];
 }
 
+export interface ParcelOnlineRequest {
+  allowedAppTypes: string[];
+  needed: 0 | 1;
+  citizen: 0 | 1;
+  parcelId: string;
+  appTypeList: {
+    code: number;
+    description: string;
+    parcel_type: string;
+    relation_object: string;
+    is_online_request: boolean;
+    online_request_description: string;
+    is_meeting: boolean;
+  }[];
+}
+
 export interface ParcelFeeInvoice {
   id: string;
   invoice_no: string;

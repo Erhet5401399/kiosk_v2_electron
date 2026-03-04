@@ -79,6 +79,7 @@ const api = {
     requestList: (register: string) => invokeIpc("parcel:request:list", register),
     applicationList: (register: string) => invokeIpc("parcel:application:list", register),
     feeList: (parcelId: string) => invokeIpc("parcel:fee:list", parcelId),
+    onlineRequestList: (register: string, parcelId: string) => invokeIpc("parcel:online-request:list", register, parcelId),
     categories: () => invokeIpc("category:list"),
   },
 

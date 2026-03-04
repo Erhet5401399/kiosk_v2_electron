@@ -1,4 +1,4 @@
-import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelRequest, ServiceCategory } from "../../shared/types";
+import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelOnlineRequest, ParcelRequest, ServiceCategory } from "../../shared/types";
 import { api } from "./api";
 import { logger } from "./logger";
 
@@ -183,6 +183,21 @@ class ServiceApiService {
 
     const url = `/api/kiosk/service/pay/land/fees?${query.toString()}`;
     this.log.debug('Fetching parcel fees:', url);
+    return api.post(url);
+  }
+
+  async getParcelOnlineRequests(registerNumber: string, parcelId: string): Promise<ApiResponse<ParcelOnlineRequest | null> | ParcelOnlineRequest | null> {
+    if (!registerNumber || !parcelId) {
+      this.log.warn("Skipping parcel online request fetch: empty parcel id");
+      return null;
+    }
+
+    const query = new URLSearchParams();
+    query.set('register_number', registerNumber);
+    query.set('parcel_id', parcelId);
+
+    const url = `/api/kiosk/service/choose/request/app/type?${query.toString()}`;
+    this.log.debug('Fetching parcel online request:', url);
     return api.post(url);
   }
 

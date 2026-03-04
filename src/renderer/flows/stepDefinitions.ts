@@ -19,6 +19,7 @@ import {
   ApplicationCheckStep,
   ParcelReasonSelectStep,
   LandParcelFeesStep,
+  LandParcelOnlineRequestSelectStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -66,6 +67,18 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       const { stepData } = context;
       if (!stepData.reason) {
         return { isValid: false, errorMessage: 'Газрын нэгж талбарын зориулалт сонгоно уу.' };
+      }
+      return { isValid: true };
+    },
+  },
+  'parcel-online-request-select': {
+    id: 'parcel-online-request-select',
+    title: 'Цахим хүсэлт илгээх',
+    component: LandParcelOnlineRequestSelectStep,
+    validate: (context: StepContext): StepValidation => {
+      const { stepData } = context;
+      if (!stepData.online_request_code) {
+        return { isValid: false, errorMessage: 'Цахим хүсэлт сонгоно уу.' };
       }
       return { isValid: true };
     },
