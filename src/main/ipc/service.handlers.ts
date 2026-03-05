@@ -1,7 +1,8 @@
-import { ipcMain } from "electron";
+﻿import { ipcMain } from "electron";
 import { IPC, asList, unwrapData } from "../core";
 import { logger, serviceApi } from "../services";
 import type { GetDocumentRequest } from "../services/service";
+import type { ParcelOnlineRequestFormRequest } from "../../shared/types";
 import { ipcWrap } from "./result";
 
 const log = logger.child("IPC:Service");
@@ -50,14 +51,21 @@ export function setupServiceHandlers() {
     return ipcWrap(async () => {
       const data = await serviceApi.getParcelOnlineRequests(register, parcel);
       return unwrapData(data);
-    }, "Get parcel apps failed");
+    }, "Get parcel online request list failed");
   });
 
-  ipcMain.handle(IPC.PARCEL_ONLINE_REQUEST_FORM, async (_, register: string, parcel: string, appType: string, value?: string) => {
+  ipcMain.handle(IPC.PARCEL_ONLINE_REQUEST_FORM, async (_, request: ParcelOnlineRequestFormRequest) => {
     return ipcWrap(async () => {
-      const data = await serviceApi.getParcelOnlineRequestForm(register, parcel, appType, value);
+      const data = await serviceApi.getParcelOnlineRequestForm(request);
       return asList(data);
-    }, "Get parcel apps failed");
+    }, "Get parcel online request form failed");
+  });
+
+  ipcMain.handle(IPC.PARCEL_ONLINE_REQUEST_SEND, async (_, request: Record<string, any>) => {
+    return ipcWrap(async () => {
+      const data = await serviceApi.sendParcelOnlineRequest(request);
+      return asList(data);
+    }, "Send parcel online request failed");
   });
 
   log.info("Service IPC handlers registered");
@@ -68,3 +76,4 @@ export function cleanupServiceHandlers() {
   ipcMain.removeHandler(IPC.CATEGORY_LIST);
   ipcMain.removeHandler(IPC.PARCEL_LIST);
 }
+

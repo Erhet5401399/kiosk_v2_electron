@@ -264,6 +264,14 @@ export interface ParcelOnlineRequest {
   }[];
 }
 
+export interface ParcelOnlineRequestFormRequest {
+  registerNumber: string;
+  parcelId: string;
+  appType: string;
+  value?: string;
+  needed?: 0 | 1;
+}
+
 export interface ParcelOnlineRequestFormField {
   field: string;
   title: string;

@@ -2,10 +2,13 @@
 import type { StepComponentProps } from "../../../types/steps";
 import { Button, useSnackbar } from "../../common";
 import { VirtualKeyboard } from "../../keyboard";
-import type { ParcelOnlineRequest, ParcelOnlineRequestFormField } from "../../../../shared/types";
+import type {
+  ParcelOnlineRequest,
+  ParcelOnlineRequestFormField,
+  ParcelOnlineRequestFormRequest,
+} from "../../../../shared/types";
 
 type FormValues = Record<string, string>;
-
 type RequiredInput = ParcelOnlineRequest["appTypeList"][0]["required_input"];
 
 function normalizeFieldKey(value: unknown): string {
@@ -30,16 +33,14 @@ function prettifyFieldName(field: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
-export function LandParcelOnlineRequestStep({ context, actions, config }: StepComponentProps) {
+export function LandParcelOnlineRequestStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
   const { showError } = useSnackbar();
-  const isLegacyFormStep = config.id === "parcel-online-request-form";
-  const combinedDone = stepData.online_request_combined_done === true;
 
   const registerNumber = String(stepData.register_number || "").trim();
   const parcelId = String(stepData.parcel_id || "").trim();
-  const selectedOnlineRequestCode = Number(stepData.online_request_code || 0) || 0;
 
+  const [selectedOnlineRequestCode, setSelectedOnlineRequestCode] = useState(0);
   const [onlineRequest, setOnlineRequest] = useState<ParcelOnlineRequest | null>(null);
   const [isLoadingList, setIsLoadingList] = useState(false);
 
@@ -48,9 +49,13 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
   const [formValues, setFormValues] = useState<FormValues>({});
   const [isLoadingForm, setIsLoadingForm] = useState(false);
   const [hasFetchedForm, setHasFetchedForm] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
   const [keyboardTarget, setKeyboardTarget] = useState<string | null>(null);
-  const [keyboardPosition, setKeyboardPosition] = useState<{ left: number; top: number; width: number } | null>(null);
+  const [keyboardPosition, setKeyboardPosition] = useState<{
+    left: number;
+    top: number;
+    width: number;
+  } | null>(null);
 
   const fetchKeyRef = useRef("");
   const autoFetchAttemptedRef = useRef("");
@@ -69,10 +74,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
   const requiredFieldTitle = String(requiredInput?.title || "").trim();
   const hasRequiredInput = Boolean(requiredFieldKey);
 
-  const visibleFields = useMemo(
-    () => formFields.filter((field) => !field.hide),
-    [formFields],
-  );
+  const visibleFields = useMemo(() => formFields.filter((field) => !field.hide), [formFields]);
 
   const missingRequired = useMemo(
     () =>
@@ -84,18 +86,11 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
   );
 
   const canFetchForm =
-    Boolean(selectedOnlineRequestCode) &&
-    !isLoadingForm &&
-    (!hasRequiredInput || requiredValue.trim().length > 0);
+    Boolean(selectedOnlineRequestCode) && !isLoadingForm && (!hasRequiredInput || requiredValue.trim().length > 0);
 
-  const canContinue =
-    Boolean(selectedOnlineRequestCode) &&
-    hasFetchedForm &&
-    !isLoadingForm &&
-    missingRequired.length === 0;
+  const canContinue = Boolean(selectedOnlineRequestCode) && hasFetchedForm && !isLoadingForm && missingRequired.length === 0;
 
   const raiseError = (message: string) => {
-    setError(message);
     showError(message);
   };
 
@@ -106,7 +101,6 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     }
 
     setIsLoadingList(true);
-    setError(null);
 
     try {
       if (!window.electron?.parcel?.onlineRequestList) {
@@ -117,7 +111,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
       setOnlineRequest(response || null);
     } catch (err) {
       setOnlineRequest(null);
-      raiseError((err as Error)?.message || "Failed to fetch requests");
+      raiseError((err as Error)?.message || "Хүсэлтийн жагсаалт авахад алдаа гарлаа.");
     } finally {
       setIsLoadingList(false);
     }
@@ -127,15 +121,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     void fetchRequestList();
   }, [registerNumber, parcelId]);
 
-  useEffect(() => {
-    if (!isLegacyFormStep || !combinedDone) return;
-    actions.onNext();
-  }, [actions, combinedDone, isLegacyFormStep]);
-
-  const buildInitialValues = (
-    fields: ParcelOnlineRequestFormField[],
-    requestValue: string,
-  ): FormValues => {
+  const buildInitialValues = (fields: ParcelOnlineRequestFormField[], requestValue: string): FormValues => {
     const initialValues: FormValues = {};
 
     fields.forEach((field) => {
@@ -143,9 +129,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
       if (!key) return;
 
       const firstOption =
-        Array.isArray(field.options) && field.options.length > 0
-          ? String(field.options[0]?.id || "").trim()
-          : "";
+        Array.isArray(field.options) && field.options.length > 0 ? String(field.options[0]?.id || "").trim() : "";
 
       const fromInitial = String(field.initialInputValue ?? "").trim();
       const fromStepData = String(stepData[key] ?? "").trim();
@@ -174,19 +158,21 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     if (fetchKeyRef.current === key && hasFetchedForm) return;
 
     setIsLoadingForm(true);
-    setError(null);
 
     try {
       if (!window.electron?.parcel?.onlineRequestForm) {
         throw new Error("Electron IPC not available");
       }
 
-      const response = await window.electron.parcel.onlineRequestForm(
+      const request: ParcelOnlineRequestFormRequest = {
         registerNumber,
         parcelId,
-        requestCode,
-        normalizedRequiredValue || undefined,
-      );
+        appType: requestCode,
+        value: normalizedRequiredValue || undefined,
+        needed: onlineRequest?.needed,
+      };
+
+      const response = await window.electron.parcel.onlineRequestForm(request);
 
       const fields = (Array.isArray(response) ? response : []).filter(
         (field) => normalizeFieldKey(field?.field).length > 0,
@@ -215,7 +201,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
       setFormValues({});
       setHasFetchedForm(false);
       fetchKeyRef.current = "";
-      raiseError((err as Error)?.message || "Failed to fetch form fields");
+      raiseError((err as Error)?.message || "Форм авахад алдаа гарлаа.");
     } finally {
       setIsLoadingForm(false);
     }
@@ -223,8 +209,10 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
 
   useEffect(() => {
     if (!selectedOnlineRequestCode || hasRequiredInput || hasFetchedForm || isLoadingForm) return;
+
     const autoKey = `${registerNumber}|${parcelId}|${selectedOnlineRequestCode}`;
     if (autoFetchAttemptedRef.current === autoKey) return;
+
     autoFetchAttemptedRef.current = autoKey;
     void fetchForms();
   }, [hasFetchedForm, hasRequiredInput, isLoadingForm, parcelId, registerNumber, selectedOnlineRequestCode]);
@@ -232,7 +220,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
   const handleSelect = (value: ParcelOnlineRequest["appTypeList"][0]) => {
     if (value.code === selectedOnlineRequestCode) return;
 
-    setError(null);
+    setSelectedOnlineRequestCode(value.code);
     setRequiredValue("");
     setFormFields([]);
     setFormValues({});
@@ -242,12 +230,10 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     autoFetchAttemptedRef.current = "";
 
     actions.onUpdateStepData({
-      online_request_code: value.code,
       online_request_required_input: value.required_input,
       online_request_form_value: "",
       online_request_form_fields: [],
       online_request_form_values: {},
-      online_request_combined_done: false,
     });
   };
 
@@ -284,15 +270,13 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     const patch: Record<string, unknown> = {
       online_request_form_values: formValues,
       online_request_form_fields: formFields,
-      online_request_combined_done: true,
     };
 
     Object.entries(formValues).forEach(([key, value]) => {
       patch[key] = value;
     });
 
-    actions.onUpdateStepData(patch);
-    actions.onNext();
+    console.log(patch, "PATCH");
   };
 
   const appendKeyboard = (key: string) => {
@@ -368,25 +352,12 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     };
   }, [keyboardTarget]);
 
-  if (isLegacyFormStep && combinedDone) {
-    return (
-      <div className="service-modal">
-        <div className="service-modal-body">
-          <div className="loading-container">
-            <div className="processing-spinner" />
-            <p>Түр хүлээнэ үү...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="service-modal online-request-step">
       <div className="service-modal-body online-request-body">
         <div className="step-header online-request-header">
           <h1>Цахим хүсэлт илгээх</h1>
-          <p>Та хүсэлтийн төрөлөө сонгон хүсэлтээ илгээнэ үү.</p>
+          <p>Та хүсэлтийн төрлөө сонгон хүсэлтээ илгээнэ үү.</p>
         </div>
 
         <div className="online-request-layout">
@@ -435,9 +406,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
                     onClick={() => focusKeyboardTarget("__required__")}
                   >
                     <div className="input-label">{requiredFieldTitle || requiredFieldKey}</div>
-                    <div className="input-value">
-                      {requiredValue || <span className="placeholder"></span>}
-                    </div>
+                    <div className="input-value">{requiredValue || <span className="placeholder"></span>}</div>
                   </button>
                 </div>
               </div>
@@ -483,44 +452,42 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
                             </select>
                           </div>
                         ) : (
-                          <>
-                            <button
-                              ref={(el) => {
-                                inputRefs.current[key] = el;
-                              }}
-                              type="button"
-                              className={`registration-input-field ${keyboardTarget === key ? "active" : ""}`}
-                              style={{ width: "100%" }}
-                              onClick={() => focusKeyboardTarget(key)}
+                          <button
+                            ref={(el) => {
+                              inputRefs.current[key] = el;
+                            }}
+                            type="button"
+                            className={`registration-input-field ${keyboardTarget === key ? "active" : ""}`}
+                            style={{ width: "100%" }}
+                            onClick={() => focusKeyboardTarget(key)}
+                          >
+                            <div className="input-label">{label}</div>
+                            <div
+                              className="input-value"
+                              style={
+                                field.long
+                                  ? {
+                                      display: "block",
+                                      whiteSpace: "pre-wrap",
+                                      lineHeight: 1.35,
+                                      width: "100%",
+                                      minHeight: "4.8rem",
+                                      letterSpacing: "normal",
+                                      overflowWrap: "anywhere",
+                                      wordBreak: "break-word",
+                                    }
+                                  : {
+                                      display: "block",
+                                      width: "100%",
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }
+                              }
                             >
-                              <div className="input-label">{label}</div>
-                              <div
-                                className="input-value"
-                                style={
-                                  field.long
-                                    ? {
-                                        display: "block",
-                                        whiteSpace: "pre-wrap",
-                                        lineHeight: 1.35,
-                                        width: "100%",
-                                        minHeight: "4.8rem",
-                                        letterSpacing: "normal",
-                                        overflowWrap: "anywhere",
-                                        wordBreak: "break-word",
-                                      }
-                                    : {
-                                        display: "block",
-                                        width: "100%",
-                                        whiteSpace: "nowrap",
-                                        overflow: "hidden",
-                                        textOverflow: "ellipsis",
-                                      }
-                                }
-                              >
-                                {value || <span className="placeholder"></span>}
-                              </div>
-                            </button>
-                          </>
+                              {value || <span className="placeholder"></span>}
+                            </div>
+                          </button>
                         )}
 
                         {qrSrc ? (
@@ -535,7 +502,6 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
                       </div>
                     );
                   })}
-
                 </div>
               </div>
             )}

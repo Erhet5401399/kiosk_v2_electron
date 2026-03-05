@@ -9,6 +9,7 @@ import type {
   ParcelFee,
   ParcelOnlineRequest,
   ParcelOnlineRequestFormField,
+  ParcelOnlineRequestFormRequest,
   ParcelRequest,
   PrinterDevice,
   PrintJobStatus,
@@ -69,7 +70,8 @@ declare global {
         applicationList: (register: string) => Promise<ParcelApplication[]>;
         feeList: (parcelId: string) => Promise<ParcelFee[]>;
         onlineRequestList: (register: string, parcelId: string) => Promise<ParcelOnlineRequest | null>;
-        onlineRequestForm: (register: string, parcelId: string, appType: string, value?: string) => Promise<ParcelOnlineRequestFormField[]>;
+        onlineRequestForm: (request: ParcelOnlineRequestFormRequest) => Promise<ParcelOnlineRequestFormField[]>;
+        onlineRequestSend: (request: Record<string, any>) => Promise<any>;
         categories: () => Promise<ServiceCategory[]>;
       };
       service: {
@@ -121,3 +123,4 @@ declare namespace JSX {
     };
   }
 }
+

@@ -191,7 +191,7 @@
   flex: 1;
   min-height: 0;
   overflow: hidden;
-  padding: 0 16px;
+  padding: 0 32px;
 }
 
 .online-request-header {

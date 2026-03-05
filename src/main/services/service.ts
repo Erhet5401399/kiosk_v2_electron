@@ -1,4 +1,4 @@
-import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelOnlineRequest, ParcelOnlineRequestFormField, ParcelRequest, ServiceCategory } from "../../shared/types";
+import { ApiResponse, Parcel, ParcelApplication, ParcelFee, ParcelOnlineRequest, ParcelOnlineRequestFormField, ParcelOnlineRequestFormRequest, ParcelRequest, ServiceCategory } from "../../shared/types";
 import { api } from "./api";
 import { logger } from "./logger";
 
@@ -201,7 +201,8 @@ class ServiceApiService {
     return api.post(url);
   }
 
-  async getParcelOnlineRequestForm(registerNumber: string, parcelId: string, appType: string, value?: string): Promise<ApiResponse<ParcelOnlineRequestFormField[]> | ParcelOnlineRequestFormField[]> {
+  async getParcelOnlineRequestForm(params: ParcelOnlineRequestFormRequest): Promise<ApiResponse<ParcelOnlineRequestFormField[]> | ParcelOnlineRequestFormField[]> {
+    const { registerNumber, parcelId, appType, value, needed } = params;
     if (!registerNumber || !parcelId || !appType) {
       this.log.warn("Skipping parcel online request forms fetch: missing parameters");
       return [];
@@ -211,7 +212,7 @@ class ServiceApiService {
     query.set('register_number', registerNumber);
     query.set('parcel_id', parcelId);
     query.set('app_type', appType);
-    query.set('needed', "0");
+    query.set('needed', String(needed ?? "0"));
     const normalizedValue = String(value || "").trim();
     if (normalizedValue) {
       query.set('value', normalizedValue);
@@ -220,6 +221,12 @@ class ServiceApiService {
     const url = `/api/kiosk/service/application/request/parameter/file/upload?${query.toString()}`;
     this.log.debug('Fetching parcel online request forms:', url);
     return api.post(url);
+  }
+
+  async sendParcelOnlineRequest(params: Record<string, any>): Promise<ApiResponse<any> | any> {
+    const url = `/api/kiosk/service/application/request/sent`;
+    this.log.debug('Sending parcel online request:', url);
+    return api.post(url, params);
   }
 
   async getCategories(): Promise<ApiResponse<ServiceCategory[]> | ServiceCategory[]> {
@@ -231,3 +238,4 @@ class ServiceApiService {
 }
 
 export const serviceApi = ServiceApiService.get();
+

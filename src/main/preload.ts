@@ -1,3 +1,4 @@
+﻿import type { ParcelOnlineRequestFormRequest } from '../shared/types';
 import { contextBridge, ipcRenderer } from "electron";
 
 type IpcResult<T> =
@@ -80,7 +81,8 @@ const api = {
     applicationList: (register: string) => invokeIpc("parcel:application:list", register),
     feeList: (parcelId: string) => invokeIpc("parcel:fee:list", parcelId),
     onlineRequestList: (register: string, parcelId: string) => invokeIpc("parcel:online-request:list", register, parcelId),
-    onlineRequestForm: (register: string, parcelId: string, appType: string, value?: string) => invokeIpc("parcel:online-request:form", register, parcelId, appType, value),
+    onlineRequestForm: (request: ParcelOnlineRequestFormRequest) => invokeIpc("parcel:online-request:form", request),
+    onlineRequestSend: (request: Record<string, any>) => invokeIpc("parcel:online-request:send", request),
     categories: () => invokeIpc("category:list"),
   },
 
@@ -138,3 +140,4 @@ const api = {
 };
 
 contextBridge.exposeInMainWorld("electron", api);
+
