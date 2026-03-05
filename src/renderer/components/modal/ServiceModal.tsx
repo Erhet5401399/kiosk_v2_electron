@@ -162,8 +162,8 @@ export function ServiceModal({
           <div className="service-context-strip">
             <div className="service-context-main">
               <strong className="service-context-name">{service.name}</strong>
-              <span className="service-context-price">{formatServicePrice(service.price)}</span>
             </div>
+            <span className="service-context-price">{`Үйлчилгээний нийт төлбөр: ${formatServicePrice(service.price)}`}</span>
             {/* <span className="service-context-meta">{state.currentStepIndex + 1} / {state.steps.length}</span> */}
           </div>
           <FlowProgressBar steps={stepConfigs} currentIndex={state.currentStepIndex} />

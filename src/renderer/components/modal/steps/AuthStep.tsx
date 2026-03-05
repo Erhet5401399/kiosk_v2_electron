@@ -424,16 +424,6 @@ export function AuthStep({ actions }: StepComponentProps) {
         {!initializing && showMethodSelector && (
           <div className="auth-method-selector-wrap">
             <div className="auth-method-selector">
-              {danMethod && (
-                <button
-                  type="button"
-                  className={`auth-method-option ${authMethodId === danMethod.id ? "active" : ""}`}
-                  onClick={() => void changeMethod(danMethod)}
-                  disabled={loading}
-                >
-                  ДАН
-                </button>
-              )}
               {smsMethod && (
                 <button
                   type="button"
@@ -442,6 +432,16 @@ export function AuthStep({ actions }: StepComponentProps) {
                   disabled={loading}
                 >
                   НЭГ УДААГИЙН КОД
+                </button>
+              )}
+              {danMethod && (
+                <button
+                  type="button"
+                  className={`auth-method-option ${authMethodId === danMethod.id ? "active" : ""}`}
+                  onClick={() => void changeMethod(danMethod)}
+                  disabled={loading}
+                >
+                  ДАН НЭВТРЭЛТ
                 </button>
               )}
             </div>
