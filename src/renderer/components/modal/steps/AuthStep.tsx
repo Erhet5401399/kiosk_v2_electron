@@ -68,6 +68,7 @@ export function AuthStep({ actions }: StepComponentProps) {
     () => methods.find((method) => method.id === "dan" && method.enabled) || null,
     [methods],
   );
+  const showMethodSelector = Boolean(danMethod && smsMethod);
 
   const isWebviewMethod = selectedMethod?.type === "webview_oauth";
   const smsCodeSent = selectedMethod?.id === "sms" && challenge?.methodId === "sms";
@@ -148,7 +149,7 @@ export function AuthStep({ actions }: StepComponentProps) {
         setMethods(available);
 
         const preferred =
-          available.find((method) => method.id === "dan" && method.enabled) ||
+          available.find((method) => method.id === "sms" && method.enabled) ||
           available.find((method) => method.enabled);
         if (!preferred) {
           throw new Error("No authentication method is available");
@@ -420,6 +421,33 @@ export function AuthStep({ actions }: StepComponentProps) {
       <div className="service-modal-body-login auth-step-fullscreen">
         {/* {error && <p style={{ color: "#c62828", fontWeight: 700, margin: "16px 24px 0" }}>{error}</p>} */}
 
+        {!initializing && showMethodSelector && (
+          <div className="auth-method-selector-wrap">
+            <div className="auth-method-selector">
+              {danMethod && (
+                <button
+                  type="button"
+                  className={`auth-method-option ${authMethodId === danMethod.id ? "active" : ""}`}
+                  onClick={() => void changeMethod(danMethod)}
+                  disabled={loading}
+                >
+                  ДАН
+                </button>
+              )}
+              {smsMethod && (
+                <button
+                  type="button"
+                  className={`auth-method-option ${authMethodId === smsMethod.id ? "active" : ""}`}
+                  onClick={() => void changeMethod(smsMethod)}
+                  disabled={loading}
+                >
+                  НЭГ УДААГИЙН КОД
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
         {initializing ? (
           <div className="loading-container">
             <div className="processing-spinner" />
@@ -482,48 +510,17 @@ export function AuthStep({ actions }: StepComponentProps) {
           <Button variant="secondary" onClick={actions.onCancel} disabled={loading}>
             Болих
           </Button>
-          {isWebviewMethod ? (
-            <>
-              {smsMethod && (
-                <Button
-                  onClick={() => void changeMethod(smsMethod)}
-                  disabled={loading}
-                >
-                  Нэг удаагийн кодоор нэвтрэх
-                </Button>
-              )}
-            </>
-          ) : smsCodeSent ? (
-            <>
-              {danMethod && (
-                <Button
-                  onClick={() => void changeMethod(danMethod)}
-                  disabled={loading}
-                >
-                  ДАН нэвтрэлт
-                </Button>
-              )}
-              <Button onClick={verifySmsCode} disabled={loading || !smsCode.trim()}>
-                Нэвтрэх
-              </Button>
-            </>
+          {isWebviewMethod ? null : smsCodeSent ? (
+            <Button onClick={verifySmsCode} disabled={loading || !smsCode.trim()}>
+              Нэвтрэх
+            </Button>
           ) : (
-            <>
-              {danMethod && (
-                <Button
-                  onClick={() => void changeMethod(danMethod)}
-                  disabled={loading}
-                >
-                  ДАН нэвтрэлт
-                </Button>
-              )}
-              <Button
-                onClick={sendSmsCode}
-                disabled={loading || !registerNumber.trim() || !phoneNumber.trim()}
-              >
-                Код авах
-              </Button>
-            </>
+            <Button
+              onClick={sendSmsCode}
+              disabled={loading || !registerNumber.trim() || !phoneNumber.trim()}
+            >
+              Код авах
+            </Button>
           )}
         </div>
       </div>
@@ -550,4 +547,5 @@ export function AuthStep({ actions }: StepComponentProps) {
     </div>
   );
 }
+
 

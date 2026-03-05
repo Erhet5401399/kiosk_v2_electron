@@ -279,6 +279,39 @@
   padding: 0;
 }
 
+.auth-method-selector-wrap {
+  padding: 16px 24px 10px;
+  background: #fff;
+}
+
+.auth-method-selector {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-method-option {
+  flex: 1;
+  min-height: 72px;
+  border: 2px solid rgba(148, 163, 184, 0.3);
+  border-radius: 16px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 1.12rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-method-option.active {
+  background: rgba(0, 122, 255, 0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.auth-method-option:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 
 .service-header-modal {
   display: flex;
