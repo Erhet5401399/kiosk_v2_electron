@@ -12,7 +12,7 @@
 }
 
 .registration-input-field:active {
-  transform: scale(0.98);
+  transform: none;
 }
 
 .registration-input-field.active {
@@ -137,6 +137,7 @@
   border-radius: 10px;
   margin: 0;
   width: 100%;
+  max-width: 100%;
   user-select: none;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
@@ -293,4 +294,87 @@
     rgba(255, 255, 255, 0.95) 25%
   ); */
   background: #f9f9f9;
+}
+
+@media (max-width: 1280px) {
+  .modal-keyboard-host {
+    padding: 6px 16px 14px;
+  }
+
+  .virtual-keyboard {
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .keyboard-row {
+    gap: 4px;
+  }
+
+  .keyboard-letters {
+    gap: 4px;
+    padding-right: 6px;
+  }
+
+  .keyboard-numbers {
+    gap: 4px;
+    max-width: 240px;
+    padding-left: 6px;
+  }
+
+  .key,
+  .key.number-key {
+    height: 56px;
+    min-width: 36px;
+    font-size: 1.05rem;
+  }
+
+  .key-spacer {
+    min-width: 36px;
+  }
+
+  .key.keyboard-done,
+  .key.backspace {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 960px), (max-height: 760px) {
+  .modal-keyboard-host {
+    padding: 4px 8px 10px;
+  }
+
+  .virtual-keyboard {
+    padding: 6px;
+    border-radius: 7px;
+  }
+
+  .keyboard-row {
+    gap: 3px;
+  }
+
+  .keyboard-letters {
+    padding-right: 4px;
+  }
+
+  .keyboard-numbers {
+    max-width: 210px;
+    padding-left: 4px;
+  }
+
+  .key,
+  .key.number-key {
+    height: 48px;
+    min-width: 30px;
+    font-size: 0.95rem;
+    border-radius: 7px;
+  }
+
+  .key-spacer {
+    min-width: 30px;
+  }
+
+  .key.keyboard-done,
+  .key.backspace {
+    font-size: 0.9rem;
+  }
 }

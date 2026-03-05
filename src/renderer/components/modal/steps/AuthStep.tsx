@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { UserAuthChallenge, UserAuthMethod, UserAuthStatus } from "../../../../shared/types";
 import type { StepComponentProps } from "../../../types/steps";
-import { Button, useSnackbar } from "../../common";
-import { VirtualKeyboard } from "../../keyboard";
+import { BottomVirtualKeyboard, Button, useSnackbar } from "../../common";
 
 const AUTH_STEP_IDLE_MS = Number(import.meta.env.VITE_USER_SESSION_IDLE_MS || 90_000);
 
@@ -530,28 +529,25 @@ export function AuthStep({ actions }: StepComponentProps) {
       </div>
 
       {smsKeyboardTarget && !isWebviewMethod && (
-        <div className="modal-keyboard-host">
-          <VirtualKeyboard
-            mode={smsKeyboardTarget === "register" ? "alphanumeric" : "numeric"}
-            onKeyClick={appendSmsKeyboard}
-            onBackspace={backspaceSmsKeyboard}
-            onDone={() => setSmsKeyboardTarget(null)}
-          />
-        </div>
+        <BottomVirtualKeyboard
+          visible
+          mode={smsKeyboardTarget === "register" ? "alphanumeric" : "numeric"}
+          onKeyClick={appendSmsKeyboard}
+          onBackspace={backspaceSmsKeyboard}
+          onDone={() => setSmsKeyboardTarget(null)}
+        />
       )}
 
       {showWebviewKeyboard && isWebviewMethod && (
-        <div className="modal-keyboard-host">
-          <VirtualKeyboard
-            mode={webviewKeyboardMode}
-            onKeyClick={(key) => sendWebviewKeyboardInput({ action: "append", key })}
-            onBackspace={() => sendWebviewKeyboardInput({ action: "backspace" })}
-            onDone={() => sendWebviewKeyboardInput({ action: "done" })}
-          />
-        </div>
+        <BottomVirtualKeyboard
+          visible
+          mode={webviewKeyboardMode}
+          onKeyClick={(key) => sendWebviewKeyboardInput({ action: "append", key })}
+          onBackspace={() => sendWebviewKeyboardInput({ action: "backspace" })}
+          onDone={() => sendWebviewKeyboardInput({ action: "done" })}
+        />
       )}
     </div>
   );
 }
-
 

@@ -24,7 +24,7 @@ export function FlowProgressBar({ steps, currentIndex }: FlowProgressBarProps) {
                   className="step-connector"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: isActive ? 1 : 0 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  transition={{ duration: 0, ease: 'easeOut' }}
                 />
               )}
 

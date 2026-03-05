@@ -249,6 +249,9 @@ export interface ParcelOnlineRequest {
   needed: 0 | 1;
   citizen: 0 | 1;
   parcelId: string;
+  parcel: {
+    right_type_code: number;
+  },
   appTypeList: {
     code: number;
     description: string;

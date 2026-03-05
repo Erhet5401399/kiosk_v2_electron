@@ -126,7 +126,7 @@
 .parcel-option:active,
 .document-option:active,
 .print-option:active {
-  transform: scale(0.99);
+  /* transform: scale(0.99); */
 }
 
 .parcel-icon,

@@ -1,7 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import type { StepComponentProps } from "../../../types/steps";
-import { Button, useSnackbar } from "../../common";
-import { VirtualKeyboard } from "../../keyboard";
+import { BottomVirtualKeyboard, Button, KeyboardInputField, SelectInputField, useSnackbar } from "../../common";
 import type {
   ParcelOnlineRequest,
   ParcelOnlineRequestFormField,
@@ -35,7 +34,7 @@ function prettifyFieldName(field: string): string {
 
 export function LandParcelOnlineRequestStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
-  const { showError } = useSnackbar();
+  const { showError, showSuccess } = useSnackbar();
 
   const registerNumber = String(stepData.register_number || "").trim();
   const parcelId = String(stepData.parcel_id || "").trim();
@@ -44,23 +43,17 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
   const [onlineRequest, setOnlineRequest] = useState<ParcelOnlineRequest | null>(null);
   const [isLoadingList, setIsLoadingList] = useState(false);
 
-  const [requiredValue, setRequiredValue] = useState(String(stepData.online_request_form_value || ""));
+  const [requiredValue, setRequiredValue] = useState("");
   const [formFields, setFormFields] = useState<ParcelOnlineRequestFormField[]>([]);
   const [formValues, setFormValues] = useState<FormValues>({});
   const [isLoadingForm, setIsLoadingForm] = useState(false);
   const [hasFetchedForm, setHasFetchedForm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [keyboardTarget, setKeyboardTarget] = useState<string | null>(null);
-  const [keyboardPosition, setKeyboardPosition] = useState<{
-    left: number;
-    top: number;
-    width: number;
-  } | null>(null);
 
   const fetchKeyRef = useRef("");
   const autoFetchAttemptedRef = useRef("");
-  const inputRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const formPanelRef = useRef<HTMLDivElement | null>(null);
 
   const isReady = Boolean(registerNumber && parcelId);
 
@@ -76,19 +69,34 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
 
   const visibleFields = useMemo(() => formFields.filter((field) => !field.hide), [formFields]);
 
+  const resolveFieldValue = (field: ParcelOnlineRequestFormField): string => {
+    const key = normalizeFieldKey(field.field);
+    if (!key) return "";
+
+    const fromForm = String(formValues[key] ?? "").trim();
+    const fromStepData = String(stepData[key] ?? "").trim();
+    const fromInitial = String(field.initialInputValue ?? "").trim();
+
+    return fromForm || fromStepData || fromInitial;
+  };
+
   const missingRequired = useMemo(
     () =>
       formFields
-        .map((field) => normalizeFieldKey(field.field))
-        .filter((key) => key.length > 0)
-        .filter((key) => !String(formValues[key] || "").trim()),
-    [formFields, formValues],
+        .filter((field) => normalizeFieldKey(field.field).length > 0)
+        .map((field) => ({
+          key: normalizeFieldKey(field.field),
+          value: resolveFieldValue(field),
+        }))
+        .filter(({ value }) => !value),
+    [formFields, formValues, stepData],
   );
 
   const canFetchForm =
     Boolean(selectedOnlineRequestCode) && !isLoadingForm && (!hasRequiredInput || requiredValue.trim().length > 0);
 
-  const canContinue = Boolean(selectedOnlineRequestCode) && hasFetchedForm && !isLoadingForm && missingRequired.length === 0;
+  const canContinue =
+    Boolean(selectedOnlineRequestCode) && hasFetchedForm && !isLoadingForm && !isSubmitting && missingRequired.length === 0;
 
   const raiseError = (message: string) => {
     showError(message);
@@ -109,6 +117,10 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
 
       const response = await window.electron.parcel.onlineRequestList(registerNumber, parcelId);
       setOnlineRequest(response || null);
+      actions.onUpdateStepData({
+        right_type: response?.parcel?.right_type_code,
+      });
+
     } catch (err) {
       setOnlineRequest(null);
       raiseError((err as Error)?.message || "Хүсэлтийн жагсаалт авахад алдаа гарлаа.");
@@ -132,18 +144,17 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
         Array.isArray(field.options) && field.options.length > 0 ? String(field.options[0]?.id || "").trim() : "";
 
       const fromInitial = String(field.initialInputValue ?? "").trim();
-      const fromStepData = String(stepData[key] ?? "").trim();
 
       if (field.hide) {
         if (requiredFieldKey && key === requiredFieldKey && requestValue) {
           initialValues[key] = requestValue;
           return;
         }
-        initialValues[key] = fromStepData || fromInitial || firstOption;
+        initialValues[key] = fromInitial || firstOption;
         return;
       }
 
-      initialValues[key] = fromInitial || fromStepData || firstOption;
+      initialValues[key] = fromInitial || firstOption;
     });
 
     return initialValues;
@@ -186,16 +197,6 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
       setKeyboardTarget(null);
       fetchKeyRef.current = key;
 
-      const patch: Record<string, unknown> = {
-        online_request_form_fields: fields,
-      };
-
-      if (requiredFieldKey && normalizedRequiredValue) {
-        patch.online_request_form_value = normalizedRequiredValue;
-        patch[requiredFieldKey] = normalizedRequiredValue;
-      }
-
-      actions.onUpdateStepData(patch);
     } catch (err) {
       setFormFields([]);
       setFormValues({});
@@ -229,12 +230,6 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
     fetchKeyRef.current = "";
     autoFetchAttemptedRef.current = "";
 
-    actions.onUpdateStepData({
-      online_request_required_input: value.required_input,
-      online_request_form_value: "",
-      online_request_form_fields: [],
-      online_request_form_values: {},
-    });
   };
 
   const handleFieldChange = (key: string, value: string) => {
@@ -256,7 +251,9 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
     await fetchForms(normalizedRequiredValue);
   };
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    if (isSubmitting) return;
+
     if (!selectedOnlineRequestCode) {
       raiseError("Цахим хүсэлт сонгоно уу.");
       return;
@@ -267,16 +264,31 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
       return;
     }
 
-    const patch: Record<string, unknown> = {
-      online_request_form_values: formValues,
-      online_request_form_fields: formFields,
-    };
+    const requestPayload: Record<string, unknown> = {};
 
-    Object.entries(formValues).forEach(([key, value]) => {
-      patch[key] = value;
+    formFields.forEach((field) => {
+      const key = normalizeFieldKey(field.field);
+      if (!key) return;
+
+      const resolved = resolveFieldValue(field);
+      if (!resolved) return;
+      requestPayload[key] = resolved;
     });
 
-    console.log(patch, "PATCH");
+    if (!window.electron?.parcel?.onlineRequestSend) {
+      raiseError("Хүсэлт илгээх боломжгүй байна.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await window.electron.parcel.onlineRequestSend(requestPayload);
+      showSuccess("Хүсэлт амжилттай илгээгдлээ.");
+    } catch (err) {
+      raiseError((err as Error)?.message || "Хүсэлт илгээхэд алдаа гарлаа.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const appendKeyboard = (key: string) => {
@@ -302,55 +314,9 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
     handleFieldChange(keyboardTarget, value.slice(0, -1));
   };
 
-  const positionKeyboardFor = (target: string) => {
-    const el = inputRefs.current[target];
-    if (!el) {
-      setKeyboardPosition(null);
-      return;
-    }
-
-    const rect = el.getBoundingClientRect();
-    const margin = 12;
-    const maxWidth = Math.max(420, window.innerWidth - margin * 2);
-    const preferredWidth = Math.max(rect.width, 620);
-    let keyboardWidth = Math.min(maxWidth, preferredWidth);
-    const keyboardHeight = 320;
-
-    let left = Math.max(margin, rect.left);
-    const rightLimit = window.innerWidth - margin;
-    if (left + keyboardWidth > rightLimit) {
-      keyboardWidth = Math.max(420, rightLimit - left);
-    }
-
-    let top = rect.bottom + 8;
-    if (top + keyboardHeight > window.innerHeight - margin) {
-      top = Math.max(margin, rect.top - keyboardHeight - 8);
-    }
-
-    setKeyboardPosition({ left, top, width: keyboardWidth });
-  };
-
   const focusKeyboardTarget = (target: string) => {
-    setKeyboardPosition(null);
     setKeyboardTarget(target);
-    requestAnimationFrame(() => positionKeyboardFor(target));
   };
-
-  useEffect(() => {
-    if (!keyboardTarget) return;
-
-    const recalc = () => positionKeyboardFor(keyboardTarget);
-    const panel = formPanelRef.current;
-    recalc();
-
-    window.addEventListener("resize", recalc);
-    panel?.addEventListener("scroll", recalc);
-
-    return () => {
-      window.removeEventListener("resize", recalc);
-      panel?.removeEventListener("scroll", recalc);
-    };
-  }, [keyboardTarget]);
 
   return (
     <div className="service-modal online-request-step">
@@ -388,7 +354,7 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
             )}
           </div>
 
-          <div className="online-request-form-panel" ref={formPanelRef}>
+          <div className="online-request-form-panel">
             {!selectedOnlineRequestCode ? (
               <div className="step-no-data">
                 <p>Эхлээд хүсэлтээ сонгоно уу.</p>
@@ -396,18 +362,12 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
             ) : hasRequiredInput && !hasFetchedForm ? (
               <div className="auth-sms-layout">
                 <div className="auth-sms-card">
-                  <button
-                    ref={(el) => {
-                      inputRefs.current.__required__ = el;
-                    }}
-                    type="button"
-                    className={`registration-input-field ${keyboardTarget === "__required__" ? "active" : ""}`}
-                    style={{ width: "100%" }}
+                  <KeyboardInputField
+                    label={requiredFieldTitle || requiredFieldKey}
+                    value={requiredValue}
+                    active={keyboardTarget === "__required__"}
                     onClick={() => focusKeyboardTarget("__required__")}
-                  >
-                    <div className="input-label">{requiredFieldTitle || requiredFieldKey}</div>
-                    <div className="input-value">{requiredValue || <span className="placeholder"></span>}</div>
-                  </button>
+                  />
                 </div>
               </div>
             ) : isLoadingForm && !hasFetchedForm ? (
@@ -429,65 +389,20 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
                     return (
                       <div key={key} style={{ width: "100%" }}>
                         {isSelect ? (
-                          <div className="registration-input-field active" style={{ cursor: "default", width: "100%" }}>
-                            <div className="input-label">{label}</div>
-                            <select
-                              value={value}
-                              onChange={(event) => handleFieldChange(key, event.target.value)}
-                              style={{
-                                width: "100%",
-                                minHeight: "46px",
-                                borderRadius: "10px",
-                                border: "1px solid #cbd5e1",
-                                padding: "10px 12px",
-                                fontSize: "1rem",
-                              }}
-                            >
-                              <option value="">Сонгох...</option>
-                              {options.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                  {option.label}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
+                          <SelectInputField
+                            label={label}
+                            value={value}
+                            options={options}
+                            onChange={(nextValue) => handleFieldChange(key, nextValue)}
+                          />
                         ) : (
-                          <button
-                            ref={(el) => {
-                              inputRefs.current[key] = el;
-                            }}
-                            type="button"
-                            className={`registration-input-field ${keyboardTarget === key ? "active" : ""}`}
-                            style={{ width: "100%" }}
+                          <KeyboardInputField
+                            label={label}
+                            value={value}
+                            active={keyboardTarget === key}
+                            multiline={Boolean(field.long)}
                             onClick={() => focusKeyboardTarget(key)}
-                          >
-                            <div className="input-label">{label}</div>
-                            <div
-                              className="input-value"
-                              style={
-                                field.long
-                                  ? {
-                                      display: "block",
-                                      whiteSpace: "pre-wrap",
-                                      lineHeight: 1.35,
-                                      width: "100%",
-                                      minHeight: "4.8rem",
-                                      letterSpacing: "normal",
-                                      overflowWrap: "anywhere",
-                                      wordBreak: "break-word",
-                                    }
-                                  : {
-                                      display: "block",
-                                      width: "100%",
-                                      whiteSpace: "nowrap",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                    }
-                              }
-                            >
-                              {value || <span className="placeholder"></span>}
-                            </div>
-                          </button>
+                          />
                         )}
 
                         {qrSrc ? (
@@ -521,32 +436,19 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
             </Button>
           ) : (
             <Button onClick={handleContinue} disabled={!canContinue}>
-              Хүсэлт илгээх
+              {isSubmitting ? "Түр хүлээнэ үү..." : "Хүсэлт илгээх"}
             </Button>
           )}
         </div>
       </div>
 
-      {keyboardTarget && keyboardPosition ? (
-        <div
-          className="online-request-floating-keyboard"
-          style={{
-            left: keyboardPosition.left,
-            top: keyboardPosition.top,
-            width: keyboardPosition.width,
-          }}
-        >
-          <VirtualKeyboard
-            mode="alphanumeric"
-            onKeyClick={appendKeyboard}
-            onBackspace={backspaceKeyboard}
-            onDone={() => {
-              setKeyboardTarget(null);
-              setKeyboardPosition(null);
-            }}
-          />
-        </div>
-      ) : null}
+      <BottomVirtualKeyboard
+        visible={Boolean(keyboardTarget)}
+        mode="alphanumeric"
+        onKeyClick={appendKeyboard}
+        onBackspace={backspaceKeyboard}
+        onDone={() => setKeyboardTarget(null)}
+      />
     </div>
   );
 }
