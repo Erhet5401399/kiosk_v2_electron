@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react";
 import type { StepComponentProps } from "../../../types/steps";
-import { Button } from "../../common";
+import { Button, useSnackbar } from "../../common";
 import { VirtualKeyboard } from "../../keyboard";
 import type { ParcelOnlineRequest, ParcelOnlineRequestFormField } from "../../../../shared/types";
 
@@ -32,6 +32,7 @@ function prettifyFieldName(field: string): string {
 
 export function LandParcelOnlineRequestStep({ context, actions, config }: StepComponentProps) {
   const { stepData } = context;
+  const { showError } = useSnackbar();
   const isLegacyFormStep = config.id === "parcel-online-request-form";
   const combinedDone = stepData.online_request_combined_done === true;
 
@@ -52,6 +53,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
   const [keyboardPosition, setKeyboardPosition] = useState<{ left: number; top: number; width: number } | null>(null);
 
   const fetchKeyRef = useRef("");
+  const autoFetchAttemptedRef = useRef("");
   const inputRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const formPanelRef = useRef<HTMLDivElement | null>(null);
 
@@ -92,6 +94,11 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     !isLoadingForm &&
     missingRequired.length === 0;
 
+  const raiseError = (message: string) => {
+    setError(message);
+    showError(message);
+  };
+
   const fetchRequestList = async () => {
     if (!isReady) {
       setOnlineRequest(null);
@@ -110,7 +117,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
       setOnlineRequest(response || null);
     } catch (err) {
       setOnlineRequest(null);
-      setError((err as Error)?.message || "Failed to fetch requests");
+      raiseError((err as Error)?.message || "Failed to fetch requests");
     } finally {
       setIsLoadingList(false);
     }
@@ -208,7 +215,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
       setFormValues({});
       setHasFetchedForm(false);
       fetchKeyRef.current = "";
-      setError((err as Error)?.message || "Failed to fetch form fields");
+      raiseError((err as Error)?.message || "Failed to fetch form fields");
     } finally {
       setIsLoadingForm(false);
     }
@@ -216,8 +223,11 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
 
   useEffect(() => {
     if (!selectedOnlineRequestCode || hasRequiredInput || hasFetchedForm || isLoadingForm) return;
+    const autoKey = `${registerNumber}|${parcelId}|${selectedOnlineRequestCode}`;
+    if (autoFetchAttemptedRef.current === autoKey) return;
+    autoFetchAttemptedRef.current = autoKey;
     void fetchForms();
-  }, [hasFetchedForm, hasRequiredInput, isLoadingForm, selectedOnlineRequestCode]);
+  }, [hasFetchedForm, hasRequiredInput, isLoadingForm, parcelId, registerNumber, selectedOnlineRequestCode]);
 
   const handleSelect = (value: ParcelOnlineRequest["appTypeList"][0]) => {
     if (value.code === selectedOnlineRequestCode) return;
@@ -229,6 +239,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
     setHasFetchedForm(false);
     setKeyboardTarget(null);
     fetchKeyRef.current = "";
+    autoFetchAttemptedRef.current = "";
 
     actions.onUpdateStepData({
       online_request_code: value.code,
@@ -246,13 +257,13 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
 
   const handleFetchForm = async () => {
     if (!selectedOnlineRequestCode) {
-      setError("Цахим хүсэлт сонгоно уу.");
+      raiseError("Цахим хүсэлт сонгоно уу.");
       return;
     }
 
     const normalizedRequiredValue = requiredValue.trim();
     if (hasRequiredInput && !normalizedRequiredValue) {
-      setError("Талбарыг бөглөнө үү.");
+      raiseError("Талбарыг бөглөнө үү.");
       return;
     }
 
@@ -261,12 +272,12 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
 
   const handleContinue = () => {
     if (!selectedOnlineRequestCode) {
-      setError("Цахим хүсэлт сонгоно уу.");
+      raiseError("Цахим хүсэлт сонгоно уу.");
       return;
     }
 
     if (missingRequired.length > 0) {
-      setError("Бүх шаардлагатай талбарыг бөглөнө үү.");
+      raiseError("Бүх шаардлагатай талбарыг бөглөнө үү.");
       return;
     }
 
@@ -375,7 +386,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
       <div className="service-modal-body online-request-body">
         <div className="step-header online-request-header">
           <h1>Цахим хүсэлт илгээх</h1>
-          <p>Зүүн талд хүсэлтээ сонгоод, баруун талд форм бөглөнө үү.</p>
+          <p>Та хүсэлтийн төрөлөө сонгон хүсэлтээ илгээнэ үү.</p>
         </div>
 
         <div className="online-request-layout">
@@ -433,7 +444,7 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
             ) : isLoadingForm && !hasFetchedForm ? (
               <div className="loading-container">
                 <div className="processing-spinner" />
-                <p>Форм татаж байна...</p>
+                <p>Түр хүлээнэ үү...</p>
               </div>
             ) : (
               <div className="auth-sms-layout">
@@ -525,11 +536,6 @@ export function LandParcelOnlineRequestStep({ context, actions, config }: StepCo
                     );
                   })}
 
-                  {error ? (
-                    <div className="step-no-data" style={{ width: "100%" }}>
-                      <p>{error}</p>
-                    </div>
-                  ) : null}
                 </div>
               </div>
             )}
