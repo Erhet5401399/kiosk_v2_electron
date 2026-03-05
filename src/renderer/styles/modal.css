@@ -222,8 +222,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px 32px;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 12px 32px 0 32px;
   background: #ffffff;
 }
 
@@ -373,7 +372,7 @@
 .auth-sms-layout {
   flex: 1;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   width: 100%;
   min-height: 0;
@@ -386,6 +385,11 @@
 .auth-sms-layout::-webkit-scrollbar {
   width: 0;
   height: 0;
+}
+
+.auth-sms-layout > .auth-sms-card {
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .auth-sms-head h3 {

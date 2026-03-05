@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { UserAuthChallenge, UserAuthMethod, UserAuthStatus } from "../../../../shared/types";
 import type { StepComponentProps } from "../../../types/steps";
 import { BottomVirtualKeyboard, Button, useSnackbar } from "../../common";
+import DanLogo from "../../../assets/svg/logo";
 
 const AUTH_STEP_IDLE_MS = Number(import.meta.env.VITE_USER_SESSION_IDLE_MS || 90_000);
 
@@ -441,7 +442,7 @@ export function AuthStep({ actions }: StepComponentProps) {
                   onClick={() => void changeMethod(danMethod)}
                   disabled={loading}
                 >
-                  ДАН НЭВТРЭЛТ
+                  <DanLogo/>
                 </button>
               )}
             </div>

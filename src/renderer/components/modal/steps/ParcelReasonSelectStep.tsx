@@ -39,12 +39,12 @@ export function ParcelReasonSelectStep({ context, actions }: StepComponentProps)
                 className={`parcel-option land-parcel-option ${selectedReason === reason.id ? 'selected' : ''}`}
                 onClick={() => handleSelectReason(reason.id)}
               >
-                <div className="parcel-icon">🗺️</div>
+                <div className="parcel-icon"></div>
                 <div className="parcel-info land-parcel-info">
                   {/* <h3>{reason.id}</h3> */}
 
                   <div className="land-parcel-meta-row">
-                    <span className="land-parcel-label">Зориулалт</span>
+                    <span className="land-parcel-label"></span>
                     <strong className="land-parcel-value">{reason.label}</strong>
                   </div>
                 </div>
