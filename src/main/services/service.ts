@@ -201,7 +201,7 @@ class ServiceApiService {
     return api.post(url);
   }
 
-  async getParcelOnlineRequestForm(registerNumber: string, parcelId: string, appType: string): Promise<ApiResponse<ParcelOnlineRequestFormField[]> | ParcelOnlineRequestFormField[]> {
+  async getParcelOnlineRequestForm(registerNumber: string, parcelId: string, appType: string, value?: string): Promise<ApiResponse<ParcelOnlineRequestFormField[]> | ParcelOnlineRequestFormField[]> {
     if (!registerNumber || !parcelId || !appType) {
       this.log.warn("Skipping parcel online request forms fetch: missing parameters");
       return [];
@@ -212,6 +212,10 @@ class ServiceApiService {
     query.set('parcel_id', parcelId);
     query.set('app_type', appType);
     query.set('needed', "0");
+    const normalizedValue = String(value || "").trim();
+    if (normalizedValue) {
+      query.set('value', normalizedValue);
+    }
 
     const url = `/api/kiosk/service/application/request/parameter/file/upload?${query.toString()}`;
     this.log.debug('Fetching parcel online request forms:', url);

@@ -1,4 +1,4 @@
-﻿import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer } from "electron";
 
 type IpcResult<T> =
   | { ok: true; data: T }
@@ -80,7 +80,7 @@ const api = {
     applicationList: (register: string) => invokeIpc("parcel:application:list", register),
     feeList: (parcelId: string) => invokeIpc("parcel:fee:list", parcelId),
     onlineRequestList: (register: string, parcelId: string) => invokeIpc("parcel:online-request:list", register, parcelId),
-    onlineRequestForm: (register: string, parcelId: string, appType: string) => invokeIpc("parcel:online-request:form", register, parcelId, appType),
+    onlineRequestForm: (register: string, parcelId: string, appType: string, value?: string) => invokeIpc("parcel:online-request:form", register, parcelId, appType, value),
     categories: () => invokeIpc("category:list"),
   },
 

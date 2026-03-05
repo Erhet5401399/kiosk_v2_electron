@@ -16,6 +16,7 @@ export function LandParcelOnlineRequestSelectStep({ context, actions }: StepComp
   const handleSelect = (value: ParcelOnlineRequest['appTypeList'][0]) => {
     actions.onUpdateStepData({
       online_request_code: value.code,
+      online_request_required_input: value.required_input,
     });
   };
 

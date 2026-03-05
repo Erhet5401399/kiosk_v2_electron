@@ -260,16 +260,19 @@ export interface ParcelOnlineRequest {
     required_input: {
       field: string;
       title: string;
-    }[];
+    };
   }[];
 }
 
 export interface ParcelOnlineRequestFormField {
   field: string;
+  title: string;
   type: 'input' | 'select';
   initialInputValue: string | null;
   options: { id: string, label: string }[] | null;
   qr_code: string | null;
+  hide?: boolean;
+  long?: boolean;
 }
 
 export interface ParcelFeeInvoice {
