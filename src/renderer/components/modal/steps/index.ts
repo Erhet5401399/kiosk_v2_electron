@@ -11,5 +11,4 @@ export { RequestCheckStep } from './RequestCheckStep';
 export { ApplicationCheckStep } from './ApplicationCheckStep';
 export { ParcelReasonSelectStep } from './ParcelReasonSelectStep';
 export { LandParcelFeesStep } from './LandParcelFeesStep';
-export { LandParcelOnlineRequestSelectStep } from './LandParcelOnlineRequestSelectStep';
-export { LandParcelOnlineRequestFormStep } from './LandParcelOnlineRequestFormStep';
+export { LandParcelOnlineRequestStep } from './LandParcelOnlineRequestStep';

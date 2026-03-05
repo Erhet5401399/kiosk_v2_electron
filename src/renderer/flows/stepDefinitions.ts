@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+﻿import type { ComponentType } from 'react';
 import type {
   StepComponentProps,
   StepConfig,
@@ -19,8 +19,7 @@ import {
   ApplicationCheckStep,
   ParcelReasonSelectStep,
   LandParcelFeesStep,
-  LandParcelOnlineRequestSelectStep,
-  LandParcelOnlineRequestFormStep,
+  LandParcelOnlineRequestStep,
 } from '../components/modal/steps';
 
 export type StepComponent = ComponentType<
@@ -72,22 +71,10 @@ export const STEP_DEFINITIONS: Record<string, StepDefinition> = {
       return { isValid: true };
     },
   },
-  'parcel-online-request-select': {
-    id: 'parcel-online-request-select',
+  'parcel-online-request': {
+    id: 'parcel-online-request',
     title: 'Цахим хүсэлт илгээх',
-    component: LandParcelOnlineRequestSelectStep,
-    validate: (context: StepContext): StepValidation => {
-      const { stepData } = context;
-      if (!stepData.online_request_code) {
-        return { isValid: false, errorMessage: 'Цахим хүсэлт сонгоно уу.' };
-      }
-      return { isValid: true };
-    },
-  },
-  'parcel-online-request-form': {
-    id: 'parcel-online-request-form',
-    title: 'Хүсэлтийн форм бөглөх',
-    component: LandParcelOnlineRequestFormStep,
+    component: LandParcelOnlineRequestStep,
   },
   'request-check': {
     id: 'request-check',
@@ -177,4 +164,5 @@ export function registerStepComponent(stepId: string, component: StepComponent):
     component,
   };
 }
+
 

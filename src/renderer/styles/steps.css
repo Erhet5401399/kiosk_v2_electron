@@ -182,6 +182,207 @@
   font-weight: 700;
 }
 
+.online-request-step {
+  height: 100%;
+  min-height: 0;
+}
+
+.online-request-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 16px;
+}
+
+.online-request-header {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 15px 0 20px;
+  flex-shrink: 0;
+}
+
+.online-request-header h1,
+.online-request-header p {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.online-request-header h1 {
+  margin-top: 0;
+  margin-bottom: 2px;
+  line-height: 1.2;
+}
+
+.online-request-header p {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.online-request-layout {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+  overflow: hidden;
+}
+
+.online-request-menu-panel {
+  min-height: 0;
+  height: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
+}
+
+.online-request-menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 8px;
+}
+
+.online-request-menu-list {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.55) transparent;
+}
+
+.online-request-menu-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.online-request-menu-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.online-request-menu-list::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.online-request-menu-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.7);
+  background-clip: content-box;
+}
+
+.online-request-menu-item {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.26);
+  background: #fff;
+  border-radius: 12px;
+  color: var(--text);
+  padding: 14px 14px 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.online-request-menu-item.selected {
+  background: rgba(0, 122, 255, 0.08);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(0, 122, 255, 0.2);
+}
+
+.online-request-menu-item-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.online-request-menu-item-text span {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.online-request-form-panel {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+.online-request-form-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.55) transparent;
+}
+
+.online-request-form-panel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.online-request-form-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.online-request-form-panel::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.45);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.online-request-form-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.7);
+  background-clip: content-box;
+}
+
+.online-request-form-panel .auth-sms-layout {
+  padding: 0;
+  overflow: visible;
+  justify-content: flex-start;
+}
+
+.online-request-form-panel .auth-sms-card {
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  gap: 10px;
+}
+
+.online-request-form-panel .auth-sms-layout {
+  justify-content: flex-start;
+}
+
+.online-request-form-panel .registration-input-field {
+  box-shadow: none;
+}
+
+.online-request-step .registration-input-field:active {
+  transform: none;
+}
+
+.online-request-floating-keyboard {
+  position: fixed;
+  z-index: 30;
+  max-width: calc(100vw - 24px);
+  padding: 0;
+  background: transparent;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
