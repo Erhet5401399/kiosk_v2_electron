@@ -26,6 +26,18 @@ class ApiClient {
     body?: unknown,
   ): Promise<T> {
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const resolveOnce = (value: T) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+      const rejectOnce = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        reject(error);
+      };
+
       const fullUrl = url.startsWith("http") ? url : `${this.baseUrl}${url}`;
       this.log.debug(`${method} ${url}`);
 
@@ -35,16 +47,17 @@ class ApiClient {
 
       let data = "";
       req.on("response", (res) => {
+        res.on("error", (e) => rejectOnce(new NetworkError(e.message)));
         res.on("data", (chunk) => (data += chunk));
         res.on("end", () => {
           try {
             const parsed = data ? JSON.parse(data) : null;
             if (res.statusCode >= 200 && res.statusCode < 300) {
-              resolve(parsed);
+              resolveOnce(parsed);
             } else if (res.statusCode === 401) {
-              reject(new AuthError(ERROR.AUTH_EXPIRED));
+              rejectOnce(new AuthError(ERROR.AUTH_EXPIRED));
             } else {
-              reject(
+              rejectOnce(
                 new ApiError(
                   res.statusCode,
                   parsed?.message || `HTTP ${res.statusCode}`,
@@ -53,12 +66,12 @@ class ApiClient {
               );
             }
           } catch {
-            reject(new ApiError(res.statusCode, "Parse error"));
+            rejectOnce(new ApiError(res.statusCode, "Parse error"));
           }
         });
       });
 
-      req.on("error", (e) => reject(new NetworkError(e.message)));
+      req.on("error", (e) => rejectOnce(new NetworkError(e.message)));
       if (body) req.write(JSON.stringify(body));
       req.end();
     });
@@ -70,6 +83,18 @@ class ApiClient {
     body?: unknown,
   ): Promise<string> {
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const resolveOnce = (value: string) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+      const rejectOnce = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        reject(error);
+      };
+
       const fullUrl = url.startsWith("http") ? url : `${this.baseUrl}${url}`;
       this.log.debug(`${method} ${url}`);
 
@@ -79,23 +104,24 @@ class ApiClient {
 
       let data = "";
       req.on("response", (res) => {
+        res.on("error", (e) => rejectOnce(new NetworkError(e.message)));
         res.on("data", (chunk) => (data += chunk));
         res.on("end", () => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(String(data || "").trim());
+            resolveOnce(String(data || "").trim());
             return;
           }
 
           if (res.statusCode === 401) {
-            reject(new AuthError(ERROR.AUTH_EXPIRED));
+            rejectOnce(new AuthError(ERROR.AUTH_EXPIRED));
             return;
           }
 
-          reject(new ApiError(res.statusCode, `HTTP ${res.statusCode}`, data));
+          rejectOnce(new ApiError(res.statusCode, `HTTP ${res.statusCode}`, data));
         });
       });
 
-      req.on("error", (e) => reject(new NetworkError(e.message)));
+      req.on("error", (e) => rejectOnce(new NetworkError(e.message)));
       if (body) req.write(JSON.stringify(body));
       req.end();
     });
@@ -107,6 +133,18 @@ class ApiClient {
     body?: unknown,
   ): Promise<Buffer> {
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const resolveOnce = (value: Buffer) => {
+        if (settled) return;
+        settled = true;
+        resolve(value);
+      };
+      const rejectOnce = (error: Error) => {
+        if (settled) return;
+        settled = true;
+        reject(error);
+      };
+
       const fullUrl = url.startsWith("http") ? url : `${this.baseUrl}${url}`;
       this.log.debug(`${method} ${url}`);
 
@@ -116,22 +154,23 @@ class ApiClient {
 
       const chunks: Buffer[] = [];
       req.on("response", (res) => {
+        res.on("error", (e) => rejectOnce(new NetworkError(e.message)));
         res.on("data", (chunk) => {
           chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
         });
         res.on("end", () => {
           const payload = Buffer.concat(chunks);
           if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(payload);
+            resolveOnce(payload);
             return;
           }
 
           if (res.statusCode === 401) {
-            reject(new AuthError(ERROR.AUTH_EXPIRED));
+            rejectOnce(new AuthError(ERROR.AUTH_EXPIRED));
             return;
           }
 
-          reject(
+          rejectOnce(
             new ApiError(
               res.statusCode,
               `HTTP ${res.statusCode}`,
@@ -141,7 +180,7 @@ class ApiClient {
         });
       });
 
-      req.on("error", (e) => reject(new NetworkError(e.message)));
+      req.on("error", (e) => rejectOnce(new NetworkError(e.message)));
       if (body) req.write(JSON.stringify(body));
       req.end();
     });
