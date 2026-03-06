@@ -1,4 +1,6 @@
-﻿interface SelectInputOption {
+﻿import { useEffect, useMemo, useRef, useState } from "react";
+
+interface SelectInputOption {
   id: string;
   label: string;
 }
@@ -22,43 +24,94 @@ export function SelectInputField({
   placeholder = "Сонгох...",
   onChange,
 }: SelectInputFieldProps) {
-  const groups = groupedOptions ? Object.entries(groupedOptions) : [];
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+
+  const groups = useMemo(
+    () => (groupedOptions ? Object.entries(groupedOptions) : []),
+    [groupedOptions],
+  );
   const hasGroups = groups.length > 0;
 
+  const flattenedOptions = useMemo(
+    () => (hasGroups ? groups.flatMap(([, list]) => list) : options),
+    [groups, hasGroups, options],
+  );
+
+  const selectedLabel = useMemo(() => {
+    const selected = flattenedOptions.find((opt) => String(opt.id) === String(value));
+    return selected?.label || "";
+  }, [flattenedOptions, value]);
+
+  useEffect(() => {
+    const onDocMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!rootRef.current || !target) return;
+      if (!rootRef.current.contains(target)) {
+        setOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onDocMouseDown);
+    return () => document.removeEventListener("mousedown", onDocMouseDown);
+  }, []);
+
+  const handleSelect = (nextValue: string) => {
+    onChange(nextValue);
+    setOpen(false);
+  };
+
   return (
-    <div className="registration-input-field active" style={{ cursor: "default", width: "100%" }}>
+    <div ref={rootRef} className="registration-input-field active select-input-field" style={{ width: "100%" }}>
       <div className="input-label">{label}</div>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        style={{
-          width: "100%",
-          minHeight: "46px",
-          borderRadius: "10px",
-          border: "1px solid #cbd5e1",
-          padding: "10px 12px",
-          fontSize: "1rem",
-        }}
+
+      <button
+        type="button"
+        className={`select-trigger ${open ? "open" : ""}`}
+        onClick={() => setOpen((prev) => !prev)}
       >
-        <option value="">{placeholder}</option>
-        {hasGroups
-          ? groups.map(([groupLabel, groupOptions]) => (
-              <optgroup key={groupLabel} label={groupLabel}>
-                {groupOptions.map((option, optionIndex) => (
-                  <option key={`${groupLabel}-${option.id}-${optionIndex}`} value={option.id}>
+        <span className={`select-trigger-value ${selectedLabel ? "" : "is-placeholder"}`}>
+          {selectedLabel || placeholder}
+        </span>
+        <span className="select-input-caret" aria-hidden="true">▾</span>
+      </button>
+
+      {open && (
+        <div className="select-menu" role="listbox">
+          {hasGroups
+            ? groups.map(([groupLabel, groupOptions], groupIndex) => (
+                <div key={`${groupLabel}-${groupIndex}`} className="select-group">
+                  <div className="select-group-label">{groupLabel}</div>
+                  {groupOptions.map((option, optionIndex) => {
+                    const active = String(option.id) === String(value);
+                    return (
+                      <button
+                        key={`${groupLabel}-${option.id}-${optionIndex}`}
+                        type="button"
+                        className={`select-menu-item ${active ? "active" : ""}`}
+                        onClick={() => handleSelect(option.id)}
+                      >
+                        {option.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))
+            : options.map((option, optionIndex) => {
+                const active = String(option.id) === String(value);
+                return (
+                  <button
+                    key={`${option.id}-${optionIndex}`}
+                    type="button"
+                    className={`select-menu-item ${active ? "active" : ""}`}
+                    onClick={() => handleSelect(option.id)}
+                  >
                     {option.label}
-                  </option>
-                ))}
-              </optgroup>
-            ))
-          : options.map((option, optionIndex) => (
-              <option key={`${option.id}-${optionIndex}`} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-      </select>
+                  </button>
+                );
+              })}
+        </div>
+      )}
     </div>
   );
 }
-
-

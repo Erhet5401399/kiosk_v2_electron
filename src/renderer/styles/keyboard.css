@@ -1,4 +1,4 @@
-.registration-input-field {
+﻿.registration-input-field {
   padding: 24px;
   background: white;
   border: 3px solid #eee;
@@ -400,3 +400,98 @@
 
 
 
+
+
+.select-input-field {
+  cursor: default;
+}
+
+.select-trigger {
+  width: 100%;
+  min-height: 46px;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  text-align: left;
+  font-size: 1.05rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.select-trigger:focus,
+.select-trigger:focus-visible {
+  outline: none;
+}
+
+.select-trigger-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.select-trigger-value.is-placeholder {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.select-input-caret {
+  color: #64748b;
+  font-size: 1rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.select-menu {
+  margin-top: 8px;
+  width: 100%;
+  max-height: 260px;
+  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14);
+  padding: 6px;
+}
+
+.select-group + .select-group {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.select-group-label {
+  padding: 6px 10px 4px;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.select-menu-item {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  padding: 10px 10px;
+  text-align: left;
+  font-size: 0.98rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.select-menu-item:hover {
+  background: rgba(0, 122, 255, 0.08);
+}
+
+.select-menu-item.active {
+  background: rgba(0, 122, 255, 0.14);
+  color: #0b4cb6;
+}
