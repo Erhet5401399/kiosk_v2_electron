@@ -58,6 +58,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
   const [pdfRenderError, setPdfRenderError] = useState<string | null>(null);
   const pdfListRef = useRef<HTMLDivElement | null>(null);
   const updateStepDataRef = useRef(actions.onUpdateStepData);
+  const resolvedRequestKeyRef = useRef<string>("");
 
   useEffect(() => {
     updateStepDataRef.current = actions.onUpdateStepData;
@@ -78,6 +79,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         setBase64("");
         setError("Document endpoint is not configured.");
         setHasResolvedDocument(true);
+        setIsLoading(false);
         return;
       }
 
@@ -100,6 +102,13 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
       if (existingBase64 && existingRequestKey && existingRequestKey === requestKey) {
         setBase64(existingBase64);
         setError(null);
+        setHasResolvedDocument(true);
+        setIsLoading(false);
+        resolvedRequestKeyRef.current = requestKey;
+        return;
+      }
+
+      if (requestKey && resolvedRequestKeyRef.current === requestKey) {
         setHasResolvedDocument(true);
         setIsLoading(false);
         return;
@@ -125,6 +134,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
           documentBase64: normalized,
           documentRequestKey: requestKey,
         });
+        resolvedRequestKeyRef.current = requestKey;
         setHasResolvedDocument(true);
       } catch (err) {
         if (!active) return;
