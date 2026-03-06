@@ -57,6 +57,16 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
   const [isRenderingPdf, setIsRenderingPdf] = useState(false);
   const [pdfRenderError, setPdfRenderError] = useState<string | null>(null);
   const pdfListRef = useRef<HTMLDivElement | null>(null);
+  const updateStepDataRef = useRef(actions.onUpdateStepData);
+
+  useEffect(() => {
+    updateStepDataRef.current = actions.onUpdateStepData;
+  }, [actions.onUpdateStepData]);
+
+  const missingKey = useMemo(
+    () => resolvedRequest.missing.join("|"),
+    [resolvedRequest.missing],
+  );
 
   useEffect(() => {
     let active = true;
@@ -111,7 +121,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
         }
 
         setBase64(normalized);
-        actions.onUpdateStepData({
+        updateStepDataRef.current({
           documentBase64: normalized,
           documentRequestKey: requestKey,
         });
@@ -132,7 +142,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
     return () => {
       active = false;
     };
-  }, [actions, documentConfig?.endpoint, existingBase64, existingRequestKey, requestKey, resolvedRequest]);
+  }, [documentConfig?.endpoint, existingBase64, existingRequestKey, requestKey, missingKey]);
 
   const dataUri = useMemo(() => buildDataUriFromBase64(base64), [base64]);
   const previewKind = useMemo(() => detectBase64ContentKind(base64), [base64]);
@@ -316,4 +326,3 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
     </div>
   );
 }
-
