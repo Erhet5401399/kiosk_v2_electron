@@ -59,13 +59,13 @@ export function ServiceCard({ service, onSelect }: ServiceCardProps) {
         >
           <ServiceGlyph />
         </div>
+        <span className="price price-top">{formatServicePrice(service.price)}</span>
         <h3>{service.name}</h3>
       </div>
       <div className="card-content">
         <p>{service.desc}</p>
       </div>
       <div className="card-footer">
-        <span className="price">{formatServicePrice(service.price)}</span>
         <div className="select-btn">
           <span>Үйлчилгээ авах</span>
           <ArrowIcon />

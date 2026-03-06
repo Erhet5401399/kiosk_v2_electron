@@ -5,8 +5,7 @@
 }
 
 .sidebar {
-  width: 380px;
-  background: transparent;
+  width: 360px;
   border-right: none;
   display: flex;
   flex-direction: column;
