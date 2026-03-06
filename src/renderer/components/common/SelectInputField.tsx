@@ -73,7 +73,11 @@ export function SelectInputField({
         <span className={`select-trigger-value ${selectedLabel ? "" : "is-placeholder"}`}>
           {selectedLabel || placeholder}
         </span>
-        <span className="select-input-caret" aria-hidden="true">▾</span>
+        <span className="select-input-caret" aria-hidden="true">
+          <svg className="select-input-caret-icon" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
       </button>
 
       {open && (
@@ -115,4 +119,5 @@ export function SelectInputField({
     </div>
   );
 }
+
 

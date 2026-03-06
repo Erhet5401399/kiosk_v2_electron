@@ -442,10 +442,19 @@
 
 .select-input-caret {
   color: #64748b;
-  font-size: 1rem;
-  font-weight: 800;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
+
+.select-input-caret-icon {
+  width: 18px;
+  height: 18px;
+}
+
 
 .select-menu {
   margin-top: 8px;
@@ -495,3 +504,7 @@
   background: rgba(0, 122, 255, 0.14);
   color: #0b4cb6;
 }
+
+
+
+
