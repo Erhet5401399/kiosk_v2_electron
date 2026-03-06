@@ -35,14 +35,6 @@
   flex: 1;
 }
 
-.sidebar-copyright {
-  margin-top: auto;
-  padding: 10px 16px 6px;
-  text-align: center;
-  font-size: 0.85rem;
-  color: rgba(15, 23, 42, 0.6);
-  font-weight: 600;
-}
 
 .sidebar-active-pill {
   position: absolute;
@@ -191,3 +183,4 @@
 .category-btn-sidebar.is-disabled:focus-visible {
   box-shadow: none !important;
 }
+

@@ -55,6 +55,9 @@ export function StatusBar({
             {printerConnected ? `${printerLabel || "Unknown"}` : "Disconnected"}
           </strong>
         </span>
+        <span className="status-copyright">
+          © {new Date().getFullYear()} Erkhet Innovation LLC
+        </span>
       </div>
 
       <div className="updater-panel">
@@ -86,3 +89,4 @@ export function StatusBar({
     </footer>
   );
 }
+

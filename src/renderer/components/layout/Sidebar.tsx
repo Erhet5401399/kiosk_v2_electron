@@ -59,9 +59,8 @@ export function Sidebar({
           })}
         </nav>
       </div>
-      <div className="sidebar-copyright">
-        © {new Date().getFullYear()} Erkhet Innovation LLC
-      </div>
+
     </aside>
   );
 }
+

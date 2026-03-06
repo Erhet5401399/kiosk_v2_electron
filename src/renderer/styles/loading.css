@@ -155,3 +155,12 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+
+.status-copyright {
+  font-size: 11px;
+  color: rgba(210, 219, 236, 0.72);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
