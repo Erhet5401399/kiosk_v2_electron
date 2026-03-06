@@ -281,10 +281,12 @@ export default function App() {
     };
 
     window.addEventListener("pointerdown", onActivity);
+    window.addEventListener("touchstart", onActivity);
     window.addEventListener("keydown", onActivity);
 
     return () => {
       window.removeEventListener("pointerdown", onActivity);
+      window.removeEventListener("touchstart", onActivity);
       window.removeEventListener("keydown", onActivity);
     };
   }, []);
@@ -487,3 +489,5 @@ export default function App() {
     </div>
   );
 }
+
+
