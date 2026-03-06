@@ -145,10 +145,13 @@
 }
 
 .input-cursor-inline {
-  width: 3px;
-  height: 1.15em;
-  margin-left: 3px;
-  vertical-align: text-bottom;
+  width: 4px;
+  height: var(--font-xl);
+  display: inline-block;
+  position: absolute;
+  margin-top: 1px;
+  /* margin-left: 3px; */
+  /* vertical-align: text-bottom; */
 }
 
 @keyframes keyboard-caret-blink {
@@ -450,7 +453,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--font-xl);
+  font-size: var(--font-md);
 }
 
 .select-trigger-value.is-placeholder {
@@ -494,11 +497,9 @@
 
 .select-group-label {
   padding: 6px 10px 4px;
-  color: #64748b;
-  font-size: 0.78rem;
+  font-size: var(--font-md);
   font-weight: 700;
   letter-spacing: 0.04em;
-  text-transform: uppercase;
 }
 
 .select-menu-item {
@@ -512,6 +513,7 @@
   font-size: 0.98rem;
   font-weight: 600;
   cursor: pointer;
+  margin-bottom: 4px;
 }
 
 .select-menu-item:hover {

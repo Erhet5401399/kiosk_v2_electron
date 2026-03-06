@@ -314,6 +314,9 @@ export function AuthStep({ actions }: StepComponentProps) {
     const onOutsidePointerDown = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
+      if (target.closest(".modal-footer")) return;
+      if (target.closest(".btn")) return;
+      if (target.closest("button")) return;
       if (target.closest(".registration-input-field")) return;
       if (target.closest(".modal-keyboard-host")) return;
       if (target.closest(".virtual-keyboard")) return;

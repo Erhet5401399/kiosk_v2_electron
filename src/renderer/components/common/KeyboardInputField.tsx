@@ -37,9 +37,9 @@ export function KeyboardInputField({
             ? {
                 display: "block",
                 whiteSpace: "pre-wrap",
-                lineHeight: 1.35,
+                // lineHeight: 1.35,
                 width: "100%",
-                minHeight: "4.8rem",
+                // minHeight: "4.8rem",
                 letterSpacing: "normal",
                 overflowWrap: "anywhere",
                 wordBreak: "break-word",

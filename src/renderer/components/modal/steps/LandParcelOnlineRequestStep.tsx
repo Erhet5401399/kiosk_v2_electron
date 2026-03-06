@@ -272,6 +272,9 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
     const onOutsidePointerDown = (event: PointerEvent) => {
       const target = event.target;
       if (!(target instanceof Element)) return;
+      if (target.closest(".modal-footer")) return;
+      if (target.closest(".btn")) return;
+      if (target.closest("button")) return;
       if (target.closest(".select-input-field")) {
         setKeyboardTarget(null);
         return;

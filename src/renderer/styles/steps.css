@@ -361,7 +361,7 @@
 .online-request-form-head h3 {
   margin: 4px 0 0;
   color: var(--text);
-  font-size: 1rem;
+  font-size: var(--font-xl);
   font-weight: 700;
   line-height: 1.3;
 }
