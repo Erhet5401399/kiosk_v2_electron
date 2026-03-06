@@ -216,7 +216,7 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
       <div className="service-modal-body document-preview-body">
         <div className="step-header">
           <h1>{config.title || ""}</h1>
-          <p>Та бичиг баримтыг шалгана уу.</p>
+          <p>Та бичиг баримтаа шалгана уу.</p>
         </div>
 
         {isLoading ? (
@@ -254,7 +254,10 @@ export function DocumentPreviewStep({ context, actions, config }: StepComponentP
               <div className="document-preview-pdf">
                 <div ref={pdfListRef} className="document-preview-canvas-wrap">
                   {isRenderingPdf && (
-                    <div className="document-preview-rendering">Түр хүлээнэ үү...</div>
+                    <div className="loading-container document-preview-fill">
+                      <div className="processing-spinner" />
+                      <p>Түр хүлээнэ үү...</p>
+                    </div>
                   )}
                   {pdfRenderError ? (
                     <StateCard

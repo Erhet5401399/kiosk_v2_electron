@@ -410,7 +410,7 @@
 .auth-sms-card .registration-input-field {
   margin: 0;
   padding: 18px 20px;
-  border: 2px solid rgba(148, 163, 184, 0.26);
+  /* border: 2px solid rgba(148, 163, 184, 0.26); */
   border-radius: 16px;
   background: #fff;
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
@@ -420,7 +420,7 @@
 
 .auth-sms-card .registration-input-field.active {
   border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.12);
+  box-shadow: none;
 }
 
 .auth-sms-card .registration-input-field .input-label {
@@ -442,3 +442,4 @@
   min-width: 100px;
   display: inline-block;
 }
+

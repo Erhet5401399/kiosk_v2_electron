@@ -29,10 +29,10 @@
 
 .header-logo {
   display: block;
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 10px;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+  /* background: #ffffff; */
+  /* border-radius: 16px; */
+  /* padding: 10px; */
+  /* box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12); */
 }
 
 .header-logo--small {
