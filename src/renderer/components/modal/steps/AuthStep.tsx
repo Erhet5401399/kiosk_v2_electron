@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { UserAuthChallenge, UserAuthMethod, UserAuthStatus } from "../../../../shared/types";
 import type { StepComponentProps } from "../../../types/steps";
-import { BottomVirtualKeyboard, Button, useSnackbar } from "../../common";
+import { BottomVirtualKeyboard, Button, KeyboardInputField, useSnackbar } from "../../common";
 import DanLogo from "../../../assets/svg/logo";
 
 const AUTH_STEP_IDLE_MS = Number(import.meta.env.VITE_USER_SESSION_IDLE_MS || 90_000);
@@ -224,12 +224,12 @@ export function AuthStep({ actions }: StepComponentProps) {
         payload: { callbackUrl },
       });
       if (!status.authenticated || !status.session) {
-        throw new Error("Нэвтрэх хүсэлт амжилтүй");
+        throw new Error("Нэвтрэх хүсэлт амжилтгүй");
       }
       showSuccess("Амжилттай нэвтэрлээ");
       setAuthenticatedState(status);
     } catch (err) {
-      const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтүй";
+      const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтгүй";
       setError(message);
       showError(message);
       authInFlightRef.current = false;
@@ -357,12 +357,12 @@ export function AuthStep({ actions }: StepComponentProps) {
         payload: { sendCode: normalizedCode },
       });
       if (!status.authenticated || !status.session) {
-        throw new Error("Нэвтрэх хүсэлт амжилтүй");
+        throw new Error("Нэвтрэх хүсэлт амжилтгүй");
       }
       showSuccess("Амжилттай нэвтэрлээ");
       setAuthenticatedState(status);
     } catch (err) {
-      const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтүй";
+      const message = (err as Error).message || "Нэвтрэх хүсэлт амжилтгүй";
       setError(message);
       showError(message);
     } finally {
@@ -402,17 +402,6 @@ export function AuthStep({ actions }: StepComponentProps) {
       return;
     }
     setSmsCode((prev) => prev.slice(0, -1));
-  };
-
-  const renderFieldValue = (value: string, active: boolean, secure = false) => {
-    const displayValue = secure && value ? "•".repeat(value.length) : value;
-    return (
-      <div className="input-value">
-        {active && !displayValue && <div className="input-cursor" />}
-        {displayValue || <span className="placeholder" />}
-        {active && displayValue && <div className="input-cursor" />}
-      </div>
-    );
   };
 
   return (
@@ -478,28 +467,25 @@ export function AuthStep({ actions }: StepComponentProps) {
                 <h3>Нэг удаагийн код</h3>
                 <p>Регистр болон утасны дугаараа оруулна уу.</p>
               </div>
-              <button
-                className={`registration-input-field ${smsKeyboardTarget === "register" ? "active" : ""}`}
+              <KeyboardInputField
+                label="Регистрийн дугаар"
+                value={registerNumber}
+                active={smsKeyboardTarget === "register"}
                 onClick={() => setSmsKeyboardTarget("register")}
-              >
-                <div className="input-label">Регистрийн дугаар</div>
-                {renderFieldValue(registerNumber, smsKeyboardTarget === "register")}
-              </button>
-              <button
-                className={`registration-input-field ${smsKeyboardTarget === "phone" ? "active" : ""}`}
+              />
+              <KeyboardInputField
+                label="Утасны дугаар"
+                value={phoneNumber}
+                active={smsKeyboardTarget === "phone"}
                 onClick={() => setSmsKeyboardTarget("phone")}
-              >
-                <div className="input-label">Утасны дугаар</div>
-                {renderFieldValue(phoneNumber, smsKeyboardTarget === "phone")}
-              </button>
+              />
               {smsCodeSent && (
-                <button
-                  className={`registration-input-field ${smsKeyboardTarget === "code" ? "active" : ""}`}
+                <KeyboardInputField
+                  label="Нэг удаагийн код"
+                  value={smsCode ? "•".repeat(smsCode.length) : ""}
+                  active={smsKeyboardTarget === "code"}
                   onClick={() => setSmsKeyboardTarget("code")}
-                >
-                  <div className="input-label">Нэг удаагийн код</div>
-                  {renderFieldValue(smsCode, smsKeyboardTarget === "code", true)}
-                </button>
+                />
               )}
             </div>
           </div>
@@ -548,5 +534,6 @@ export function AuthStep({ actions }: StepComponentProps) {
     </div>
   );
 }
+
 
 

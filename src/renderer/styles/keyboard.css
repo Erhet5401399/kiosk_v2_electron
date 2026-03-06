@@ -139,10 +139,25 @@
   width: 4px;
   height: var(--font-xl);
   background: var(--accent);
-  /* position: absolute;
-  right: 24px;
-  bottom: 24px; */
   margin-left: 2px;
+  display: inline-block;
+  animation: keyboard-caret-blink 1s steps(1, end) infinite;
+}
+
+.input-cursor-inline {
+  width: 3px;
+  height: 1.15em;
+  margin-left: 3px;
+  vertical-align: text-bottom;
+}
+
+@keyframes keyboard-caret-blink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
 }
 
 .virtual-keyboard {
@@ -520,4 +535,6 @@
 .key.space-key:active {
   background: #cbd5e1;
 }
+
+
 

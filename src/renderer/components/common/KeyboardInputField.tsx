@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+﻿import type { CSSProperties } from "react";
 
 interface KeyboardInputFieldProps {
   label: string;
@@ -19,6 +19,8 @@ export function KeyboardInputField({
   onClick,
   inputRef,
 }: KeyboardInputFieldProps) {
+  const hasValue = String(value || "").length > 0;
+
   return (
     <button
       ref={inputRef}
@@ -29,7 +31,7 @@ export function KeyboardInputField({
     >
       <div className="input-label">{label}</div>
       <div
-        className="input-value"
+        className={`input-value ${multiline ? "is-multiline" : ""}`}
         style={
           multiline
             ? {
@@ -51,7 +53,9 @@ export function KeyboardInputField({
               }
         }
       >
+        {active && !hasValue ? <span className="input-cursor input-cursor-inline" /> : null}
         {value || <span className="placeholder"></span>}
+        {active && hasValue ? <span className="input-cursor input-cursor-inline" /> : null}
       </div>
     </button>
   );
