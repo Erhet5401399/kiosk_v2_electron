@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from "react";
+﻿import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 
 interface SelectInputOption {
   id: string;
@@ -44,7 +44,7 @@ export function SelectInputField({
   }, [flattenedOptions, value]);
 
   useEffect(() => {
-    const onDocMouseDown = (event: MouseEvent) => {
+    const onDocMouseDown = (event: globalThis.MouseEvent) => {
       const target = event.target as Node | null;
       if (!rootRef.current || !target) return;
       if (!rootRef.current.contains(target)) {
@@ -61,8 +61,19 @@ export function SelectInputField({
     setOpen(false);
   };
 
+  const handleRootClick = (event: ReactMouseEvent<HTMLDivElement>) => {
+    const target = event.target as Element;
+    if (target.closest(".select-menu-item")) return;
+    setOpen(true);
+  };
+
   return (
-    <div ref={rootRef} className={`registration-input-field select-input-field ${open ? "active" : ""}`.trim()} style={{ width: "100%" }}>
+    <div
+      ref={rootRef}
+      className={`registration-input-field select-input-field ${open ? "active" : ""}`.trim()}
+      style={{ width: "100%" }}
+      onClick={handleRootClick}
+    >
       <div className="input-label">{label}</div>
 
       <button
@@ -93,7 +104,10 @@ export function SelectInputField({
                         key={`${groupLabel}-${option.id}-${optionIndex}`}
                         type="button"
                         className={`select-menu-item ${active ? "active" : ""}`}
-                        onClick={() => handleSelect(option.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleSelect(option.id);
+                        }}
                       >
                         {option.label}
                       </button>
@@ -108,7 +122,10 @@ export function SelectInputField({
                     key={`${option.id}-${optionIndex}`}
                     type="button"
                     className={`select-menu-item ${active ? "active" : ""}`}
-                    onClick={() => handleSelect(option.id)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleSelect(option.id);
+                    }}
                   >
                     {option.label}
                   </button>
@@ -119,5 +136,7 @@ export function SelectInputField({
     </div>
   );
 }
+
+
 
 

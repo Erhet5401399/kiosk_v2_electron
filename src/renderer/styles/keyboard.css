@@ -365,7 +365,8 @@
   }
 
   .key.keyboard-done,
-  .key.backspace {
+  .key.backspace,
+  .key.space-key {
     font-size: 1rem;
   }
 }
@@ -408,7 +409,8 @@
   }
 
   .key.keyboard-done,
-  .key.backspace {
+  .key.backspace,
+  .key.space-key {
     font-size: 0.9rem;
   }
 }
@@ -448,6 +450,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: var(--font-xl);
 }
 
 .select-trigger-value.is-placeholder {
@@ -528,7 +531,7 @@
 .key.space-key {
   background: #e2e8f0;
   flex: 0.6;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
 }
 

@@ -41,7 +41,7 @@ export function VirtualKeyboard({
               </div>
             ))}
             <div className="keyboard-row">
-              <button className="key space-key" onClick={() => onKeyClick(" ")} aria-label="Space">
+              <button className="key space-key" onClick={() => onKeyClick(" ")} aria-label="Зай">
                 Зай авах
               </button>
               <button className="key backspace" onClick={onBackspace} aria-label="Backspace">

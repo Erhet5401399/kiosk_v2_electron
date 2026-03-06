@@ -308,6 +308,24 @@ export function AuthStep({ actions }: StepComponentProps) {
     };
   }, [bumpAuthStepTimeout]);
 
+  useEffect(() => {
+    if (!smsKeyboardTarget || isWebviewMethod) return;
+
+    const onOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(".registration-input-field")) return;
+      if (target.closest(".modal-keyboard-host")) return;
+      if (target.closest(".virtual-keyboard")) return;
+      setSmsKeyboardTarget(null);
+    };
+
+    window.addEventListener("pointerdown", onOutsidePointerDown);
+    return () => {
+      window.removeEventListener("pointerdown", onOutsidePointerDown);
+    };
+  }, [isWebviewMethod, smsKeyboardTarget]);
+
   const sendSmsCode = useCallback(async () => {
     const normalizedReg = normalizeRegister(registerNumber);
     const normalizedPhone = String(phoneNumber || "").replace(/[^\d]/g, "");
@@ -534,6 +552,7 @@ export function AuthStep({ actions }: StepComponentProps) {
     </div>
   );
 }
+
 
 
 

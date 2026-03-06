@@ -266,6 +266,28 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
     void fetchForms();
   }, [hasFetchedForm, hasRequiredInput, isLoadingForm, parcelId, registerNumber, selectedOnlineRequestCode]);
 
+  useEffect(() => {
+    if (!keyboardTarget) return;
+
+    const onOutsidePointerDown = (event: PointerEvent) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(".select-input-field")) {
+        setKeyboardTarget(null);
+        return;
+      }
+      if (target.closest(".registration-input-field")) return;
+      if (target.closest(".modal-keyboard-host")) return;
+      if (target.closest(".virtual-keyboard")) return;
+      setKeyboardTarget(null);
+    };
+
+    window.addEventListener("pointerdown", onOutsidePointerDown);
+    return () => {
+      window.removeEventListener("pointerdown", onOutsidePointerDown);
+    };
+  }, [keyboardTarget]);
+
   const handleSelect = (value: ParcelOnlineRequest["appTypeList"][0]) => {
     if (value.code === selectedOnlineRequestCode) return;
 
@@ -440,7 +462,6 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
             ) : (
               <div className="auth-sms-layout">
                 <div className="auth-sms-card">
-                  <div>{JSON.stringify(missingRequired)}</div>
                   {visibleFields.map((field) => {
                     const key = normalizeFieldKey(field.field);
                     const label = String(field.title || "").trim() || prettifyFieldName(key) || key;
