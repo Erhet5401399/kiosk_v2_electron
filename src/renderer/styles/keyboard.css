@@ -508,3 +508,16 @@
 
 
 
+
+
+.key.space-key {
+  background: #e2e8f0;
+  flex: 0.6;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.key.space-key:active {
+  background: #cbd5e1;
+}
+

@@ -440,6 +440,7 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
             ) : (
               <div className="auth-sms-layout">
                 <div className="auth-sms-card">
+                  <div>{JSON.stringify(missingRequired)}</div>
                   {visibleFields.map((field) => {
                     const key = normalizeFieldKey(field.field);
                     const label = String(field.title || "").trim() || prettifyFieldName(key) || key;

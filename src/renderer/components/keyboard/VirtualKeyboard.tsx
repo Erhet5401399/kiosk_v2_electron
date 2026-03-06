@@ -1,30 +1,30 @@
-const LETTERS = [
-  ['Ф', 'Ц', 'У', 'Ж', 'Э', 'Н', 'Г', 'Ш', 'Ү', 'З', 'К', 'Ъ'],
-  ['Й', 'Ы', 'Б', 'Ө', 'А', 'Х', 'Р', 'О', 'Л', 'Д', 'П'],
-  ['Я', 'Ч', 'Е', 'Ё', 'С', 'М', 'И', 'Т', 'Ь', 'В', 'Ю'],
+﻿const LETTERS = [
+  ["Ф", "Ц", "У", "Ж", "Э", "Н", "Г", "Ш", "Ү", "З", "К", "Ъ"],
+  ["Й", "Ы", "Б", "Ө", "А", "Х", "Р", "О", "Л", "Д", "П"],
+  ["Я", "Ч", "Е", "Ё", "С", "М", "И", "Т", "Ь", "В", "Ю"],
 ];
 
 const NUMBERS = [
-  ['1', '2', '3'],
-  ['4', '5', '6'],
-  ['7', '8', '9'],
-  ['', '0', ''],
+  ["1", "2", "3"],
+  ["4", "5", "6"],
+  ["7", "8", "9"],
+  ["", "0", ""],
 ];
 
 interface VirtualKeyboardProps {
-  mode?: 'alphanumeric' | 'numeric';
+  mode?: "alphanumeric" | "numeric";
   onKeyClick: (key: string) => void;
   onBackspace: () => void;
   onDone: () => void;
 }
 
 export function VirtualKeyboard({
-  mode = 'alphanumeric',
+  mode = "alphanumeric",
   onKeyClick,
   onBackspace,
   onDone,
 }: VirtualKeyboardProps) {
-  const showLetters = mode !== 'numeric';
+  const showLetters = mode !== "numeric";
 
   return (
     <div className="virtual-keyboard split-layout">
@@ -41,7 +41,9 @@ export function VirtualKeyboard({
               </div>
             ))}
             <div className="keyboard-row">
-              <button className="key ghost" />
+              <button className="key space-key" onClick={() => onKeyClick(" ")} aria-label="Space">
+                Space
+              </button>
               <button className="key backspace" onClick={onBackspace} aria-label="Backspace">
                 Арилгах
               </button>
@@ -52,7 +54,7 @@ export function VirtualKeyboard({
           </div>
         )}
 
-        <div className={`keyboard-numbers ${showLetters ? '' : 'numbers-full'}`}>
+        <div className={`keyboard-numbers ${showLetters ? "" : "numbers-full"}`}>
           {NUMBERS.map((row, i) => (
             <div key={i} className="keyboard-row">
               {!showLetters && i === NUMBERS.length - 1 ? (
