@@ -62,7 +62,7 @@ export function SelectInputField({
   };
 
   return (
-    <div ref={rootRef} className="registration-input-field active select-input-field" style={{ width: "100%" }}>
+    <div ref={rootRef} className={`registration-input-field select-input-field ${open ? "active" : ""}`.trim()} style={{ width: "100%" }}>
       <div className="input-label">{label}</div>
 
       <button
@@ -115,3 +115,4 @@ export function SelectInputField({
     </div>
   );
 }
+
