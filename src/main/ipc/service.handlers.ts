@@ -64,7 +64,7 @@ export function setupServiceHandlers() {
   ipcMain.handle(IPC.PARCEL_ONLINE_REQUEST_SEND, async (_, request: Record<string, any>) => {
     return ipcWrap(async () => {
       const data = await serviceApi.sendParcelOnlineRequest(request);
-      return asList(data);
+      return unwrapData(data);
     }, "Send parcel online request failed");
   });
 

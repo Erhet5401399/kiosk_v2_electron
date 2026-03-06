@@ -9,6 +9,54 @@ import type {
 
 type FormValues = Record<string, string>;
 type RequiredInput = ParcelOnlineRequest["appTypeList"][0]["required_input"];
+type SelectInputOption = { id: string; label: string };
+type SelectInputGroupedOptions = Record<string, SelectInputOption[]>;
+
+type NormalizedFieldOptions = {
+  options: SelectInputOption[];
+  groupedOptions: SelectInputGroupedOptions | null;
+};
+
+function normalizeSelectFieldOptions(raw: unknown): NormalizedFieldOptions {
+  const normalizeOption = (item: unknown): SelectInputOption | null => {
+    if (!item || typeof item !== "object") return null;
+    const id = String((item as { id?: unknown }).id ?? "").trim();
+    const label = String((item as { label?: unknown }).label ?? id).trim();
+    if (!id) return null;
+    return { id, label: label || id };
+  };
+
+  if (Array.isArray(raw)) {
+    const options = raw
+      .map((item) => normalizeOption(item))
+      .filter((option): option is SelectInputOption => Boolean(option));
+    return { options, groupedOptions: null };
+  }
+
+  if (raw && typeof raw === "object") {
+    const groupedOptions: SelectInputGroupedOptions = {};
+    const options: SelectInputOption[] = [];
+
+    Object.entries(raw as Record<string, unknown>).forEach(([groupLabel, groupItems]) => {
+      if (!Array.isArray(groupItems)) return;
+      const group = groupItems
+        .map((item) => normalizeOption(item))
+        .filter((option): option is SelectInputOption => Boolean(option));
+      if (!group.length) return;
+
+      const label = String(groupLabel || "").trim() || "Options";
+      groupedOptions[label] = group;
+      options.push(...group);
+    });
+
+    return {
+      options,
+      groupedOptions: Object.keys(groupedOptions).length ? groupedOptions : null,
+    };
+  }
+
+  return { options: [], groupedOptions: null };
+}
 
 function normalizeFieldKey(value: unknown): string {
   return String(value || "").trim();
@@ -34,7 +82,7 @@ function prettifyFieldName(field: string): string {
 
 export function LandParcelOnlineRequestStep({ context, actions }: StepComponentProps) {
   const { stepData } = context;
-  const { showError, showSuccess } = useSnackbar();
+  const { showError, showInfo } = useSnackbar();
 
   const registerNumber = String(stepData.register_number || "").trim();
   const parcelId = String(stepData.parcel_id || "").trim();
@@ -140,8 +188,8 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
       const key = normalizeFieldKey(field.field);
       if (!key) return;
 
-      const firstOption =
-        Array.isArray(field.options) && field.options.length > 0 ? String(field.options[0]?.id || "").trim() : "";
+      const { options } = normalizeSelectFieldOptions(field.options);
+      const firstOption = options.length > 0 ? String(options[0]?.id || "").trim() : "";
 
       const fromInitial = String(field.initialInputValue ?? "").trim();
 
@@ -282,8 +330,22 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
 
     try {
       setIsSubmitting(true);
-      await window.electron.parcel.onlineRequestSend(requestPayload);
-      showSuccess("Хүсэлт амжилттай илгээгдлээ.");
+      const data = await window.electron.parcel.onlineRequestSend(requestPayload);
+
+      const firstItem = Array.isArray(data) ? data[0] : data;
+      const status = String((firstItem as { status?: unknown })?.status || "").trim().toLowerCase();
+      const message = String(
+        (firstItem as { msg?: unknown; message?: unknown })?.msg ||
+          (firstItem as { msg?: unknown; message?: unknown })?.message ||
+          "",
+      ).trim();
+
+      if (status === "error") {
+        raiseError(message || "Хүсэлт илгээхэд алдаа гарлаа.");
+        return;
+      }
+
+      showInfo(message || "Хүсэлт амжилттай илгээгдлээ.");
     } catch (err) {
       raiseError((err as Error)?.message || "Хүсэлт илгээхэд алдаа гарлаа.");
     } finally {
@@ -381,7 +443,7 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
                   {visibleFields.map((field) => {
                     const key = normalizeFieldKey(field.field);
                     const label = String(field.title || "").trim() || prettifyFieldName(key) || key;
-                    const options = Array.isArray(field.options) ? field.options : [];
+                    const { options, groupedOptions } = normalizeSelectFieldOptions(field.options);
                     const isSelect = field.type === "select" && options.length > 0;
                     const value = String(formValues[key] ?? "");
                     const qrSrc = normalizeQrBase64(field.qr_code);
@@ -393,6 +455,7 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
                             label={label}
                             value={value}
                             options={options}
+                            groupedOptions={groupedOptions}
                             onChange={(nextValue) => handleFieldChange(key, nextValue)}
                           />
                         ) : (
@@ -452,3 +515,13 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+

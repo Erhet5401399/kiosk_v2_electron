@@ -280,7 +280,7 @@ export interface ParcelOnlineRequestFormField {
   title: string;
   type: 'input' | 'select';
   initialInputValue: string | null;
-  options: { id: string, label: string }[] | null;
+  options: { id: string, label: string }[] | Record<string, { id: string, label: string }[]> | null;
   qr_code: string | null;
   hide?: boolean;
   long?: boolean;
@@ -396,3 +396,4 @@ export interface PromotionEvent {
   syncing: boolean;
   error?: string;
 }
+
