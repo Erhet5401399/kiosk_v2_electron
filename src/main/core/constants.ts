@@ -7,7 +7,7 @@ export const APP = {
 export const API = {
   BASE_URL: process.env.API_URL || "http://66.181.168.123:8080",
   TIMEOUT: 30000,
-  RETRY_ATTEMPTS: 3,
+  RETRY_ATTEMPTS: 1,
   RETRY_DELAY: 1000,
 } as const;
 

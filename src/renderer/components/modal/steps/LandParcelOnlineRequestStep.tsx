@@ -439,9 +439,15 @@ export function LandParcelOnlineRequestStep({ context, actions }: StepComponentP
           </div>
 
           <div className="online-request-form-panel">
+            {selectedRequest && (
+              <div className="online-request-form-head">
+                <span>Илгээж буй хүсэлт</span>
+                <h3>{selectedRequest.description}</h3>
+              </div>
+            )}
+
             {!selectedOnlineRequestCode ? (
               <div className="step-no-data">
-                <p>Эхлээд хүсэлтээ сонгоно уу.</p>
               </div>
             ) : hasRequiredInput && !hasFetchedForm ? (
               <div className="auth-sms-layout">
